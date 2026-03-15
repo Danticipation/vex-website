@@ -1,0 +1,211 @@
+.main {
+  min-height: 100vh;
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.progress {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.progressDot {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.progressDot.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+.progressDot.done {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.title {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-family: var(--font-poppins), sans-serif;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.section {
+  margin-top: 1rem;
+}
+
+.vehicleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.vehicleCard {
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vehicleCard:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.vehicleCard.selected {
+  border-color: var(--accent);
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.vehicleName {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.vehicleMeta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.vehiclePrice {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.optionCard {
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.optionCard:hover {
+  border-color: var(--accent);
+}
+
+.optionCard.selected {
+  border-color: var(--accent);
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.optionName {
+  font-weight: 500;
+  color: var(--text-primary);
+  display: block;
+}
+
+.optionPrice {
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.noOptions {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cta {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cta:hover {
+  box-shadow: 0 0 24px var(--accent-glow);
+  transform: scale(1.02);
+}
+
+.ctaSecondary {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.ctaSecondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.summary {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.summaryLine {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.summaryTotal {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--accent);
+  margin-top: 1rem;
+}
+
+.loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 3rem;
+}

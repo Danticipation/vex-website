@@ -29,5 +29,222 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
+  inventoryListings Inventory[] @relation("ListedBy")
+  orders           Order[]
+  savedVehicles    SavedVehicle[]
+  appraisals       Appraisal[]
+  subscriptions   Subscription[]
+  notifications   Notification[]
+
   @@map("users")
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  make      String
+  model     String
+  trimLevel String   @map("trim_level")
+  year      Int
+  basePrice Decimal  @map("base_price") @db.Decimal(12, 2)
+  bodyType  String?  @map("body_type")
+  imageUrls Json?    @map("image_urls")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  inventory            Inventory[]
+  configurationOptions ConfigurationOption[]
+  orders               Order[]
+
+  @@map("vehicles")
+}
+
+enum InventorySource {
+  COMPANY
+  PRIVATE_SELLER
+}
+
+enum InventoryStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Inventory {
+  id                 String             @id @default(cuid())
+  source             InventorySource
+  vehicleId          String             @map("vehicle_id")
+  listedByUserId     String?            @map("listed_by_user_id")
+  location           String?
+  listPrice          Decimal             @map("list_price") @db.Decimal(12, 2)
+  mileage            Int?
+  status             InventoryStatus    @default(AVAILABLE)
+  vin                String?
+  verificationStatus VerificationStatus? @map("verification_status")
+  imageUrls          Json?              @map("image_urls")
+  specs              Json?
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  vehicle       Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  listedBy      User?          @relation("ListedBy", fields: [listedByUserId], references: [id], onDelete: SetNull)
+  orders        Order[]
+  savedVehicles SavedVehicle[]
+
+  @@map("inventory")
+}
+
+enum OptionCategory {
+  TYRES
+  PAINT
+  ACCESSORIES
+  STYLING
+}
+
+model ConfigurationOption {
+  id          String         @id @default(cuid())
+  vehicleId   String?        @map("vehicle_id")
+  category    OptionCategory
+  name        String
+  priceDelta  Decimal        @map("price_delta") @db.Decimal(10, 2)
+  isRequired  Boolean        @default(false) @map("is_required")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("configuration_options")
+}
+
+enum OrderType {
+  INVENTORY
+  CUSTOM_BUILD
+}
+
+enum OrderStatus {
+  DRAFT
+  DEPOSIT_PAID
+  CONFIRMED
+  FULFILLED
+}
+
+model Order {
+  id                    String       @id @default(cuid())
+  userId                String       @map("user_id")
+  type                  OrderType
+  inventoryId           String?      @map("inventory_id")
+  vehicleId             String?      @map("vehicle_id")
+  configSnapshot        Json?        @map("config_snapshot")
+  status                OrderStatus  @default(DRAFT)
+  depositAmount         Decimal?     @map("deposit_amount") @db.Decimal(12, 2)
+  totalAmount           Decimal?     @map("total_amount") @db.Decimal(12, 2)
+  financingSnapshot     Json?        @map("financing_snapshot")
+  tradeInSnapshot       Json?        @map("trade_in_snapshot")
+  shippingSnapshot      Json?        @map("shipping_snapshot")
+  stylingAddonsSnapshot Json?        @map("styling_addons_snapshot")
+  createdAt             DateTime     @default(now()) @map("created_at")
+  updatedAt             DateTime     @updatedAt @map("updated_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inventory Inventory? @relation(fields: [inventoryId], references: [id], onDelete: SetNull)
+  vehicle   Vehicle?   @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  shipments Shipment[]
+
+  @@map("orders")
+}
+
+model SavedVehicle {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  inventoryId    String?  @map("inventory_id")
+  configSnapshot Json?   @map("config_snapshot")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inventory Inventory? @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  @@map("saved_vehicles")
+}
+
+enum ShipmentStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+}
+
+enum TransportType {
+  OPEN
+  ENCLOSED
+}
+
+model Shipment {
+  id                 String         @id @default(cuid())
+  orderId            String         @map("order_id")
+  carrier            String?
+  trackingUrl        String?        @map("tracking_url")
+  status             ShipmentStatus  @default(PENDING)
+  estimatedDelivery  DateTime?       @map("estimated_delivery")
+  openEnclosed       TransportType   @map("open_enclosed")
+  quoteAmount        Decimal?        @map("quote_amount") @db.Decimal(10, 2)
+  origin             String?
+  destination        String?
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("shipments")
+}
+
+model Appraisal {
+  id             String   @id @default(cuid())
+  userId         String?  @map("user_id")
+  vehicleInfo    Json     @map("vehicle_info")
+  estimatedValue Decimal? @map("estimated_value") @db.Decimal(12, 2)
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("appraisals")
+}
+
+enum SubscriptionPlan {
+  CHECK_MY_DEAL
+  VIP_CONCIERGE
+}
+
+model Subscription {
+  id              String            @id @default(cuid())
+  userId          String            @map("user_id")
+  plan            SubscriptionPlan
+  status          String            @default("ACTIVE")
+  billingInterval String?           @map("billing_interval")
+  amount          Decimal?          @map("amount") @db.Decimal(10, 2)
+  expiresAt       DateTime?         @map("expires_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  type      String
+  title     String
+  body      String
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

@@ -2,6 +2,14 @@ import express from "express";
 import cors from "cors";
 import { healthRouter } from "./routes/health.js";
 import { authRouter } from "./routes/auth.js";
+import { vehiclesRouter } from "./routes/vehicles.js";
+import { inventoryRouter } from "./routes/inventory.js";
+import { ordersRouter } from "./routes/orders.js";
+import { savedVehiclesRouter } from "./routes/savedVehicles.js";
+import { shippingRouter } from "./routes/shipping.js";
+import { financingRouter } from "./routes/financing.js";
+import { appraisalsRouter } from "./routes/appraisals.js";
+import { notificationsRouter } from "./routes/notifications.js";
 
 const app = express();
 
@@ -33,5 +41,13 @@ app.get("/", (_req, res) => {
 
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);
+app.use("/vehicles", vehiclesRouter);
+app.use("/inventory", inventoryRouter);
+app.use("/orders", ordersRouter);
+app.use("/saved-vehicles", savedVehiclesRouter);
+app.use("/shipping", shippingRouter);
+app.use("/financing", financingRouter);
+app.use("/appraisals", appraisalsRouter);
+app.use("/notifications", notificationsRouter);
 
 export { app };

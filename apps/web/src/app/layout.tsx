@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Poppins, Inter } from "next/font/google";
+import { BuildProvider } from "@/contexts/BuildContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -36,7 +38,11 @@ export default function RootLayout({
       lang="en"
       className={`${montserrat.variable} ${poppins.variable} ${inter.variable}`}
     >
-      <body style={{ fontFamily: "var(--font-inter)" }}>{children}</body>
+      <body style={{ fontFamily: "var(--font-inter)" }}>
+        <AuthProvider>
+          <BuildProvider>{children}</BuildProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }
