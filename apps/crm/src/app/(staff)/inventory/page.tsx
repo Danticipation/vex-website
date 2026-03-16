@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { getInventory } from "@/lib/api";
 

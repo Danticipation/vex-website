@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Nav } from "@/components/Nav";
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
   const { token, loading } = useAuth();
 
   useEffect(() => {
