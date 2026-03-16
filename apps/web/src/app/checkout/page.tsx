@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/Header";
@@ -12,11 +12,14 @@ import {
   createOrder,
   getAppraisal,
   type InventoryItem,
+  type CreateOrderPayload,
 } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./checkout.module.css";
 
-export default function CheckoutPage() {
+export const dynamic = "force-dynamic";
+
+function CheckoutPageInner() {
   const { token } = useAuth();
   const searchParams = useSearchParams();
   const buildMode = searchParams.get("build") === "1";
@@ -35,8 +38,6 @@ export default function CheckoutPage() {
   const [shippingDest, setShippingDest] = useState("");
   const [shippingType, setShippingType] = useState<"OPEN" | "ENCLOSED">("ENCLOSED");
   const [shippingQuote, setShippingQuote] = useState<{ amount: number } | null>(null);
-
-  const [financePrice, setFinancePrice] = useState(0);
   const [termMonths, setTermMonths] = useState(48);
   const [apr, setApr] = useState(5.9);
   const [financeResult, setFinanceResult] = useState<{ monthlyPayment: number; totalAmount: number } | null>(null);
@@ -68,10 +69,6 @@ export default function CheckoutPage() {
   }, [tradeInId]);
 
   useEffect(() => {
-    setFinancePrice(effectiveTotal);
-  }, [effectiveTotal]);
-
-  useEffect(() => {
     if (effectiveTotal <= 0) return;
     getFinancingCalculate({ price: effectiveTotal, termMonths, apr })
       .then((r) => setFinanceResult({ monthlyPayment: r.monthlyPayment, totalAmount: r.totalAmount }))
@@ -94,8 +91,8 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const payload = {
-        type: buildMode ? "CUSTOM_BUILD" : "INVENTORY",
+      const payload: CreateOrderPayload = {
+        type: (buildMode ? "CUSTOM_BUILD" : "INVENTORY") as CreateOrderPayload["type"],
         inventoryId: buildMode ? undefined : effectiveInventoryId ?? undefined,
         vehicleId: buildMode ? vehicle?.id : undefined,
         configSnapshot: buildMode
@@ -273,5 +270,22 @@ export default function CheckoutPage() {
         )}
       </main>
     </>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Header />
+          <main className={styles.main}>
+            <p className={styles.loading}>Loading checkout…</p>
+          </main>
+        </>
+      }
+    >
+      <CheckoutPageInner />
+    </Suspense>
   );
 }

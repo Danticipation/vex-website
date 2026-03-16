@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useBuild } from "@/contexts/BuildContext";
@@ -10,7 +10,9 @@ import styles from "./build.module.css";
 
 const STEPS = ["Vehicle", "Paint", "Tyres", "Accessories", "Summary"];
 
-export default function BuildPage() {
+export const dynamic = "force-dynamic";
+
+function BuildPageInner() {
   const searchParams = useSearchParams();
   const inventoryId = searchParams.get("inventoryId");
   const {
@@ -78,15 +80,6 @@ export default function BuildPage() {
     setVehicle(v);
     setInventoryId(null);
     setStep(1);
-  };
-
-  const canProceed = () => {
-    if (step === 0) return !!vehicle;
-    if (step === 1) return true;
-    if (step === 2) return true;
-    if (step === 3) return true;
-    if (step === 4) return true;
-    return true;
   };
 
   if (loading && !vehicle) {
@@ -230,5 +223,19 @@ export default function BuildPage() {
         </section>
       )}
     </main>
+  );
+}
+
+export default function BuildPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className={styles.main}>
+          <p className={styles.loading}>Loading…</p>
+        </main>
+      }
+    >
+      <BuildPageInner />
+    </Suspense>
   );
 }

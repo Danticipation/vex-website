@@ -5,7 +5,7 @@ import { useReveal } from "@/hooks/useReveal";
 import styles from "./Hero.module.css";
 
 export function Hero() {
-  const revealRef = useReveal();
+  const revealRef = useReveal<HTMLDivElement>();
   return (
     <section className={styles.hero}>
       <div className={styles.overlay} />

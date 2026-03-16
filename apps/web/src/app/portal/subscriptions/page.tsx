@@ -13,7 +13,7 @@ import styles from "./subscriptions.module.css";
 export default function PortalSubscriptionsPage() {
   const router = useRouter();
   const { user, token, loading: authLoading } = useAuth();
-  const { vehicle, totalPrice, selectedOptions, options } = useBuild();
+  const { vehicle, totalPrice } = useBuild();
   const [subs, setSubs] = useState<SubscriptionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
