@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Express } from "express";
 import cors from "cors";
 import { healthRouter } from "./routes/health.js";
 import { authRouter } from "./routes/auth.js";
@@ -17,7 +17,7 @@ import { dashboardRouter } from "./routes/dashboard.js";
 import { customersRouter } from "./routes/customers.js";
 import { webhooksRouter } from "./routes/webhooks.js";
 
-const app = express();
+const app: Express = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

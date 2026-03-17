@@ -30,7 +30,7 @@ export function Header() {
       <Link href="/" className={styles.logo}>
         {!logoError ? (
           <Image
-            src="/vex-logo.png"
+            src="/no-bg-logo.png"
             alt="VEX — Vortex Exotic Exchange"
             width={140}
             height={48}
