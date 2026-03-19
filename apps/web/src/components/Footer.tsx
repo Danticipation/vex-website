@@ -18,7 +18,7 @@ const SOCIAL = [
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className={styles.footer}>
+    <footer id="contact" className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.links}>
           {FOOTER_LINKS.map(({ href, label }) => (

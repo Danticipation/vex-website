@@ -24,7 +24,7 @@ const TESTIMONIALS = [
 export function TrustStrip() {
   const ref = useReveal();
   return (
-    <section ref={ref} className={styles.section} data-reveal>
+    <section id="about" ref={ref} className={styles.section} data-reveal>
       <h2 className={styles.title}>What clients say</h2>
       <div className={styles.grid}>
         {TESTIMONIALS.map((t, i) => (

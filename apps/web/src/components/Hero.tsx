@@ -10,17 +10,23 @@ export function Hero() {
     <section className={styles.hero}>
       <div className={styles.overlay} />
       <div ref={revealRef} className={styles.content} data-reveal>
-        <h1 className={styles.headline}>Where Exotics Meet Excellence</h1>
+        <p className={styles.eyebrow}>For The Relentless Few</p>
+        <h1 className={styles.headline}>Own The Room Before You Arrive</h1>
         <p className={styles.subhead}>
-          Build your dream ride, configure financing, and have it delivered to your door. No pressure — just possibility.
+          The elite marketplace for people who never settle. Build your spec, structure the deal, ship to your door, and move in silence.
         </p>
         <div className={styles.ctas}>
           <Link href="/inventory" className={styles.ctaPrimary}>
-            View Inventory
+            Enter The Vault
           </Link>
           <Link href="/build" className={styles.ctaSecondary}>
-            Build Your Ride
+            Build A Statement
           </Link>
+        </div>
+        <div className={styles.metrics}>
+          <div><strong>24/7</strong><span>Concierge-level flow</span></div>
+          <div><strong>2-Click</strong><span>Deal clarity</span></div>
+          <div><strong>End-to-End</strong><span>Self-service power</span></div>
         </div>
       </div>
     </section>

@@ -1,10 +1,10 @@
 .hero {
   position: relative;
-  min-height: 85vh;
+  min-height: 88vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1a1a 50%, var(--bg-primary) 100%);
+  background: linear-gradient(130deg, #070707 0%, #121212 55%, #080808 100%);
   background-size: cover;
   background-position: center;
 }
@@ -12,26 +12,39 @@
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(13, 13, 13, 0.85) 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(8, 8, 8, 0.92) 100%);
   pointer-events: none;
 }
 
 .content {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  max-width: 860px;
   text-align: center;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
+  border: 1px solid rgba(216, 178, 98, 0.24);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.65));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
 }
 
 .headline {
   font-family: var(--font-montserrat), sans-serif;
-  font-weight: 700;
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  line-height: 1.1;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  line-height: 1.04;
   color: var(--text-primary);
   margin-bottom: 1rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
 }
 
 .subhead {
@@ -40,7 +53,7 @@
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 2rem;
-  max-width: 540px;
+  max-width: 640px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -55,7 +68,9 @@
 .ctaPrimary {
   font-family: var(--font-montserrat), sans-serif;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   padding: 0.9rem 1.75rem;
   background: var(--accent);
   color: var(--bg-primary);
@@ -71,7 +86,9 @@
 .ctaSecondary {
   font-family: var(--font-montserrat), sans-serif;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   padding: 0.9rem 1.75rem;
   background: transparent;
   color: var(--text-primary);
@@ -84,4 +101,35 @@
   border-color: var(--accent);
   color: var(--accent);
   transform: scale(1.02);
+}
+
+.metrics {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.metrics strong {
+  display: block;
+  color: var(--accent);
+  font-size: 1rem;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.metrics span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 2rem 1rem;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
 }
