@@ -16,6 +16,7 @@ import { leadsRouter } from "./routes/leads.js";
 import { dashboardRouter } from "./routes/dashboard.js";
 import { customersRouter } from "./routes/customers.js";
 import { webhooksRouter } from "./routes/webhooks.js";
+import { marketListingsRouter } from "./routes/marketListings.js";
 
 const app: Express = express();
 
@@ -66,5 +67,6 @@ app.use("/leads", leadsRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/customers", customersRouter);
 app.use("/webhooks", webhooksRouter);
+app.use("/market-listings", marketListingsRouter);
 
 export { app };

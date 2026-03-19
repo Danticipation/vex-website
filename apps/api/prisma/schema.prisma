@@ -274,3 +274,31 @@ model Lead {
 
   @@map("leads")
 }
+
+enum MarketSource {
+  BAT
+  CARS_COM
+  CARFAX
+  AUTONATION
+  MARKETCHECK
+  OTHER
+}
+
+model MarketListing {
+  id           String       @id @default(cuid())
+  source       MarketSource
+  externalUrl  String       @map("external_url")
+  thumbnailUrl String?      @map("thumbnail_url")
+  make         String
+  model        String
+  trim         String?
+  year         Int
+  price        Decimal?     @db.Decimal(12, 2)
+  mileage      Int?
+  location     String?
+  rawPayload   Json?        @map("raw_payload")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  @@map("market_listings")
+}
