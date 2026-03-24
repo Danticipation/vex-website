@@ -224,6 +224,8 @@ export type VehicleSceneProps = SportsCarProps & {
   cameraTarget?: [number, number, number];
   /** Premium showroom: filmic lighting stack, fog, optional post-FX & reflective floor. Defaults to `!compact`. */
   premium?: boolean;
+  /** When `compact`, show a subtle infinite grid for depth (e.g. hero strip). */
+  compactGrid?: boolean;
 };
 
 export function VehicleScene({
@@ -237,6 +239,7 @@ export function VehicleScene({
   gltfUrl,
   cameraTarget: cameraTargetProp,
   premium: premiumProp,
+  compactGrid = false,
 }: VehicleSceneProps) {
   const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
   const keyLightRef = useRef<THREE.SpotLight>(null);
@@ -247,7 +250,7 @@ export function VehicleScene({
   const premium = premiumProp ?? !compact;
   const effectsOn = premium && !reducedMotion;
   const showReflectorFloor = premium && !reducedMotion && !compact;
-  const showGrid = !compact && !showReflectorFloor;
+  const showGrid = !showReflectorFloor && (!compact || compactGrid);
 
   useLayoutEffect(() => {
     const L = keyLightRef.current;

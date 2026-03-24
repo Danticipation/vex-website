@@ -17,6 +17,8 @@ export function ExoticVisualization() {
         compact
         minimal
         embed
+        premium
+        compactGrid
         finishId="rosso"
         edition="Launch"
         powertrain="V12"

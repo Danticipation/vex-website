@@ -14,7 +14,7 @@ const ITEMS = [
 export function PrestigeMarquee() {
   const doubled = [...ITEMS, ...ITEMS];
   return (
-    <div className={styles.wrap} aria-hidden>
+    <div id="discover" className={styles.wrap} aria-hidden>
       <div className={styles.track}>
         {doubled.map((label, i) => (
           <span key={`${label}-${i}`} className={styles.item}>

@@ -18,6 +18,10 @@ export type ConfiguratorVehicleCanvasProps = {
   minimal?: boolean;
   /** Strip outer frame — parent provides border (e.g. hero) */
   embed?: boolean;
+  /** Override default premium (`!compact`). Use true on hero for fog + post-FX. */
+  premium?: boolean;
+  /** Subtle floor grid when `compact` (hero strip). */
+  compactGrid?: boolean;
 };
 
 function CanvasLoader() {
@@ -43,6 +47,8 @@ export function ConfiguratorVehicleCanvas({
   compact = false,
   minimal = false,
   embed = false,
+  premium,
+  compactGrid = false,
 }: ConfiguratorVehicleCanvasProps) {
   const [cameraPreset, setCameraPreset] = useState<CameraPreset | null>(null);
   const [autoRotate, setAutoRotate] = useState(false);
@@ -109,6 +115,8 @@ export function ConfiguratorVehicleCanvas({
               onPresetApplied={onPresetApplied}
               autoRotate={autoRotate}
               compact={compact}
+              premium={premium}
+              compactGrid={compactGrid}
             />
           </Suspense>
         </Canvas>

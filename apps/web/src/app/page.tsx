@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main>
+      <main id="main-content" className="home-main" aria-label="Vortex Exotic Exchange home">
         <Hero />
         <PrestigeMarquee />
         <ExoticPillars />

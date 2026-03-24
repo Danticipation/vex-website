@@ -8,6 +8,7 @@ import styles from "./Header.module.css";
 
 const NAV_LINKS = [
   { href: "/inventory", label: "Exotics" },
+  { href: "/#featured", label: "Featured" },
   { href: "/build", label: "Configure" },
   { href: "/#configure", label: "Spec preview" },
   { href: "/#pillars", label: "Why VEX" },

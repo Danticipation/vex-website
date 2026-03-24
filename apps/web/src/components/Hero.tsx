@@ -3,28 +3,31 @@
 import Link from "next/link";
 import { useReveal } from "@/hooks/useReveal";
 import { ExoticVisualization } from "@/components/ExoticVisualization";
+import { HeroScrollHint } from "@/components/HeroScrollHint";
 import styles from "./Hero.module.css";
 
 export function Hero() {
   const revealRef = useReveal<HTMLDivElement>();
   return (
-    <section className={styles.hero}>
+    <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={styles.ambient} aria-hidden />
       <div className={styles.overlay} />
+      <div className={styles.vignette} aria-hidden />
       <div ref={revealRef} className={styles.shell} data-reveal>
         <div className={styles.copy}>
           <div className={styles.badgeRow}>
             <span className={styles.badge}>The Exchange</span>
             <span className={styles.lot}>LOT SERIES · 2026</span>
           </div>
-          <h1 className={styles.headline}>
+          <p className={styles.kicker}>The private market for vehicles that refuse to blend in.</p>
+          <h1 className={styles.headline} id="hero-heading">
             <span className={styles.headlineGradient}>Rare metal.</span>
             <br />
             <span className={styles.headlineSolid}>No compromise.</span>
           </h1>
           <p className={styles.subhead}>
-            A luxury auction-grade platform for exotic vehicles — curated lots, transparent bids, and delivery handled like the asset
-            depends on it. Because it does.
+            Curated exotic lots, sealed bids, and white-glove logistics — so the first time you see your car in person isn’t the first
+            time you’ve seen the truth of the deal.
           </p>
           <div className={styles.ctas}>
             <Link href="/inventory" className={styles.ctaPrimary}>
@@ -56,6 +59,7 @@ export function Hero() {
           </div>
         </div>
       </div>
+      <HeroScrollHint />
     </section>
   );
 }

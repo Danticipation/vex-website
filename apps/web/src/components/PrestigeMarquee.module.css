@@ -3,7 +3,7 @@
   overflow: hidden;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: linear-gradient(90deg, rgba(201, 169, 98, 0.04), transparent 40%, transparent 60%, rgba(212, 255, 0, 0.03));
+  background: linear-gradient(90deg, rgba(201, 169, 98, 0.04), transparent 40%, transparent 60%, rgba(232, 204, 122, 0.03));
   padding: 0.85rem 0;
 }
 

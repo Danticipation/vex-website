@@ -25,7 +25,7 @@ export function FeaturedInventory() {
 
   if (loading) {
     return (
-      <section className={styles.section}>
+      <section id="featured" className={styles.section}>
         <h2 className={styles.title}>Featured lots</h2>
         <p className={styles.subtitle}>Current listings on the exchange</p>
         <div className={styles.grid}>
@@ -40,7 +40,7 @@ export function FeaturedInventory() {
   if (items.length === 0) return null;
 
   return (
-    <section className={styles.section}>
+    <section id="featured" className={styles.section}>
       <h2 className={styles.title}>Featured lots</h2>
       <p className={styles.subtitle}>Current listings on the exchange</p>
       <div className={styles.grid}>

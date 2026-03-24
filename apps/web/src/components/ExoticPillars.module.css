@@ -55,7 +55,7 @@
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 32px rgba(212, 255, 0, 0.06);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 32px rgba(232, 204, 122, 0.08);
 }
 
 .cardTitle {
