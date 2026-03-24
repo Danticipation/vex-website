@@ -80,7 +80,7 @@
 
 .vehicleCard.selected {
   border-color: var(--accent);
-  background: rgba(255, 215, 0, 0.08);
+  background: var(--accent-08);
 }
 
 .vehicleName {
@@ -123,7 +123,7 @@
 
 .optionCard.selected {
   border-color: var(--accent);
-  background: rgba(255, 215, 0, 0.08);
+  background: var(--accent-08);
 }
 
 .optionName {

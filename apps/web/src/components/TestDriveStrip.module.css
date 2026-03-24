@@ -1,0 +1,108 @@
+.section {
+  padding: 3.5rem 2rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(201, 169, 98, 0.06) 0%, transparent 55%);
+}
+
+.inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.copy {
+  flex: 1;
+  min-width: 260px;
+}
+
+.eyebrow {
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--highlight);
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.subhead {
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 460px;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.primary {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.4rem;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  color: #0a0906;
+  border-radius: 2px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.primary:hover {
+  box-shadow: 0 0 24px var(--accent-glow);
+  transform: scale(1.02);
+}
+
+.secondary {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.4rem;
+  border: 1px solid var(--highlight);
+  color: var(--text-primary);
+  border-radius: 2px;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.secondary:hover {
+  border-color: var(--accent-bright);
+  color: var(--accent-bright);
+}
+
+@media (max-width: 640px) {
+  .inner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .subhead {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ctas {
+    justify-content: center;
+  }
+}

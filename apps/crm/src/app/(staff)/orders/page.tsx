@@ -49,7 +49,7 @@ export default function OrdersPage() {
               <td>{o.id.slice(0, 8)}…</td>
               <td>{o.type}</td>
               <td>{o.status}</td>
-              <td>{o.totalAmount != null ? `£${o.totalAmount.toLocaleString()}` : "—"}</td>
+              <td>{o.totalAmount != null ? `$${o.totalAmount.toLocaleString("en-US")}` : "—"}</td>
               <td>{new Date(o.createdAt).toLocaleDateString()}</td>
               <td><Link href={`/orders/${o.id}`}>View</Link></td>
             </tr>

@@ -3,6 +3,6 @@ import { validateBody } from "../middleware/validate.js";
 import { shippingQuoteSchema } from "@vex/shared";
 import * as shippingController from "../controllers/shippingController.js";
 
-export const shippingRouter = Router();
+export const shippingRouter: Router = Router();
 
 shippingRouter.post("/quote", validateBody(shippingQuoteSchema), shippingController.quote);

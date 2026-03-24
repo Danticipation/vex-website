@@ -15,6 +15,7 @@ import {
   type CreateOrderPayload,
 } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatUsd } from "@/lib/formatCurrency";
 import styles from "./checkout.module.css";
 
 export const dynamic = "force-dynamic";
@@ -163,46 +164,55 @@ function CheckoutPageInner() {
               <div className={styles.breakdownRows}>
                 <div className={styles.breakdownRow}>
                   <span>{displayVehicle ? `${displayVehicle.make} ${displayVehicle.model} ${displayVehicle.year}` : "Vehicle"}</span>
-                  <span>£{effectiveTotal.toLocaleString()}</span>
+                  <span>{formatUsd(effectiveTotal)}</span>
                 </div>
                 {buildMode && options.filter((o) => selectedOptions[o.category] === o.id).map((o) => (
                   <div key={o.id} className={styles.breakdownRow}>
                     <span>+ {o.name}</span>
-                    <span>+£{Number(o.priceDelta).toLocaleString()}</span>
+                    <span>+{formatUsd(Number(o.priceDelta))}</span>
                   </div>
                 ))}
                 {shippingQuote && (
                   <div className={styles.breakdownRow}>
                     <span>Shipping</span>
-                    <span>£{shippingQuote.amount.toFixed(2)}</span>
+                    <span>{formatUsd(shippingQuote.amount, 2)}</span>
                   </div>
                 )}
                 {tradeInSnapshot && typeof (tradeInSnapshot as { estimatedValue?: number }).estimatedValue === "number" && (
                   <div className={styles.breakdownRow}>
                     <span>Trade-in credit</span>
-                    <span className={styles.credit}>-£{(tradeInSnapshot as { estimatedValue: number }).estimatedValue.toLocaleString()}</span>
+                    <span className={styles.credit}>-{formatUsd((tradeInSnapshot as { estimatedValue: number }).estimatedValue)}</span>
                   </div>
                 )}
                 {financeResult && (
                   <div className={styles.breakdownRow}>
                     <span>Financing (est. total)</span>
-                    <span>£{financeResult.totalAmount.toLocaleString()}</span>
+                    <span>{formatUsd(financeResult.totalAmount)}</span>
                   </div>
                 )}
               </div>
               <div className={styles.breakdownTotal}>
-                <span>Total{deposit ? " (deposit £" + Number(deposit).toLocaleString() + ")" : ""}</span>
-                <span>£{(effectiveTotal + (shippingQuote?.amount ?? 0) - (typeof (tradeInSnapshot as { estimatedValue?: number })?.estimatedValue === "number" ? (tradeInSnapshot as { estimatedValue: number }).estimatedValue : 0)).toLocaleString()}</span>
+                <span>Total{deposit ? " (deposit " + formatUsd(Number(deposit)) + ")" : ""}</span>
+                <span>
+                  {formatUsd(
+                    effectiveTotal +
+                      (shippingQuote?.amount ?? 0) -
+                      (typeof (tradeInSnapshot as { estimatedValue?: number }).estimatedValue === "number"
+                        ? (tradeInSnapshot as { estimatedValue: number }).estimatedValue
+                        : 0),
+                    2,
+                  )}
+                </span>
               </div>
             </section>
 
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Order summary</h2>
               <p className={styles.summaryLine}>
-                {displayVehicle ? `${displayVehicle.make} ${displayVehicle.model} ${displayVehicle.year}` : "Vehicle"} — £{effectiveTotal.toLocaleString()}
+                {displayVehicle ? `${displayVehicle.make} ${displayVehicle.model} ${displayVehicle.year}` : "Vehicle"} — {formatUsd(effectiveTotal)}
               </p>
               {buildMode && options.filter((o) => selectedOptions[o.category] === o.id).map((o) => (
-                <p key={o.id} className={styles.summaryLine}>+ {o.name} (+£{o.priceDelta})</p>
+                <p key={o.id} className={styles.summaryLine}>+ {o.name} (+{formatUsd(o.priceDelta)})</p>
               ))}
             </section>
 
@@ -217,7 +227,9 @@ function CheckoutPageInner() {
                 <input type="number" step={0.1} min={0} value={apr} onChange={(e) => setApr(Number(e.target.value))} className={styles.input} />
               </div>
               {financeResult && (
-                <p className={styles.financeResult}>Estimated payment: £{financeResult.monthlyPayment.toFixed(2)}/mo · Total £{financeResult.totalAmount.toLocaleString()}</p>
+                <p className={styles.financeResult}>
+                  Estimated payment: {formatUsd(financeResult.monthlyPayment, 2)}/mo · Total {formatUsd(financeResult.totalAmount)}
+                </p>
               )}
             </section>
 
@@ -239,18 +251,22 @@ function CheckoutPageInner() {
                 </select>
               </div>
               <button type="button" onClick={handleShippingQuote} className={styles.ctaSecondary}>Get quote</button>
-              {shippingQuote && <p className={styles.shippingResult}>Shipping: £{shippingQuote.amount.toFixed(2)}</p>}
+              {shippingQuote && <p className={styles.shippingResult}>Shipping: {formatUsd(shippingQuote.amount, 2)}</p>}
             </section>
 
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Trade-in</h2>
               <Link href="/appraisal" className={styles.link}>Get your trade-in value</Link>
-              {tradeInSnapshot && <p className={styles.tradeInNote}>Trade-in value applied: £{(tradeInSnapshot.estimatedValue as number)?.toLocaleString()}</p>}
+              {tradeInSnapshot && (
+                <p className={styles.tradeInNote}>
+                  Trade-in value applied: {formatUsd((tradeInSnapshot.estimatedValue as number) ?? 0)}
+                </p>
+              )}
             </section>
 
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Deal analysis & VIP</h2>
-              <p className={styles.upsellText}>Check My Deal — get expert recommendations on your deal. £99/mo or £750/yr.</p>
+              <p className={styles.upsellText}>Check My Deal — get expert recommendations on your deal. $99/mo or $750/yr.</p>
               <Link href="/portal/subscriptions" className={styles.link}>Manage subscriptions in Portal</Link>
             </section>
 

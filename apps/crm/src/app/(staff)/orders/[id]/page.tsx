@@ -46,8 +46,8 @@ export default function OrderDetailPage() {
       <Link href="/orders" style={{ display: "inline-block", marginBottom: "1rem" }}>← Orders</Link>
       <h1 style={{ marginBottom: "1rem", color: "var(--text-primary)" }}>Order {id.slice(0, 8)}…</h1>
       <p><strong>Type</strong> {o.type}</p>
-      <p><strong>Total</strong> {o.totalAmount != null ? `£${o.totalAmount.toLocaleString()}` : "—"}</p>
-      <p><strong>Deposit</strong> {o.depositAmount != null ? `£${o.depositAmount.toLocaleString()}` : "—"}</p>
+      <p><strong>Total</strong> {o.totalAmount != null ? `$${o.totalAmount.toLocaleString("en-US")}` : "—"}</p>
+      <p><strong>Deposit</strong> {o.depositAmount != null ? `$${o.depositAmount.toLocaleString("en-US")}` : "—"}</p>
       <p><strong>Created</strong> {new Date(o.createdAt).toLocaleString()}</p>
       {o.shipments && o.shipments.length > 0 && (
         <p><strong>Shipment</strong> {o.shipments[0].status} {o.shipments[0].trackingUrl && <a href={o.shipments[0].trackingUrl} target="_blank" rel="noopener noreferrer">Track</a>}</p>

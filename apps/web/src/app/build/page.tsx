@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useBuild } from "@/contexts/BuildContext";
 import { getVehicles, getVehicleOptions, getInventoryItem } from "@/lib/api";
+import { formatUsd } from "@/lib/formatCurrency";
 import type { Vehicle } from "@/lib/api";
 import styles from "./build.module.css";
 
@@ -121,7 +122,7 @@ function BuildPageInner() {
               >
                 <span className={styles.vehicleName}>{v.make} {v.model}</span>
                 <span className={styles.vehicleMeta}>{v.year} · {v.trimLevel}</span>
-                <span className={styles.vehiclePrice}>£{v.basePrice.toLocaleString()}</span>
+                <span className={styles.vehiclePrice}>{formatUsd(v.basePrice)}</span>
               </button>
             ))}
           </div>
@@ -147,7 +148,7 @@ function BuildPageInner() {
                 onClick={() => setSelectedOption("PAINT", o.id)}
               >
                 <span className={styles.optionName}>{o.name}</span>
-                <span className={styles.optionPrice}>{o.priceDelta > 0 ? `+£${o.priceDelta}` : "Included"}</span>
+                <span className={styles.optionPrice}>{o.priceDelta > 0 ? `+${formatUsd(o.priceDelta)}` : "Included"}</span>
               </button>
             ))}
           </div>
@@ -171,7 +172,7 @@ function BuildPageInner() {
                 onClick={() => setSelectedOption("TYRES", o.id)}
               >
                 <span className={styles.optionName}>{o.name}</span>
-                <span className={styles.optionPrice}>{o.priceDelta > 0 ? `+£${o.priceDelta}` : "Included"}</span>
+                <span className={styles.optionPrice}>{o.priceDelta > 0 ? `+${formatUsd(o.priceDelta)}` : "Included"}</span>
               </button>
             ))}
           </div>
@@ -195,7 +196,7 @@ function BuildPageInner() {
                 onClick={() => setSelectedOption(o.category, o.id)}
               >
                 <span className={styles.optionName}>{o.name}</span>
-                <span className={styles.optionPrice}>{o.priceDelta > 0 ? `+£${o.priceDelta}` : "Included"}</span>
+                <span className={styles.optionPrice}>{o.priceDelta > 0 ? `+${formatUsd(o.priceDelta)}` : "Included"}</span>
               </button>
             ))}
           </div>
@@ -212,9 +213,9 @@ function BuildPageInner() {
           <div className={styles.summary}>
             <p className={styles.summaryLine}><strong>{vehicle.make} {vehicle.model}</strong> {vehicle.year} · {vehicle.trimLevel}</p>
             {options.filter((o) => selectedOptions[o.category] === o.id).map((o) => (
-              <p key={o.id} className={styles.summaryLine}>+ {o.name} (+£{o.priceDelta})</p>
+              <p key={o.id} className={styles.summaryLine}>+ {o.name} (+{formatUsd(o.priceDelta)})</p>
             ))}
-            <p className={styles.summaryTotal}>Total: £{totalPrice.toLocaleString()}</p>
+            <p className={styles.summaryTotal}>Total: {formatUsd(totalPrice)}</p>
           </div>
           <div className={styles.actions}>
             <button type="button" className={styles.ctaSecondary} onClick={() => setStep(3)}>Back</button>

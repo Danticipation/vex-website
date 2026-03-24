@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { createAppraisal } from "@/lib/api";
+import { formatUsd } from "@/lib/formatCurrency";
 import styles from "./appraisal.module.css";
 
 export default function AppraisalPage() {
@@ -53,7 +54,7 @@ export default function AppraisalPage() {
         {result ? (
           <div className={styles.result}>
             <p className={styles.estimateLabel}>Estimated value</p>
-            <p className={styles.estimateValue}>£{result.estimatedValue.toLocaleString()}</p>
+            <p className={styles.estimateValue}>{formatUsd(result.estimatedValue)}</p>
             <Link href={`/checkout?tradeInId=${result.id}`} className={styles.cta}>Use as trade-in at checkout</Link>
             <Link href="/checkout" className={styles.ctaSecondary}>Back to checkout</Link>
           </div>

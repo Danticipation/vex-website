@@ -39,7 +39,7 @@ export default function CustomerDetailPage() {
           <h2 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>Orders</h2>
           <ul style={{ listStyle: "none" }}>
             {c.orders.map((o) => (
-              <li key={o.id}><Link href={`/orders/${o.id}`}>{o.id.slice(0, 8)}…</Link> — {o.status} — {o.totalAmount != null ? `£${o.totalAmount.toLocaleString()}` : "—"}</li>
+              <li key={o.id}><Link href={`/orders/${o.id}`}>{o.id.slice(0, 8)}…</Link> — {o.status} — {o.totalAmount != null ? `$${o.totalAmount.toLocaleString("en-US")}` : "—"}</li>
             ))}
           </ul>
         </section>

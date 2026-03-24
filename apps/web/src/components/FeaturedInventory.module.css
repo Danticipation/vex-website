@@ -34,7 +34,7 @@
 
 .card {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: 4px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -43,14 +43,30 @@
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 215, 0, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--edge-15), 0 0 40px rgba(232, 204, 122, 0.05);
 }
 
 .cardImage {
   position: relative;
   aspect-ratio: 16 / 10;
   background: var(--bg-primary);
+}
+
+.lotTag {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 2;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #0a0906;
+  background: linear-gradient(90deg, var(--accent), var(--highlight));
+  padding: 0.35rem 0.55rem;
+  border-radius: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .cardImage .img {
@@ -82,7 +98,7 @@
   letter-spacing: 0.06em;
   color: var(--accent);
   width: fit-content;
-  border: 1px solid rgba(216, 178, 98, 0.3);
+  border: 1px solid var(--accent-30);
   border-radius: 999px;
   padding: 0.18rem 0.5rem;
 }
@@ -104,8 +120,9 @@
   font-family: var(--font-montserrat), sans-serif;
   font-weight: 700;
   font-size: 1.15rem;
-  color: var(--accent);
+  color: var(--accent-bright);
   margin-top: 0.25rem;
+  letter-spacing: 0.02em;
 }
 
 .cta {

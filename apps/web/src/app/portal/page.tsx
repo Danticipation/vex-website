@@ -14,6 +14,7 @@ import {
   type SavedVehicleItem,
   type NotificationItem,
 } from "@/lib/api";
+import { formatUsd } from "@/lib/formatCurrency";
 import styles from "./portal.module.css";
 
 export default function PortalPage() {
@@ -85,7 +86,7 @@ export default function PortalPage() {
                         <span className={styles.badge}>{o.status}</span>
                       </div>
                       <p className={styles.cardMeta}>
-                        {o.type} · {o.totalAmount != null ? `£${o.totalAmount.toLocaleString()}` : "—"}
+                        {o.type} · {o.totalAmount != null ? formatUsd(o.totalAmount) : "—"}
                       </p>
                       {o.shipments && o.shipments.length > 0 && (
                         <div className={styles.shipment}>
@@ -117,7 +118,7 @@ export default function PortalPage() {
                       {s.inventory?.vehicle ? (
                         <Link href={s.inventoryId ? `/inventory/${s.inventoryId}` : "/build"} className={styles.cardLink}>
                           {s.inventory.vehicle.make} {s.inventory.vehicle.model} {s.inventory.vehicle.year}
-                          {s.inventory.listPrice != null && ` · £${s.inventory.listPrice.toLocaleString()}`}
+                          {s.inventory.listPrice != null && ` · ${formatUsd(s.inventory.listPrice)}`}
                         </Link>
                       ) : (
                         <Link href="/build" className={styles.cardLink}>Custom build</Link>

@@ -4,25 +4,25 @@ import styles from "./PremiumServices.module.css";
 const SERVICES = [
   {
     title: "Tailored financing",
-    description: "Transparent rates, monthly payment calculator, and full cost breakdown before you commit.",
+    description: "Structured for exotic collateral — transparent rates, clear terms, and full payment visibility before you commit.",
     href: "/inventory",
-    icon: "£",
+    icon: "$",
   },
   {
     title: "VIP concierge",
-    description: "Full-service deal execution: vehicle selection, negotiation, shipping, and delivery handled for you.",
+    description: "Private-office execution: sourcing, negotiation, enclosed transport, and delivery coordinated around your calendar.",
     href: "/portal/subscriptions",
     icon: "◆",
   },
   {
     title: "Worldwide delivery",
-    description: "Open or enclosed transport, real-time quotes, and live tracking from pickup to your door.",
+    description: "Open or enclosed transport for high-value metal — quotes, insurance, and tracking from collection to your door.",
     href: "/checkout",
     icon: "◈",
   },
   {
-    title: "Custom upgrades",
-    description: "Styling, restyling, paint, wrap, interior, and detailing—add at checkout with live pricing.",
+    title: "Bespoke upgrades",
+    description: "Paint, wrap, interior, and detailing — specified at checkout with live pricing and craft partners you can trust.",
     href: "/build",
     icon: "◇",
   },
@@ -31,11 +31,14 @@ const SERVICES = [
 export function PremiumServices() {
   return (
     <section id="services" className={styles.section}>
-      <h2 className={styles.title}>Our premium services</h2>
+      <h2 className={styles.title}>Premium services</h2>
+      <p className={styles.subtitle}>Built for exotic ownership — not ordinary retail</p>
       <div className={styles.grid}>
         {SERVICES.map((s) => (
           <div key={s.title} className={styles.card}>
-            <span className={styles.icon} aria-hidden>{s.icon}</span>
+            <span className={styles.icon} aria-hidden>
+              {s.icon}
+            </span>
             <h3 className={styles.cardTitle}>{s.title}</h3>
             <p className={styles.desc}>{s.description}</p>
             <Link href={s.href} className={styles.link}>

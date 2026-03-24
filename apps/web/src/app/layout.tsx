@@ -1,13 +1,28 @@
 import type { Metadata } from "next";
-import { Montserrat, Poppins, Inter } from "next/font/google";
+import { Oswald, Cormorant_Garamond, Inter, Poppins } from "next/font/google";
 import { BuildProvider } from "@/contexts/BuildContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
 
-const montserrat = Montserrat({
+/* Sleek display + editorial serif — variable names preserved for existing CSS */
+const oswald = Oswald({
   subsets: ["latin"],
   variable: "--font-montserrat",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -18,15 +33,10 @@ const poppins = Poppins({
   display: "swap",
 });
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "VEX | Vortex Exotic Exchange",
-  description: "Luxury automotive marketplace — buy, build, and drive.",
+  description:
+    "The private exchange for exotic vehicles — curated lots, sealed bids, and white-glove delivery for collectors worldwide.",
 };
 
 export default function RootLayout({
@@ -35,10 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${montserrat.variable} ${poppins.variable} ${inter.variable}`}
-    >
+    <html lang="en-US" className={`${oswald.variable} ${cormorant.variable} ${inter.variable} ${poppins.variable}`}>
       <body style={{ fontFamily: "var(--font-inter)" }}>
         <AuthProvider>
           <BuildProvider>

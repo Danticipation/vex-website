@@ -42,7 +42,7 @@ export default function InventoryPage() {
             <tr key={i.id}>
               <td>{i.vehicle ? `${i.vehicle.make} ${i.vehicle.model} ${i.vehicle.year}` : "—"}</td>
               <td>{i.source}</td>
-              <td>£{i.listPrice.toLocaleString()}</td>
+              <td>${i.listPrice.toLocaleString("en-US")}</td>
               <td>{i.location || "—"}</td>
               <td>{i.status}</td>
               <td><a href={`${WEB_URL}/inventory/${i.id}`} target="_blank" rel="noopener noreferrer">View on site</a></td>

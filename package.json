@@ -9,12 +9,16 @@
     "dev:api": "pnpm --filter @vex/api dev",
     "dev:web": "pnpm --filter @vex/web dev",
     "dev:crm": "pnpm --filter @vex/crm dev",
-    "build": "pnpm -r run build",
+    "build": "turbo run build",
     "build:api": "pnpm --filter @vex/api build",
     "build:web": "pnpm --filter @vex/web build",
     "build:crm": "pnpm --filter @vex/crm build"
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "devDependencies": {
+    "turbo": "^2.8.20"
+  },
+  "packageManager": "pnpm@9.15.9"
 }

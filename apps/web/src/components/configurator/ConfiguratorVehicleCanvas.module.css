@@ -1,0 +1,164 @@
+.wrap,
+.wrapCompact {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.wrap {
+  /* Fills parent flex slot (ConfiguratorPreview .previewViewer) */
+  min-height: 0;
+}
+
+.wrapCompact {
+  min-height: 280px;
+}
+
+.wrapEmbed .hint {
+  bottom: 0.4rem;
+  font-size: 0.58rem;
+  padding: 0.28rem 0.5rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  z-index: 2;
+}
+
+.viewRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.viewBtn {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.65rem;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  background: rgba(8, 10, 14, 0.92);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.viewBtn:hover {
+  border-color: var(--line-gold);
+  color: var(--text-primary);
+}
+
+.viewBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toolsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.75rem;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  background: rgba(8, 10, 14, 0.92);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.toggle:hover {
+  border-color: var(--line-gold);
+  color: var(--text-primary);
+}
+
+.toggleOn {
+  border-color: var(--accent);
+  color: var(--accent-bright);
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.canvasShell {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--line-gold);
+  background: #06080c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.canvasShellEmbed {
+  border: none;
+  box-shadow: none;
+  border-radius: 2px;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  touch-action: none;
+}
+
+.wrapCompact .canvas {
+  min-height: 240px;
+}
+
+.loading {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--highlight);
+  padding: 0.5rem 0.85rem;
+  border-radius: 4px;
+  background: rgba(4, 6, 10, 0.9);
+  border: 1px solid var(--line-gold);
+}
+
+.hint {
+  position: absolute;
+  bottom: 0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: rgba(4, 6, 10, 0.75);
+  border: 1px solid var(--line);
+  pointer-events: none;
+  max-width: 90%;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .canvas {
+    min-height: min(52vw, 360px);
+  }
+}

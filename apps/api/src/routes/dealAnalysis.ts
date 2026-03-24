@@ -4,6 +4,6 @@ import { requireAuth } from "../middleware/auth.js";
 import { dealAnalysisSchema } from "@vex/shared";
 import * as dealAnalysisController from "../controllers/dealAnalysisController.js";
 
-export const dealAnalysisRouter = Router();
+export const dealAnalysisRouter: Router = Router();
 
 dealAnalysisRouter.post("/", requireAuth, validateBody(dealAnalysisSchema), dealAnalysisController.run);

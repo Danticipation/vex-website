@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getInventory, type InventoryItem } from "@/lib/api";
+import { formatUsd } from "@/lib/formatCurrency";
 import styles from "./FeaturedInventory.module.css";
 
 function imageUrl(item: InventoryItem): string | null {
@@ -25,8 +26,8 @@ export function FeaturedInventory() {
   if (loading) {
     return (
       <section className={styles.section}>
-        <h2 className={styles.title}>Featured inventory</h2>
-        <p className={styles.subtitle}>Explore our exclusive collection</p>
+        <h2 className={styles.title}>Featured lots</h2>
+        <p className={styles.subtitle}>Current listings on the exchange</p>
         <div className={styles.grid}>
           {[1, 2, 3].map((i) => (
             <div key={i} className={styles.cardSkeleton} />
@@ -40,14 +41,16 @@ export function FeaturedInventory() {
 
   return (
     <section className={styles.section}>
-      <h2 className={styles.title}>Featured inventory</h2>
-      <p className={styles.subtitle}>Explore our exclusive collection</p>
+      <h2 className={styles.title}>Featured lots</h2>
+      <p className={styles.subtitle}>Current listings on the exchange</p>
       <div className={styles.grid}>
-        {items.map((item) => {
+        {items.map((item, index) => {
           const url = imageUrl(item);
+          const lot = String(index + 1).padStart(3, "0");
           return (
             <Link key={item.id} href={`/inventory/${item.id}`} className={styles.card}>
               <div className={styles.cardImage}>
+                <span className={styles.lotTag}>LOT · {lot}</span>
                 {url ? (
                   <img src={url} alt="" loading="lazy" className={styles.img} />
                 ) : (
@@ -63,7 +66,7 @@ export function FeaturedInventory() {
                   {item.vehicle?.year}
                   {item.location ? ` · ${item.location}` : ""}
                 </p>
-                <p className={styles.cardPrice}>£{item.listPrice.toLocaleString()}</p>
+                <p className={styles.cardPrice}>{formatUsd(item.listPrice)}</p>
                 <span className={styles.cta}>View details</span>
               </div>
             </Link>
@@ -71,7 +74,7 @@ export function FeaturedInventory() {
         })}
       </div>
       <Link href="/inventory" className={styles.viewAll}>
-        View all inventory →
+        View all exotics →
       </Link>
     </section>
   );

@@ -114,10 +114,10 @@ export default function PortalSubscriptionsPage() {
               ) : (
                 <div className={styles.actions}>
                   <button type="button" onClick={() => handleSubscribe("CHECK_MY_DEAL", "monthly")} disabled={submitting} className={styles.cta}>
-                    £99/month
+                    $99/month
                   </button>
                   <button type="button" onClick={() => handleSubscribe("CHECK_MY_DEAL", "yearly")} disabled={submitting} className={styles.ctaSecondary}>
-                    £750/year
+                    $750/year
                   </button>
                 </div>
               )}
@@ -130,7 +130,7 @@ export default function PortalSubscriptionsPage() {
                 <p className={styles.active}>Active</p>
               ) : (
                 <button type="button" onClick={() => handleSubscribe("VIP_CONCIERGE", "monthly")} disabled={submitting} className={styles.cta}>
-                  Subscribe — £499/mo
+                  Subscribe — $499/mo
                 </button>
               )}
             </section>

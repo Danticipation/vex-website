@@ -1,13 +1,32 @@
 :root {
-  --bg-primary: #080808;
-  --bg-card: #141414;
-  --bg-footer: #050505;
-  --accent: #d8b262;
-  --accent-glow: rgba(216, 178, 98, 0.35);
-  --text-primary: #ffffff;
-  --text-secondary: #d6d6d6;
-  --text-muted: #8d8d8d;
-  --line: rgba(255, 255, 255, 0.08);
+  /* US / luxury auction — warm gold + graphite (no neon green) */
+  --bg-primary: #030304;
+  --bg-card: #0c0c0e;
+  --bg-footer: #010102;
+  --bg-panel: rgba(14, 14, 18, 0.82);
+  --accent: #c9a962;
+  --accent-bright: #e8d5a3;
+  /* Sleek “neon gold” accent — champagne / amber, not lime */
+  --highlight: #e8cc7a;
+  --highlight-glow: rgba(232, 204, 122, 0.38);
+  /* Secondary emphasis — cool graphite */
+  --graphite: #8b8d94;
+  --graphite-soft: rgba(139, 141, 148, 0.35);
+  --accent-deep: #7a6230;
+  --accent-glow: rgba(201, 169, 98, 0.45);
+  --text-primary: #f4f2ed;
+  --text-secondary: #a8a6a1;
+  --text-muted: #5c5a56;
+  --line: rgba(255, 255, 255, 0.06);
+  --line-gold: rgba(201, 169, 98, 0.35);
+  --accent-06: rgba(201, 169, 98, 0.06);
+  --accent-08: rgba(201, 169, 98, 0.08);
+  --accent-12: rgba(201, 169, 98, 0.12);
+  --accent-15: rgba(201, 169, 98, 0.15);
+  --accent-20: rgba(201, 169, 98, 0.2);
+  --accent-30: rgba(201, 169, 98, 0.3);
+  --edge-08: rgba(232, 204, 122, 0.1);
+  --edge-15: rgba(232, 204, 122, 0.2);
 }
 
 * {
@@ -26,21 +45,73 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background-color: var(--bg-primary);
-  background-image: radial-gradient(circle at 20% -10%, rgba(216, 178, 98, 0.1), transparent 30%),
-    radial-gradient(circle at 90% 10%, rgba(216, 178, 98, 0.07), transparent 25%);
+  background-image: radial-gradient(ellipse 100% 70% at 50% -25%, rgba(201, 169, 98, 0.09), transparent 52%),
+    radial-gradient(ellipse 50% 45% at 100% 20%, rgba(232, 204, 122, 0.05), transparent 50%),
+    radial-gradient(ellipse 40% 35% at 0% 80%, rgba(139, 141, 148, 0.04), transparent 45%),
+    linear-gradient(180deg, #060608 0%, var(--bg-primary) 45%, #020203 100%);
   color: var(--text-secondary);
 }
 
-::selection {
-  background: rgba(216, 178, 98, 0.3);
-  color: #fff;
+body {
+  position: relative;
 }
 
-/* Scroll-reveal: use data-reveal on sections */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 20%, transparent 100%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(201, 169, 98, 0.03) 40%,
+    transparent 55%,
+    rgba(139, 141, 148, 0.04) 75%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: meshShift 18s ease-in-out infinite;
+}
+
+@keyframes meshShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: rgba(201, 169, 98, 0.3);
+  color: var(--text-primary);
+}
+
 [data-reveal] {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(18px);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 [data-reveal].revealed {
@@ -48,16 +119,14 @@ body {
   transform: translateY(0);
 }
 
-/* Button hover polish */
 button[class*="cta"]:not(:disabled):hover,
 a[class*="cta"]:hover {
-  transform: scale(1.02);
+  transform: translateY(-1px);
 }
 
-/* Card lift on hover (inventory/build use their own; this is fallback) */
 .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 215, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--edge-15);
 }
 
 a {

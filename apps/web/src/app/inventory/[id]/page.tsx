@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getInventoryItem, type InventoryItem } from "@/lib/api";
+import { formatUsd } from "@/lib/formatCurrency";
 import styles from "./detail.module.css";
 
 export default function InventoryDetailPage() {
@@ -96,7 +97,7 @@ export default function InventoryDetailPage() {
               {item.vehicle?.year} · {item.vehicle?.trimLevel}
               {item.location ? ` · ${item.location}` : ""}
             </p>
-            <p className={styles.price}>£{item.listPrice.toLocaleString()}</p>
+            <p className={styles.price}>{formatUsd(item.listPrice)}</p>
             {item.mileage != null && (
               <p className={styles.spec}>Mileage: {item.mileage.toLocaleString()} mi</p>
             )}

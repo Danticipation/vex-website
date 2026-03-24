@@ -112,7 +112,7 @@ export default function NewLeadPage() {
             type="text"
             value={form.vehicleInterest}
             onChange={(e) => setForm((f) => ({ ...f, vehicleInterest: e.target.value }))}
-            placeholder="e.g. Ferrari 488, budget £250k"
+            placeholder="e.g. Ferrari 488, budget $250k"
             className={styles.input}
           />
         </label>

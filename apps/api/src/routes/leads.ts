@@ -4,7 +4,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { createLeadSchema, updateLeadSchema } from "@vex/shared";
 import * as leadsController from "../controllers/leadsController.js";
 
-export const leadsRouter = Router();
+export const leadsRouter: Router = Router();
 
 leadsRouter.get("/", requireAuth, leadsController.list);
 leadsRouter.post("/", validateBody(createLeadSchema), leadsController.create);

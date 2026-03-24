@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getInventory, type InventoryItem, type GetInventoryParams } from "@/lib/api";
+import { formatUsd } from "@/lib/formatCurrency";
 import styles from "./inventory.module.css";
 
 export default function InventoryPage() {
@@ -80,7 +81,7 @@ export default function InventoryPage() {
             />
           </label>
           <label className={styles.label}>
-            Min price (£)
+            Min price (USD)
             <input
               type="number"
               min={0}
@@ -91,7 +92,7 @@ export default function InventoryPage() {
             />
           </label>
           <label className={styles.label}>
-            Max price (£)
+            Max price (USD)
             <input
               type="number"
               min={0}
@@ -161,7 +162,7 @@ export default function InventoryPage() {
                       <p className={styles.cardMeta}>
                         {item.vehicle?.year} {item.location ? ` · ${item.location}` : ""}
                       </p>
-                      <p className={styles.cardPrice}>£{item.listPrice.toLocaleString()}</p>
+                      <p className={styles.cardPrice}>{formatUsd(item.listPrice)}</p>
                       <span className={styles.cardCta}>View details</span>
                     </div>
                   </Link>
