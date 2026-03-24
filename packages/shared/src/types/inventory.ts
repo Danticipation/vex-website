@@ -17,6 +17,13 @@ export enum VerificationStatus {
   REJECTED = "REJECTED",
 }
 
+/** Origin of the 3D mesh — see vehicle 3D pipeline on the API */
+export enum VehicleModelSource {
+  LIBRARY = "LIBRARY",
+  UPLOAD = "UPLOAD",
+  GENERATED_FROM_PHOTOS = "GENERATED_FROM_PHOTOS",
+}
+
 export interface Inventory {
   id: string;
   source: InventorySource;
@@ -30,6 +37,9 @@ export interface Inventory {
   verificationStatus: VerificationStatus | null;
   imageUrls: string[] | null;
   specs: Record<string, unknown> | null;
+  modelGlbUrl: string | null;
+  modelSource: VehicleModelSource | null;
+  modelSourcePhotoIds: string[] | null;
   createdAt: Date;
   updatedAt: Date;
 }

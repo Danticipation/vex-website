@@ -32,6 +32,10 @@ const IMAGE = {
   amgGtBlack: unsplash("photo-1592198084033-aade902d1aae"),
 } as const;
 
+/** glTF demo for 3D viewer — replace per listing with photogrammetry output URL when ready */
+const LIBRARY_DEMO_GLB =
+  "https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb";
+
 type VehicleSeed = {
   make: string;
   model: string;
@@ -332,6 +336,8 @@ async function main() {
           verificationStatus: "APPROVED",
           imageUrls: invImages,
           specs: row.inventory.specs as object,
+          modelGlbUrl: LIBRARY_DEMO_GLB,
+          modelSource: "LIBRARY",
         },
       });
     }

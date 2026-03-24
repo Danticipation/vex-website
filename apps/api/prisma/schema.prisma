@@ -77,6 +77,13 @@ enum VerificationStatus {
   REJECTED
 }
 
+// How the 3D asset was produced — supports future photo→mesh jobs
+enum VehicleModelSource {
+  LIBRARY
+  UPLOAD
+  GENERATED_FROM_PHOTOS
+}
+
 model Inventory {
   id                 String             @id @default(cuid())
   source             InventorySource
@@ -90,6 +97,11 @@ model Inventory {
   verificationStatus VerificationStatus? @map("verification_status")
   imageUrls          Json?              @map("image_urls")
   specs              Json?
+  // HTTPS URL to GLB/GLTF (CDN, S3, or /models/…). Viewer loads this mesh.
+  modelGlbUrl        String?            @map("model_glb_url")
+  modelSource        VehicleModelSource? @map("model_source")
+  // IDs of listing photos used to generate modelGlbUrl (future photogrammetry pipeline)
+  modelSourcePhotoIds Json?             @map("model_source_photo_ids")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 

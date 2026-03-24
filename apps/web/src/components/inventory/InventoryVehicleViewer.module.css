@@ -1,0 +1,100 @@
+.section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.head {
+  margin-bottom: 1rem;
+}
+
+.h2 {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--highlight);
+  margin: 0 0 0.35rem;
+}
+
+.caption {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  max-width: 52rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.viewBtn {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.65rem;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  background: rgba(8, 10, 14, 0.92);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.viewBtn:hover {
+  border-color: var(--line-gold);
+  color: var(--text-primary);
+}
+
+.canvasWrap {
+  position: relative;
+  min-height: min(52vh, 520px);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line-gold);
+  background: #06080c;
+}
+
+.hint {
+  position: absolute;
+  bottom: 0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: rgba(4, 6, 10, 0.8);
+  border: 1px solid var(--line);
+  pointer-events: none;
+  max-width: 92%;
+  text-align: center;
+}
+
+.loader {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--highlight);
+  padding: 0.5rem 0.85rem;
+  border-radius: 4px;
+  background: rgba(4, 6, 10, 0.92);
+  border: 1px solid var(--line-gold);
+}
+
+@media (max-width: 900px) {
+  .canvasWrap {
+    min-height: 42vh;
+  }
+}

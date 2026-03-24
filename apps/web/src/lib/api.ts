@@ -17,6 +17,9 @@ export interface InventoryItem {
   verificationStatus: string | null;
   imageUrls: string[] | null;
   specs: Record<string, unknown> | null;
+  modelGlbUrl: string | null;
+  modelSource: string | null;
+  modelSourcePhotoIds: string[] | null;
   createdAt: string;
   updatedAt: string;
   vehicle?: {

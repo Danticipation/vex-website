@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { InventorySource, InventoryStatus, Prisma, PrismaClient } from "@prisma/client";
 import type { CreateInventoryInput, UpdateInventoryInput } from "@vex/shared";
 import { requireAuth } from "../middleware/auth.js";
+import { optionalJson } from "../utils/prismaJson.js";
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,9 @@ function toInventory(record: {
   verificationStatus: string | null;
   imageUrls: unknown;
   specs: unknown;
+  modelGlbUrl: string | null;
+  modelSource: string | null;
+  modelSourcePhotoIds: unknown;
   createdAt: Date;
   updatedAt: Date;
   vehicle?: unknown;
@@ -35,6 +39,9 @@ function toInventory(record: {
     verificationStatus: record.verificationStatus,
     imageUrls: record.imageUrls as string[] | null,
     specs: record.specs as Record<string, unknown> | null,
+    modelGlbUrl: record.modelGlbUrl,
+    modelSource: record.modelSource,
+    modelSourcePhotoIds: record.modelSourcePhotoIds as string[] | null,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
   };
@@ -78,15 +85,8 @@ export async function list(req: Request, res: Response) {
   if (minPrice != null && !Number.isNaN(minPrice)) listPriceWhere.gte = minPrice;
   if (maxPrice != null && !Number.isNaN(maxPrice)) listPriceWhere.lte = maxPrice;
 
-  const where: {
-    status: string;
-    source?: string;
-    location?: { contains: string; mode: "insensitive" };
-    vehicle?: { make?: string; model?: string; year?: number };
-    listPrice?: { gte?: number; lte?: number };
-    verificationStatus?: string;
-  } = { status };
-  if (source) where.source = source;
+  const where: Prisma.InventoryWhereInput = { status: status as InventoryStatus };
+  if (source) where.source = source as InventorySource;
   if (location) where.location = { contains: location, mode: "insensitive" };
   if (Object.keys(vehicleWhere).length > 0) where.vehicle = vehicleWhere;
   if (Object.keys(listPriceWhere).length > 0) where.listPrice = listPriceWhere;
@@ -155,8 +155,11 @@ export async function create(req: Request, res: Response) {
       mileage: body.mileage ?? null,
       vin: body.vin ?? null,
       verificationStatus: body.source === "PRIVATE_SELLER" ? "PENDING" : null,
-      imageUrls: body.imageUrls ?? null,
-      specs: body.specs ?? null,
+      imageUrls: optionalJson(body.imageUrls),
+      specs: optionalJson(body.specs),
+      modelGlbUrl: body.modelGlbUrl ?? null,
+      modelSource: body.modelSource ?? null,
+      modelSourcePhotoIds: optionalJson(body.modelSourcePhotoIds),
     },
     include: { vehicle: true },
   });
@@ -196,7 +199,17 @@ export async function update(req: Request, res: Response) {
       ...(body.vin !== undefined && { vin: body.vin }),
       ...(body.verificationStatus !== undefined && { verificationStatus: body.verificationStatus }),
       ...(body.imageUrls !== undefined && { imageUrls: body.imageUrls }),
-      ...(body.specs !== undefined && { specs: body.specs }),
+      ...(body.specs !== undefined && {
+        specs: body.specs === null ? Prisma.JsonNull : (body.specs as Prisma.InputJsonValue),
+      }),
+      ...(body.modelGlbUrl !== undefined && { modelGlbUrl: body.modelGlbUrl }),
+      ...(body.modelSource !== undefined && { modelSource: body.modelSource }),
+      ...(body.modelSourcePhotoIds !== undefined && {
+        modelSourcePhotoIds:
+          body.modelSourcePhotoIds === null
+            ? Prisma.JsonNull
+            : (body.modelSourcePhotoIds as Prisma.InputJsonValue),
+      }),
     },
     include: { vehicle: true },
   });

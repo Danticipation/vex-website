@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { optionalJson } from "../utils/prismaJson.js";
 import type { CreateSavedVehicleInput } from "@vex/shared";
 
 const prisma = new PrismaClient();
@@ -57,7 +58,7 @@ export async function create(req: Request, res: Response) {
     data: {
       userId: user.userId,
       inventoryId: body.inventoryId ?? null,
-      configSnapshot: body.configSnapshot ?? null,
+      configSnapshot: optionalJson(body.configSnapshot),
     },
   });
   return res.status(201).json({ id: saved.id, inventoryId: saved.inventoryId, configSnapshot: saved.configSnapshot, createdAt: saved.createdAt });

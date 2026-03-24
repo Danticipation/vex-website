@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import { optionalJson } from "../utils/prismaJson.js";
 import type { CreateOrderInput, UpdateOrderInput } from "@vex/shared";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -72,14 +73,14 @@ export async function create(req: Request, res: Response) {
       type: body.type,
       inventoryId: body.inventoryId ?? null,
       vehicleId: body.vehicleId ?? null,
-      configSnapshot: body.configSnapshot ?? null,
+      configSnapshot: optionalJson(body.configSnapshot),
       status: body.status ?? "DRAFT",
       depositAmount: body.depositAmount ?? null,
       totalAmount: body.totalAmount ?? null,
-      financingSnapshot: body.financingSnapshot ?? null,
-      tradeInSnapshot: body.tradeInSnapshot ?? null,
-      shippingSnapshot: body.shippingSnapshot ?? null,
-      stylingAddonsSnapshot: body.stylingAddonsSnapshot ?? null,
+      financingSnapshot: optionalJson(body.financingSnapshot),
+      tradeInSnapshot: optionalJson(body.tradeInSnapshot),
+      shippingSnapshot: optionalJson(body.shippingSnapshot),
+      stylingAddonsSnapshot: optionalJson(body.stylingAddonsSnapshot),
     },
   });
   return res.status(201).json(toOrder(order));

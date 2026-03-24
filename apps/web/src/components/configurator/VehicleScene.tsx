@@ -13,8 +13,34 @@ import {
 import type { ElementRef, MutableRefObject } from "react";
 import type { EditionId, FinishId, PowertrainId } from "./vehicleFinish";
 import { FINISH_PHYSICAL } from "./vehicleFinish";
+import { GltfVehicle } from "./GltfVehicle";
 
 export type CameraPreset = "threeQuarter" | "side" | "front" | "top";
+
+/** Default canvas + preset positions: full viewer is tighter (larger car in frame). */
+export function getCanvasCamera(compact: boolean | undefined): {
+  position: [number, number, number];
+  fov: number;
+} {
+  if (compact) {
+    return { position: [4.6, 1.85, 5.2], fov: 40 };
+  }
+  return { position: [3.65, 1.45, 4.1], fov: 36 };
+}
+
+const PRESET_COMPACT: Record<CameraPreset, [number, number, number]> = {
+  threeQuarter: [4.6, 1.85, 5.2],
+  side: [7.2, 1.35, 0.15],
+  front: [0.1, 1.55, 6.8],
+  top: [0.2, 8.4, 0.35],
+};
+
+const PRESET_FULL: Record<CameraPreset, [number, number, number]> = {
+  threeQuarter: [3.65, 1.45, 4.1],
+  side: [5.95, 1.12, 0.12],
+  front: [0.08, 1.28, 5.65],
+  top: [0.12, 6.75, 0.28],
+};
 
 type SportsCarProps = {
   finishId: FinishId;
@@ -152,42 +178,32 @@ function CameraRig({
   controlsRef,
   preset,
   onPresetApplied,
+  compact,
+  orbitTarget,
 }: {
   controlsRef: MutableRefObject<ElementRef<typeof OrbitControls> | null>;
   preset: CameraPreset | null;
   onPresetApplied: () => void;
+  compact: boolean | undefined;
+  orbitTarget: [number, number, number];
 }) {
   const { camera } = useThree();
+  const isCompact = compact === true;
 
   useEffect(() => {
     const controls = controlsRef.current;
     if (!preset || !controls) return;
 
-    const target = new THREE.Vector3(0, 0.38, 0);
-    const pos = new THREE.Vector3();
-
-    switch (preset) {
-      case "threeQuarter":
-        pos.set(4.6, 1.85, 5.2);
-        break;
-      case "side":
-        pos.set(7.2, 1.35, 0.15);
-        break;
-      case "front":
-        pos.set(0.1, 1.55, 6.8);
-        break;
-      case "top":
-        pos.set(0.2, 8.4, 0.35);
-        break;
-      default:
-        pos.set(4.6, 1.85, 5.2);
-    }
+    const target = new THREE.Vector3(orbitTarget[0], orbitTarget[1], orbitTarget[2]);
+    const table = isCompact ? PRESET_COMPACT : PRESET_FULL;
+    const [x, y, z] = table[preset];
+    const pos = new THREE.Vector3(x, y, z);
 
     camera.position.copy(pos);
     controls.target.copy(target);
     controls.update();
     onPresetApplied();
-  }, [preset, camera, controlsRef, onPresetApplied]);
+  }, [preset, camera, controlsRef, onPresetApplied, isCompact, orbitTarget]);
 
   return null;
 }
@@ -198,6 +214,10 @@ export type VehicleSceneProps = SportsCarProps & {
   autoRotate: boolean;
   /** When true, gently rotate the car when user is not dragging (handled by orbit autoRotate instead — we use orbit autoRotate) */
   compact?: boolean;
+  /** Load a real glTF/GLB (listing asset or library). When set, procedural concept car is hidden. */
+  gltfUrl?: string | null;
+  /** Orbit pivot (glTF is usually centered at origin). */
+  cameraTarget?: [number, number, number];
 };
 
 export function VehicleScene({
@@ -208,18 +228,23 @@ export function VehicleScene({
   onPresetApplied,
   autoRotate,
   compact,
+  gltfUrl,
+  cameraTarget: cameraTargetProp,
 }: VehicleSceneProps) {
   const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
+  const useGltf = Boolean(gltfUrl?.length);
+  const orbitTarget: [number, number, number] =
+    cameraTargetProp ?? (useGltf ? [0, 0, 0] : [0, 0.38, 0]);
 
   return (
     <>
       <color attach="background" args={["#06080c"]} />
-      <ambientLight intensity={0.35} />
+      <ambientLight intensity={useGltf ? 0.28 : 0.35} />
       <spotLight
         position={[6, 9, 4]}
         angle={0.42}
         penumbra={0.85}
-        intensity={1.35}
+        intensity={useGltf ? 1.55 : 1.35}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -227,14 +252,20 @@ export function VehicleScene({
       <spotLight position={[-5, 4, -3]} angle={0.55} penumbra={1} intensity={0.45} color="#b8a878" />
       <directionalLight position={[-3, 6, 2]} intensity={0.55} color="#e8e4dc" />
 
-      <Environment preset={compact ? "studio" : "city"} />
+      <Environment preset={useGltf ? "warehouse" : compact ? "studio" : "city"} />
 
-      <SportsCar finishId={finishId} edition={edition} powertrain={powertrain} />
+      {useGltf && gltfUrl ? (
+        <GltfVehicle url={gltfUrl} />
+      ) : (
+        <group scale={compact ? 1 : 1.14}>
+          <SportsCar finishId={finishId} edition={edition} powertrain={powertrain} />
+        </group>
+      )}
 
       <ContactShadows
         position={[0, 0, 0]}
-        opacity={0.55}
-        scale={14}
+        opacity={useGltf ? 0.62 : 0.55}
+        scale={compact ? 14 : useGltf ? 20 : 17}
         blur={2.4}
         far={9}
         color="#000000"
@@ -262,20 +293,22 @@ export function VehicleScene({
         enableDamping
         enablePan={false}
         dampingFactor={0.06}
-        minDistance={compact ? 4 : 3.2}
-        maxDistance={compact ? 14 : 16}
+        minDistance={compact ? 4 : useGltf ? 1.75 : 2.65}
+        maxDistance={compact ? 14 : 15}
         minPolarAngle={0.28}
         maxPolarAngle={Math.PI / 2.05}
         maxAzimuthAngle={Infinity}
         autoRotate={autoRotate}
         autoRotateSpeed={0.45}
-        target={[0, 0.38, 0]}
+        target={orbitTarget}
       />
 
       <CameraRig
         controlsRef={controlsRef}
         preset={cameraPreset}
         onPresetApplied={onPresetApplied}
+        compact={compact}
+        orbitTarget={orbitTarget}
       />
     </>
   );

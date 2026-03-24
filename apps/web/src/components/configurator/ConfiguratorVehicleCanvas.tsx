@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useId, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Html, useProgress } from "@react-three/drei";
-import { VehicleScene, type CameraPreset } from "./VehicleScene";
+import { VehicleScene, getCanvasCamera, type CameraPreset } from "./VehicleScene";
 import type { EditionId, FinishId, PowertrainId } from "./vehicleFinish";
 import styles from "./ConfiguratorVehicleCanvas.module.css";
 
@@ -46,6 +46,7 @@ export function ConfiguratorVehicleCanvas({
   const [cameraPreset, setCameraPreset] = useState<CameraPreset | null>(null);
   const [autoRotate, setAutoRotate] = useState(false);
   const hintId = useId();
+  const cam = getCanvasCamera(compact);
 
   const onPresetApplied = useCallback(() => {
     setCameraPreset(null);
@@ -94,7 +95,7 @@ export function ConfiguratorVehicleCanvas({
           className={styles.canvas}
           shadows
           dpr={[1, 2]}
-          camera={{ position: [4.6, 1.85, 5.2], fov: compact ? 40 : 45, near: 0.1, far: 80 }}
+          camera={{ position: cam.position, fov: cam.fov, near: 0.1, far: 80 }}
           gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
         >
           <Suspense fallback={<CanvasLoader />}>

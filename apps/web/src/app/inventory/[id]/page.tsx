@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getInventoryItem, type InventoryItem } from "@/lib/api";
 import { formatUsd } from "@/lib/formatCurrency";
+import { InventoryVehicleViewer } from "@/components/inventory/InventoryVehicleViewer";
 import styles from "./detail.module.css";
 
 export default function InventoryDetailPage() {
@@ -13,6 +14,7 @@ export default function InventoryDetailPage() {
   const id = params.id as string;
   const [item, setItem] = useState<InventoryItem | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -27,6 +29,10 @@ export default function InventoryDetailPage() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [item?.id]);
 
   if (error) {
     return (
@@ -53,8 +59,8 @@ export default function InventoryDetailPage() {
     );
   }
 
-  const imageUrls = item.imageUrls ?? (Array.isArray(item.vehicle?.imageUrls) ? item.vehicle?.imageUrls : null) ?? [];
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const imageUrls =
+    item.imageUrls ?? (Array.isArray(item.vehicle?.imageUrls) ? item.vehicle?.imageUrls : null) ?? [];
   const mainImage = imageUrls[selectedIndex];
 
   return (
@@ -128,6 +134,12 @@ export default function InventoryDetailPage() {
             </div>
           </div>
         </div>
+
+        <InventoryVehicleViewer
+          modelGlbUrl={item.modelGlbUrl ?? null}
+          modelSource={item.modelSource ?? null}
+          title={`${item.vehicle?.make ?? ""} ${item.vehicle?.model ?? ""}`.trim()}
+        />
       </main>
     </>
   );
