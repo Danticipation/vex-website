@@ -16,6 +16,8 @@
  * **Viewer stack (web, free OSS):** ACES filmic tone mapping, PMREM via drei `Environment`, soft shadows,
  * optional bloom/vignette (`@react-three/postprocessing`), reflective floor (`MeshReflectorMaterial`),
  * exponential fog. Respects `prefers-reduced-motion` (drops post-FX + reflector, keeps grid).
+ *
+ * **Next steps (assets, HDR, LOD, photo pipeline, QA):** see `FOLLOW_UP.md` in this folder.
  */
 
 export type VehicleModelSourceApi = "LIBRARY" | "UPLOAD" | "GENERATED_FROM_PHOTOS";
