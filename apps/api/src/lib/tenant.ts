@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { getOrSetTenantJson } from "./cache.js";
 
 type TenantContext = { tenantId: string };
 
@@ -36,7 +37,8 @@ function forceTenantCreateManyData(data: unknown, tenantId: string): unknown {
   return forceTenantData(data, tenantId);
 }
 
-const basePrisma = new PrismaClient();
+/** Raw Prisma client (no tenant `$use` scoping). Use only for explicit system paths (e.g. auth bootstrap, queue workers wrapping `runWithTenant`). */
+export const basePrisma = new PrismaClient();
 
 /**
  * Prisma middleware that enforces tenant scoping by default.
@@ -54,7 +56,8 @@ basePrisma.$use(async (params, next) => {
 
   // Safe reads
   if (action === "findMany" || action === "findFirst" || action === "findFirstOrThrow") {
-    params.args = { ...params.args, where: mergeWhere(params.args?.where, tenantId) };
+    const merged = mergeWhere(params.args?.where, tenantId);
+    params.args = { ...params.args, where: merged };
     return next(params);
   }
 
@@ -154,17 +157,19 @@ export type TenantBranding = {
 };
 
 export async function getTenantBranding(tenantId: string): Promise<TenantBranding | null> {
-  return withTenantScope(tenantId, async (p) => {
-    const tenant = await p.tenant.findFirst({
-      where: { id: tenantId },
-      select: { billingTier: true, customDomain: true, themeJson: true },
-    });
-    if (!tenant) return null;
-    return {
-      billingTier: tenant.billingTier,
-      customDomain: tenant.customDomain,
-      themeJson: (tenant.themeJson as Record<string, unknown> | null) ?? null,
-    };
-  });
+  return getOrSetTenantJson(tenantId, "branding", "main", 300, async () =>
+    withTenantScope(tenantId, async (p) => {
+      const tenant = await p.tenant.findFirst({
+        where: { id: tenantId },
+        select: { billingTier: true, customDomain: true, themeJson: true },
+      });
+      if (!tenant) return null;
+      return {
+        billingTier: tenant.billingTier,
+        customDomain: tenant.customDomain,
+        themeJson: (tenant.themeJson as Record<string, unknown> | null) ?? null,
+      };
+    })
+  );
 }
 

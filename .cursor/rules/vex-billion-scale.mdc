@@ -1,0 +1,15 @@
+---
+description: Billion-scale patterns — tenant partitions, Redis, BullMQ, metrics, JWT refresh
+globs: apps/api/**,apps/crm/**,apps/web/**,packages/shared/**
+---
+
+# Vex billion-scale rules
+
+- **Tenant ID** is the partition key on all tenant-owned rows; never query cross-tenant without `basePrisma` + explicit audit.
+- **Redis**: `REDIS_URL` enables BullMQ workers, cache-aside (`lib/cache.ts`), refresh tokens, JWT denylist, and Redis-backed rate limits.
+- **Queues** (`lib/queue.ts`): tenant-scoped payloads; idempotent `jobId` where possible; worker concurrency default 50 (tune via `QUEUE_WORKER_CONCURRENCY`).
+- **Observability**: expose `GET /metrics` (Prometheus); do not log raw VINs — use hashed audit payloads on `EventLog` type `valuation.audit`.
+- **Migrations**: use `DIRECT_DATABASE_URL` when `DATABASE_URL` points at a pooler or Prisma Accelerate.
+- **Frontends**: prefer React Query for server state; lazy-load heavy CRM routes; PWA manifests for field use.
+- **GTM**: onboarding and pilot funnels should emit telemetry/audit events and avoid client-side trust for billing/referrals.
+- **Phase 6**: AI inference endpoints must cap spend and sanitize PII; mobile PWA paths should support offline-first drafts/sync.

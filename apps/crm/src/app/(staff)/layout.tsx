@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Nav } from "@/components/Nav";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
   return (
     <>
       <Nav />
+      <OnboardingWizard />
       {children}
     </>
   );

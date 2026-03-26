@@ -65,7 +65,9 @@ Luxury automotive marketplace: customer-facing site, build-your-own configurator
 
 | App   | Variable              | Description                    |
 |-------|------------------------|--------------------------------|
-| API   | `DATABASE_URL`         | PostgreSQL connection string   |
+| API   | `DATABASE_URL`         | PostgreSQL connection string (pooler or Accelerate) |
+| API   | `DIRECT_DATABASE_URL`  | Direct Postgres URL for migrations / long scripts |
+| API   | `REDIS_URL`              | Redis for BullMQ, cache, refresh tokens, rate limits |
 | API   | `JWT_SECRET`           | Secret for signing JWTs         |
 | API   | `PORT`                 | Server port (default 3001)      |
 | API   | `CORS_ORIGIN`          | Allowed origin (e.g. http://localhost:3000) |
@@ -88,3 +90,20 @@ Use `pnpm` or `npx pnpm` if pnpm isn’t installed globally:
 ## Logo
 
 Place your **VEX logo (no background)** at `apps/web/public/vex-logo.png`. The header will use it; if the file is missing, the text “VEX” is shown as fallback.
+
+
+## Valuation API cost model
+- Pro/Enterprise tiers include API-powered appraisals.
+- Daily guardrail: max `$5/day` external valuation spend per tenant before fallback/manual flow.
+- Cached valuations (24h TTL) reduce duplicate API calls and cost.
+
+## Billion-scale operations (targets)
+- **Cost / MRR**: target **~$0.02/tenant/month** at 100k tenants via PgBouncer/Accelerate-style pooling, Redis cache-aside, BullMQ async work, and read replicas (`READ_REPLICA_URLS` for future read routing).
+- **Infra**: `DIRECT_DATABASE_URL` for migrations when `DATABASE_URL` uses a pooler or Prisma Accelerate; `REDIS_URL` for queues, refresh tokens, JWT denylist, and rate limits; optional `OTEL_EXPORTER_OTLP_ENDPOINT` for traces.
+- **Partitioning / cron**: declarative Postgres partitions and `pg_cron` retention are documented in `apps/api/prisma/sql/` (ops-applied).
+- **Verification**: `pnpm --filter @vex/api run test:e2e`, `pnpm --filter @vex/api run load-test:scale`, `GET /metrics` (Prometheus).
+
+## Investor sharing links
+- Live MRR dashboard URL: `https://app.vex.example/admin` (replace with your production domain).
+- Pilot signup link: `https://app.vex.example/pilot` (replace with your production domain).
+- Live seed metrics dashboard URL: `https://app.vex.example/seed-metrics` (replace with your production domain).

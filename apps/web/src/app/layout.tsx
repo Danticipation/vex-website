@@ -3,6 +3,7 @@ import { Syne, Fraunces, Plus_Jakarta_Sans, Outfit, Playfair_Display } from "nex
 import { BuildProvider } from "@/contexts/BuildContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TenantThemeProvider } from "@/components/TenantThemeProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
 import { Footer } from "@/components/Footer";
 import { SkipToContent } from "@/components/SkipToContent";
 import { AmbientShell } from "@/components/ambient";
@@ -58,6 +59,19 @@ export const metadata: Metadata = {
   title: "VEX | Vortex Exotic Exchange",
   description:
     "The private exchange for exotic vehicles — curated lots, sealed bids, and white-glove delivery for collectors worldwide.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Vex" },
+  openGraph: {
+    title: "VEX Dealer Platform",
+    description: "CRM + inventory + portal + appraisals for modern auto dealers.",
+    type: "website",
+    images: [{ url: "/og-vex-appraisals.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VEX Dealer Platform",
+    description: "White-label dealer SaaS with analytics and appraisals.",
+  },
 };
 
 export default function RootLayout({
@@ -79,12 +93,14 @@ export default function RootLayout({
         <CursorFX />
         <ButtonSoundFX />
         <TenantThemeProvider>
-          <AuthProvider>
-            <BuildProvider>
-              {children}
-              <Footer />
-            </BuildProvider>
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <BuildProvider>
+                {children}
+                <Footer />
+              </BuildProvider>
+            </AuthProvider>
+          </QueryProvider>
         </TenantThemeProvider>
       </body>
     </html>

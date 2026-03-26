@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { createInventoryItem, getInventory } from "@/lib/api";
@@ -21,7 +22,15 @@ export default function InventoryPage() {
       .catch(() => setData({ items: [] }));
   }, [token]);
 
-  const items = (data?.items ?? []) as { id: string; source: string; listPrice: number; status: string; location: string | null; vehicle?: { make: string; model: string; year: number } }[];
+  const items = (data?.items ?? []) as {
+    id: string;
+    vehicleId: string;
+    source: string;
+    listPrice: number;
+    status: string;
+    location: string | null;
+    vehicle?: { make: string; model: string; year: number };
+  }[];
 
   const refresh = () => {
     if (!token) return;
@@ -75,7 +84,11 @@ export default function InventoryPage() {
               <td>${i.listPrice.toLocaleString("en-US")}</td>
               <td>{i.location || "—"}</td>
               <td>{i.status}</td>
-              <td><a href={`${WEB_URL}/inventory/${i.id}`} target="_blank" rel="noopener noreferrer">View on site</a></td>
+              <td>
+                <Link href={`/appraisals/new?vehicleId=${encodeURIComponent(i.vehicleId)}`}>Appraise</Link>
+                {" · "}
+                <a href={`${WEB_URL}/inventory/${i.id}`} target="_blank" rel="noopener noreferrer">View on site</a>
+              </td>
             </tr>
           ))}
         </tbody>

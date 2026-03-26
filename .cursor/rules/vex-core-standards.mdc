@@ -14,4 +14,10 @@ alwaysApply: true
 - **API contracts**
   - Validate request bodies with Zod schemas from `@vex/shared`.
   - Return consistent error objects: `{ code, message }`.
+- **Revenue pipeline**
+  - Self-serve onboarding must be idempotent and complete quickly (<90s target UX).
+  - Track critical provisioning/referral/usage mutations in `AuditLog` for SOC2-lite readiness.
+- **AI/PWA growth**
+  - AI outputs must be versioned and auditable.
+  - Offline-first mobile flows should queue mutations and sync safely when online.
 

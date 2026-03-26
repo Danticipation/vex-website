@@ -3,6 +3,12 @@ import styles from "./PremiumServices.module.css";
 
 const SERVICES = [
   {
+    title: "Instant appraisals",
+    description: "Rule-based trade-in estimates in seconds — perfect for showroom conversations and faster closes.",
+    href: "/appraisal",
+    icon: "◎",
+  },
+  {
     title: "Tailored financing",
     description: "Structured for exotic collateral — transparent rates, clear terms, and full payment visibility before you commit.",
     href: "/inventory",

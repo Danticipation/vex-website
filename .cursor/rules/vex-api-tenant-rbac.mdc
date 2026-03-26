@@ -27,3 +27,8 @@ alwaysApply: false
 - Use AsyncLocalStorage request context + Prisma middleware to enforce tenant scoping.
 - Avoid unsafe Prisma unique actions (`findUnique/update/delete/upsert`) on the tenant-scoped client; prefer `findFirst/updateMany/deleteMany`.
 
+
+- `POST /appraisals/valuate` must require `requireAuth + requireRole("STAFF", "ADMIN")` and must never trust client tenant authority.
+- Revenue pipeline: onboarding/provision/referral/pilot routes must write `AuditLog` rows for critical state transitions.
+- Compliance: avoid returning secrets or unhashed referral codes from API persistence layers.
+- AI/growth endpoints must require auth + tenant scope and never trust tenant identifiers from clients.

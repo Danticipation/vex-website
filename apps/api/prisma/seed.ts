@@ -361,6 +361,24 @@ async function main() {
     console.log(`Seeded ${CATALOG.length} vehicles with US-market inventory, specs, and images.`);
   }
 
+  const appraisalCount = await prisma.appraisal.count();
+  if (appraisalCount === 0) {
+    const firstInventory = await prisma.inventory.findFirst({ where: { tenantId: demoTenant.id }, orderBy: { createdAt: "asc" } });
+    await prisma.appraisal.create({
+      data: {
+        tenantId: demoTenant.id,
+        vehicleId: firstInventory?.vehicleId ?? null,
+        value: 38900,
+        notes: "Seeded sample valuation",
+        status: "completed",
+        valuationSource: "fallback",
+        valuationFetchedAt: new Date(),
+        valuationData: { low: 36000, avg: 38900, high: 42500, source: "seed" },
+      },
+    });
+    console.log("Sample appraisal valuation seeded.");
+  }
+
   const leadCount = await prisma.lead.count();
   if (leadCount === 0) {
     const lead = await prisma.lead.create({

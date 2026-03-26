@@ -1,0 +1,9 @@
+{
+  "name": "Vex Dealer Platform",
+  "short_name": "Vex",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050508",
+  "theme_color": "#e8c547",
+  "description": "B2B dealer SaaS — CRM, inventory, portal, appraisals."
+}

@@ -16,8 +16,17 @@ const PLANS: Array<{
   desc: string;
   highlight?: string;
 }> = [
-  { id: "CHECK_MY_DEAL", name: "Starter", desc: "Inventory + CRM essentials for getting online fast." },
-  { id: "VIP_CONCIERGE", name: "Pro", desc: "Full portal + analytics + faster workflows.", highlight: "Most popular" },
+  {
+    id: "CHECK_MY_DEAL",
+    name: "Starter",
+    desc: "Inventory + CRM + appraisals (instant valuations) — get online fast with trade-in tools dealers use daily.",
+  },
+  {
+    id: "VIP_CONCIERGE",
+    name: "Pro",
+    desc: "Full portal + analytics + white-label + premium appraisal workflows — including unlimited API-powered valuations.",
+    highlight: "Most popular",
+  },
 ];
 
 export default function PricingPage() {

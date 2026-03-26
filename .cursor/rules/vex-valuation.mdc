@@ -1,0 +1,15 @@
+---
+description: Valuation API integration rules
+globs: apps/api/src/lib/valuation.ts,apps/api/src/routes/appraisals.ts,apps/api/src/controllers/appraisalsController.ts,packages/shared/src/schemas/valuation.ts
+alwaysApply: false
+---
+
+# Valuation rules
+
+- Primary provider: Edmunds TMV; fallback provider: MarketCheck; final fallback: deterministic internal formula.
+- Always apply tenant-scoped caching via `ValuationCache` (`tenantId + cacheKey`), TTL 24h.
+- Do not log raw VIN or API keys; sanitize VIN when logging provider failures.
+- Enforce daily API spend guardrail (`$5/day` per tenant in service guard).
+- API errors must return consistent shape `{ data: null, error: { code, message, fallbackValue? } }`.
+- During provisioning/demo seeding, cap valuation calls per tenant and persist spend/usage logs.
+- AI valuation-adjacent insights must hash VIN-like identifiers and avoid raw PII in prompts/logs.

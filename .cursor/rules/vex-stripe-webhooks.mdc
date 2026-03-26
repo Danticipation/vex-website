@@ -23,4 +23,6 @@ alwaysApply: false
 
 - Store Stripe identifiers in Prisma (`customer`, `subscription`, `checkoutSession`) with uniqueness.
 - Prefer lifecycle updates from Stripe events (`subscription.updated/deleted`) over local timers.
+- Revenue activation: webhook completion should trigger async tenant provisioning and referral credit hooks idempotently.
+- Affiliate/reward payout jobs must run async and remain idempotent under webhook retries.
 

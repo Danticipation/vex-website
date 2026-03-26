@@ -1,4 +1,4 @@
-import type { AnalyticsResponse } from "@vex/shared";
+import type { AnalyticsResponse, AppraisalOutput, CreateAppraisalInput, UpdateAppraisalInput, ValuationInput, AppraisalValuateResponse } from "@vex/shared";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -13,7 +13,10 @@ function unwrap(payload: unknown): any {
   return payload as any;
 }
 
-export async function login(email: string, password: string): Promise<{ user: { role: string }; token: string }> {
+export async function login(
+  email: string,
+  password: string
+): Promise<{ user: { role: string }; token: string; refreshToken: string }> {
   let res: Response;
   try {
     res = await fetch(`${API_BASE}/auth/login`, {
@@ -21,19 +24,34 @@ export async function login(email: string, password: string): Promise<{ user: { 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-  } catch (err) {
+  } catch {
     throw new Error("Cannot reach API. Is it running at " + API_BASE + "?");
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = (data && typeof data.message === "string") ? data.message : "Login failed";
+    const msg = data && typeof data.message === "string" ? data.message : "Login failed";
     throw new Error(msg);
   }
+  return data as { user: { role: string }; token: string; refreshToken: string };
+}
+
+export async function refreshSession(
+  refreshToken: string
+): Promise<{ token: string; refreshToken: string } | null> {
+  const res = await fetch(`${API_BASE}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+  });
+  if (!res.ok) return null;
+  const data = (await res.json()) as { token: string; refreshToken: string };
+  if (!data.token || !data.refreshToken) return null;
   return data;
 }
 
-export async function getMe(token: string): Promise<{ role: string }> {
+export async function getMe(token: string): Promise<{ role: string } | null> {
   const res = await fetch(`${API_BASE}/auth/me`, { headers: authHeaders(token) });
+  if (res.status === 401) return null;
   if (!res.ok) throw new Error("Not authenticated");
   return res.json();
 }
@@ -176,4 +194,69 @@ export async function createOrder(
   });
   if (!res.ok) throw new Error("Failed to create order");
   return unwrap(await res.json());
+}
+
+export async function listAppraisals(token: string) {
+  const res = await fetch(`${API_BASE}/appraisals`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load appraisals");
+  return unwrap(await res.json()) as { items: AppraisalOutput[]; total: number; limit: number; offset: number };
+}
+
+export async function createAppraisalRecord(token: string, data: CreateAppraisalInput) {
+  const res = await fetch(`${API_BASE}/appraisals`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create appraisal");
+  return unwrap(await res.json()) as AppraisalOutput;
+}
+
+export async function getAppraisalById(token: string, id: string) {
+  const res = await fetch(`${API_BASE}/appraisals/${id}`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load appraisal");
+  return unwrap(await res.json()) as AppraisalOutput;
+}
+
+export async function updateAppraisalRecord(token: string, id: string, data: UpdateAppraisalInput) {
+  const res = await fetch(`${API_BASE}/appraisals/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update appraisal");
+  return unwrap(await res.json()) as AppraisalOutput;
+}
+
+export async function deleteAppraisalRecord(token: string, id: string) {
+  const res = await fetch(`${API_BASE}/appraisals/${id}`, { method: "DELETE", headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to delete appraisal");
+  return unwrap(await res.json());
+}
+
+export async function completeOnboarding(token: string) {
+  const res = await fetch(`${API_BASE}/auth/onboarding/complete`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) throw new Error("Failed to complete onboarding");
+  return unwrap(await res.json());
+}
+
+
+export async function valuateAppraisal(
+  token: string,
+  data: Omit<ValuationInput, "tenantId"> & { tenantId: string }
+): Promise<AppraisalValuateResponse> {
+  const res = await fetch(`${API_BASE}/appraisals/valuate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(data),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = (body && typeof body.error?.message === "string") ? body.error.message : "Valuation failed";
+    throw new Error(msg);
+  }
+  return unwrap(body) as AppraisalValuateResponse;
 }

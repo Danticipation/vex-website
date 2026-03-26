@@ -1,17 +1,20 @@
+import { randomUUID } from "node:crypto";
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-import type { RegisterInput, LoginInput } from "@vex/shared";
-
-const prisma = new PrismaClient();
+import type { RegisterInput, LoginInput, RefreshTokenInput } from "@vex/shared";
+import { basePrisma as prisma } from "../lib/tenant.js";
+import { sendLifecycleNotification } from "../lib/notify.js";
+import { denylistJti, newRefreshToken, storeRefreshToken, consumeRefreshToken } from "../lib/tokenStore.js";
 
 const _jwtSecret = process.env.JWT_SECRET;
 if (!_jwtSecret) {
   throw new Error("JWT_SECRET environment variable is required — refusing to start without it");
 }
 const JWT_SECRET: string = _jwtSecret;
-const JWT_EXPIRY = "7d";
+
+const accessTtlSec = () => Number(process.env.JWT_ACCESS_TTL_MINUTES || 5) * 60;
+const refreshTtlSec = 60 * 60 * 24 * 7;
 
 function toPublicUser(user: {
   id: string;
@@ -37,8 +40,26 @@ function toPublicUser(user: {
   };
 }
 
-function signToken(payload: { userId: string; email: string; role: string; tenantId: string }) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+function signAccessToken(payload: { userId: string; email: string; role: string; tenantId: string }) {
+  const jti = randomUUID();
+  const token = jwt.sign({ ...payload, jti }, JWT_SECRET, { expiresIn: accessTtlSec() });
+  return { token, jti, expiresIn: accessTtlSec() };
+}
+
+async function issueSession(user: { id: string; email: string; role: string; tenantId: string }) {
+  const { token, expiresIn } = signAccessToken({
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    tenantId: user.tenantId,
+  });
+  const refreshToken = newRefreshToken();
+  await storeRefreshToken(
+    refreshToken,
+    { userId: user.id, email: user.email, role: user.role, tenantId: user.tenantId },
+    refreshTtlSec
+  );
+  return { token, refreshToken, expiresIn };
 }
 
 export async function register(req: Request, res: Response) {
@@ -57,8 +78,15 @@ export async function register(req: Request, res: Response) {
     data: { tenantId: tenant.id, email, passwordHash, name: name || null, role: "CUSTOMER" },
   });
 
-  const token = signToken({ userId: user.id, email: user.email, role: user.role, tenantId: user.tenantId });
-  return res.status(201).json({ user: toPublicUser(user), token });
+  const session = await issueSession(user);
+  void sendLifecycleNotification({
+    type: "WELCOME",
+    toEmail: user.email,
+    smsTo: user.phone ?? undefined,
+    subject: "Welcome to Vex",
+    message: `Welcome to Vex, ${user.name ?? user.email}. Your dealer workspace is ready.`,
+  });
+  return res.status(201).json({ user: toPublicUser(user), ...session });
 }
 
 export async function login(req: Request, res: Response) {
@@ -69,8 +97,32 @@ export async function login(req: Request, res: Response) {
     return res.status(401).json({ code: "UNAUTHORIZED", message: "Invalid email or password" });
   }
 
-  const token = signToken({ userId: user.id, email: user.email, role: user.role, tenantId: user.tenantId });
-  return res.json({ user: toPublicUser(user), token });
+  const session = await issueSession(user);
+  return res.json({ user: toPublicUser(user), ...session });
+}
+
+export async function refresh(req: Request, res: Response) {
+  const { refreshToken } = req.body as RefreshTokenInput;
+  const payload = await consumeRefreshToken(refreshToken);
+  if (!payload) {
+    return res.status(401).json({ code: "UNAUTHORIZED", message: "Invalid refresh token" });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+  if (!user || user.email !== payload.email) {
+    return res.status(401).json({ code: "UNAUTHORIZED", message: "Invalid refresh token" });
+  }
+
+  const session = await issueSession(user);
+  return res.json({ user: toPublicUser(user), ...session });
+}
+
+export async function logout(req: Request, res: Response) {
+  const jti = req.user?.jti;
+  if (jti) {
+    await denylistJti(jti, accessTtlSec() + 120);
+  }
+  return res.json({ data: { ok: true }, error: null });
 }
 
 export async function me(req: Request, res: Response) {
@@ -80,4 +132,27 @@ export async function me(req: Request, res: Response) {
   if (!user) return res.status(404).json({ code: "NOT_FOUND", message: "User not found" });
 
   return res.json(toPublicUser(user));
+}
+
+/** Mark tenant onboarding wizard complete (first-login flow). */
+export async function completeOnboarding(req: Request, res: Response) {
+  if (!req.user) return res.status(401).json({ code: "UNAUTHORIZED", message: "Not authenticated" });
+
+  await prisma.tenant.updateMany({
+    where: { id: req.user.tenantId },
+    data: { onboardedAt: new Date() },
+  });
+
+  const meUser = await prisma.user.findUnique({ where: { id: req.user.userId }, select: { email: true, phone: true } });
+  if (meUser?.email) {
+    void sendLifecycleNotification({
+      type: "ONBOARDING_COMPLETE",
+      toEmail: meUser.email,
+      smsTo: meUser.phone ?? undefined,
+      subject: "Onboarding complete",
+      message: "Your Vex workspace onboarding is complete. You can now activate pilots and invite staff.",
+    });
+  }
+
+  return res.json({ data: { ok: true }, error: null });
 }

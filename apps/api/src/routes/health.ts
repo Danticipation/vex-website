@@ -1,12 +1,24 @@
 import { Router } from "express";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export const healthRouter: Router = Router();
 
-healthRouter.get("/", (_req, res) => {
-  res.json({
+healthRouter.get("/", async (_req, res) => {
+  let db: "ok" | "error" = "ok";
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch {
+    db = "error";
+  }
+
+  const status = db === "ok" ? "ok" : "degraded";
+  res.status(db === "ok" ? 200 : 503).json({
     api: "@vex/api",
-    status: "running hot 🔥",
-    message: "VEX backend is live — luxury whips, no cap",
+    status,
+    db,
+    message: db === "ok" ? "VEX backend is live" : "Database unreachable",
     endpoints: {
       health: "GET /health → server check",
       auth: [
@@ -17,7 +29,7 @@ healthRouter.get("/", (_req, res) => {
       vehicles: "GET /vehicles, GET /vehicles/:id/options",
       inventory: "GET /inventory (filters), GET /inventory/:id, POST/PATCH /inventory (auth)",
     },
-    note: "Hit /health to confirm everything's breathing",
+    note: "Use this endpoint for production load balancers and uptime monitors",
     timestamp: new Date().toISOString(),
   });
 });

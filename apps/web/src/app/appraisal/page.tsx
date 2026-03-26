@@ -36,7 +36,7 @@ export default function AppraisalPage() {
         mileage: m,
         condition: condition.trim() || undefined,
       });
-      setResult({ id: data.id, estimatedValue: data.estimatedValue });
+      setResult({ id: data.id, estimatedValue: data.value ?? 0 });
     } catch {
       setError("Failed to get appraisal.");
     } finally {

@@ -1,0 +1,40 @@
+name: deploy-prod
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Security scan
+        run: pnpm audit --prod
+      - name: Build
+        run: pnpm -w turbo run build
+      - name: API e2e
+        run: pnpm --filter @vex/api run test:e2e
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+      - name: Deploy hooks (blue-green trigger)
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then curl -fsSL -X POST "$VERCEL_DEPLOY_HOOK"; fi
+          if [ -n "$RENDER_DEPLOY_HOOK" ]; then curl -fsSL -X POST "$RENDER_DEPLOY_HOOK"; fi

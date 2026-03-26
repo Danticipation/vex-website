@@ -185,20 +185,31 @@ export interface CreateAppraisalPayload {
   condition?: string;
 }
 
-export async function createAppraisal(payload: CreateAppraisalPayload): Promise<{ id: string; estimatedValue: number; vehicleInfo: unknown }> {
-  const res = await fetch(`${API_BASE}/appraisals`, {
+function publicAppraisalTenantQuery(): string {
+  const id = process.env.NEXT_PUBLIC_PUBLIC_APPRAISAL_TENANT_ID;
+  return id ? `?tenantId=${encodeURIComponent(id)}` : "";
+}
+
+/** Public instant estimate (no auth) — uses /public/quick-appraisal + tenant resolution. */
+export async function createAppraisal(
+  payload: CreateAppraisalPayload
+): Promise<{ id: string; value: number | null; notes: string | null }> {
+  const res = await fetch(`${API_BASE}/public/quick-appraisal${publicAppraisalTenantQuery()}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to get appraisal");
-  return res.json();
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(typeof body.message === "string" ? body.message : "Failed to get appraisal");
+  const data = unwrap<{ id: string; value: number | null; notes: string | null }>(body);
+  return data;
 }
 
-export async function getAppraisal(id: string): Promise<{ id: string; estimatedValue: number | null; vehicleInfo: unknown }> {
-  const res = await fetch(`${API_BASE}/appraisals/${id}`);
+export async function getAppraisal(id: string): Promise<{ id: string; value: number | null; notes: string | null }> {
+  const res = await fetch(`${API_BASE}/public/quick-appraisal/${encodeURIComponent(id)}${publicAppraisalTenantQuery()}`);
+  const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error("Appraisal not found");
-  return res.json();
+  return unwrap<{ id: string; value: number | null; notes: string | null }>(body);
 }
 
 export interface OrderItem {
@@ -355,9 +366,19 @@ export async function getCurrentTenantBilling(token: string): Promise<{
   stripeSubscriptionStatus: string | null;
   customDomain: string | null;
   themeJson: Record<string, unknown> | null;
+  onboardedAt: string | null;
 }> {
   const res = await fetch(`${API_BASE}/pricing/current`, { headers: authHeaders(token) });
   if (!res.ok) throw new Error("Failed to fetch tenant billing");
+  return unwrap(await res.json());
+}
+
+export async function completeOnboarding(token: string): Promise<{ ok: boolean }> {
+  const res = await fetch(`${API_BASE}/auth/onboarding/complete`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) throw new Error("Failed to complete onboarding");
   return unwrap(await res.json());
 }
 
@@ -385,4 +406,91 @@ export async function createLead(payload: { source?: string; email?: string; pho
   });
   if (!res.ok) throw new Error("Failed to submit");
   return res.json();
+}
+
+
+export async function getOwnerAdminOverview(token: string): Promise<{
+  mrr: number;
+  activeTenants: number;
+  tenants: Array<{
+    id: string;
+    name: string;
+    billingTier: string;
+    stripeSubscriptionStatus: string | null;
+    customDomain: string | null;
+    createdAt: string;
+  }>;
+}> {
+  const res = await fetch(`${API_BASE}/admin/overview`, { headers: authHeaders(token) });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { message?: string }).message || "Failed to load admin overview");
+  }
+  return unwrap(await res.json());
+}
+
+export async function onboardingStart(input: { email: string; dealerName: string; password: string; captchaToken: string }) {
+  const res = await fetch(`${API_BASE}/onboard/start`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((body as { message?: string }).message || "Failed to start onboarding");
+  return unwrap<{ tenantId: string; userId: string; onboardingToken: string }>(body);
+}
+
+export async function onboardingStripe(
+  input: { tenantId: string; tier: "STARTER" | "PRO" | "ENTERPRISE"; interval?: "monthly" | "yearly" },
+  onboardingToken: string
+) {
+  const res = await fetch(`${API_BASE}/onboard/stripe`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${onboardingToken}` },
+    body: JSON.stringify({ ...input, interval: input.interval ?? "monthly" }),
+  });
+  if (!res.ok) throw new Error("Failed onboarding billing step");
+}
+
+export async function onboardingTheme(
+  input: { tenantId: string; customDomain?: string; themeJson?: Record<string, unknown> },
+  onboardingToken: string
+) {
+  const res = await fetch(`${API_BASE}/onboard/theme`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${onboardingToken}` },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("Failed onboarding theme step");
+}
+
+export async function onboardingSeed(input: { tenantId: string; enableDemoData: boolean }, onboardingToken: string) {
+  const res = await fetch(`${API_BASE}/onboard/seed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${onboardingToken}` },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("Failed onboarding seed step");
+}
+
+export async function onboardingConfirm(input: { tenantId: string }, onboardingToken: string) {
+  const res = await fetch(`${API_BASE}/onboard/confirm`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${onboardingToken}` },
+    body: JSON.stringify(input),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error("Failed onboarding confirm step");
+  return unwrap<{ magicLink: string }>(body);
+}
+
+export async function applyPilot(input: { name: string; email: string; dealership: string; phone?: string }) {
+  const res = await fetch(`${API_BASE}/pilot/apply`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((body as { message?: string }).message || "Pilot application failed");
+  return unwrap<{ leadId: string; status: string; autoApprove: boolean }>(body);
 }

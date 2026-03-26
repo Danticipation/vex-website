@@ -10,6 +10,7 @@ export function Nav() {
 
   const links = [
     { href: "/dashboard", label: "Dashboard" },
+    { href: "/appraisals", label: "Appraisals" },
     { href: "/analytics", label: "Analytics" },
     { href: "/leads", label: "Leads" },
     { href: "/orders", label: "Orders" },

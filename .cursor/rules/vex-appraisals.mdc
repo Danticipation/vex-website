@@ -1,0 +1,18 @@
+---
+description: Appraisals module — API, CRM, public trade-in, PDF, onboarding
+globs: apps/api/**/appraisal*,apps/crm/**/appraisal*,packages/shared/**/appraisal*
+---
+
+# Appraisals
+
+- **Tenant scope**: All `/appraisals` CRUD uses scoped Prisma (`apps/api/src/lib/tenant.ts`); never bypass tenant context for dealer data.
+- **RBAC**: List/create/update/delete appraisals — **STAFF | ADMIN** only (`requireRole` + `requireAuth`).
+- **Public estimates**: `POST/GET /public/quick-appraisal*` — no JWT; tenant resolved by `Host` / `?tenantId=` / `PUBLIC_APPRAISAL_TENANT_ID`.
+- **Shared contracts**: Zod in `packages/shared/src/schemas/appraisal.ts` — `createAppraisalSchema`, `updateAppraisalSchema`, `quickAppraisalSchema`, `appraisalOutputSchema`.
+- **Valuation**: Implement third-party pricing behind `estimateFromQuickInput` / `estimateFromVehicleBasePrice` in `apps/api/src/lib/appraisalValuation.ts` using `VALUATION_*` env vars when integrated.
+- **CRM PDF**: Use `@react-pdf/renderer`; include tenant name from `/pricing/current` for branding.
+- **Responses**: Prefer `{ data, error: null }` for CRM list/detail mutations; public quick routes return `{ data, error: null }` on success.
+- **E2E**: `apps/api/scripts/e2e-appraisal-isolation.ts` — SQL-level tenant_id checks (run `pnpm --filter @vex/api run test:e2e:appraisal`).
+- **Revenue guardrail**: Starter/free tenants must be quota-limited server-side for appraisal calls.
+- **Compliance**: Appraisal create/update/delete should emit immutable audit entries.
+- **Mobile**: support offline appraisal drafts with safe sync semantics when connectivity returns.

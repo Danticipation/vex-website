@@ -10,6 +10,8 @@ import {
   getSavedVehicles,
   getNotifications,
   markNotificationRead,
+  getCurrentTenantBilling,
+  completeOnboarding,
   type OrderItem,
   type SavedVehicleItem,
   type NotificationItem,
@@ -24,6 +26,8 @@ export default function PortalPage() {
   const [saved, setSaved] = useState<SavedVehicleItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(1);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -38,6 +42,12 @@ export default function PortalPage() {
       getOrders(token).then((r) => setOrders(r.items)),
       getSavedVehicles(token).then(setSaved),
       getNotifications(token).then((r) => setNotifications(r.items)),
+      getCurrentTenantBilling(token).then((b) => {
+        if (!b.onboardedAt) {
+          setShowOnboarding(true);
+          setOnboardingStep(b.stripeSubscriptionStatus ? 2 : 1);
+        }
+      }),
     ]).catch(() => {}).finally(() => setLoading(false));
   }, [token]);
 
@@ -68,6 +78,40 @@ export default function PortalPage() {
       <main id="main-content" className={styles.main}>
         <h1 className={styles.title}>My account</h1>
         <p className={styles.greeting}>Welcome back{user.name ? `, ${user.name}` : ""}</p>
+        {user.role === "ADMIN" && (
+          <p style={{ marginTop: "-1rem", marginBottom: "1.25rem" }}>
+            <Link href="/admin">Owner admin dashboard →</Link>
+          </p>
+        )}
+
+        {showOnboarding && (
+          <section className={styles.section} style={{ border: "1px solid rgba(255,215,0,0.35)", borderRadius: 8, padding: "1rem 1.25rem", marginBottom: "1.5rem" }}>
+            <h2 className={styles.sectionTitle}>Get started (step {onboardingStep} of 3)</h2>
+            <ol style={{ marginLeft: "1.25rem", lineHeight: 1.7 }}>
+              <li>
+                <Link href="/portal/subscriptions">Connect billing (Stripe)</Link>
+              </li>
+              <li>
+                <Link href="/inventory">Browse inventory</Link> or list a vehicle from the CRM
+              </li>
+              <li>
+                <Link href="/appraisal">Run a sample appraisal</Link>
+              </li>
+            </ol>
+            <button
+              type="button"
+              style={{ marginTop: "0.75rem", padding: "0.5rem 1rem", cursor: "pointer", borderRadius: 6 }}
+              onClick={() => {
+                if (!token) return;
+                completeOnboarding(token)
+                  .then(() => setShowOnboarding(false))
+                  .catch(() => {});
+              }}
+            >
+              Mark complete
+            </button>
+          </section>
+        )}
 
         {loading ? (
           <p className={styles.loading}>Loading your data…</p>

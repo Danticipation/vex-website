@@ -1,0 +1,12 @@
+---
+description: Revenue pipeline + compliance guardrails
+globs: apps/api/**,apps/web/**,packages/shared/**
+---
+
+- Onboarding flows must be idempotent and support retry without duplicate tenant/user creation.
+- Starter/free plans must enforce appraisal quota limits server-side (never client-only).
+- Referral codes must be stored as hashes only.
+- Provisioning and critical mutations must emit `AuditLog` rows.
+- Pilot funnel endpoints must validate with Zod and avoid exposing secrets in responses.
+- AI insights must include versioned outputs with cost/inference caps and audit logs.
+- Growth claims/referral credits must be idempotent and tenant-scoped.

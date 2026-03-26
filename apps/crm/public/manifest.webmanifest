@@ -1,0 +1,9 @@
+{
+  "name": "Vex CRM",
+  "short_name": "Vex",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#c9a227",
+  "description": "Dealer CRM — appraisals, inventory, leads (offline-capable shell)."
+}

@@ -1,5 +1,9 @@
 import express, { type Express } from "express";
 import cors from "cors";
+import { metricsRegistry } from "./lib/metrics.js";
+import { requestContextMiddleware } from "./middleware/requestContext.js";
+import { metricsHttpMiddleware } from "./middleware/metricsHttp.js";
+import { tenantRateLimitMiddleware } from "./middleware/rateLimitTenant.js";
 import { healthRouter } from "./routes/health.js";
 import { authRouter } from "./routes/auth.js";
 import { vehiclesRouter } from "./routes/vehicles.js";
@@ -21,12 +25,19 @@ import { stripeRouter } from "./routes/stripe.js";
 import { pricingRouter } from "./routes/pricing.js";
 import { publicRouter } from "./routes/public.js";
 import { analyticsRouter } from "./routes/analytics.js";
+import { adminRouter } from "./routes/admin.js";
+import { onboardRouter } from "./routes/onboard.js";
+import { referralRouter } from "./routes/referral.js";
+import { pilotRouter } from "./routes/pilot.js";
+import { aiRouter } from "./routes/ai.js";
+import { growthRouter } from "./routes/growth.js";
 
 const app: Express = express();
 
 // Stripe needs raw body for signature verification.
 app.use("/stripe/webhook", express.raw({ type: "application/json" }));
 
+app.use(requestContextMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const corsOrigin = process.env.CORS_ORIGIN;
@@ -42,6 +53,8 @@ app.use(
 // Quick root route so the base URL actually responds with something useful
 // White-label: resolve tenant theme by Host — no auth, before tenant middleware.
 app.use("/public", publicRouter);
+app.use("/onboard", onboardRouter);
+app.use("/pilot", pilotRouter);
 
 app.get("/", (_req, res) => {
   res.json({
@@ -62,6 +75,13 @@ app.get("/", (_req, res) => {
 });
 
 app.use(tenantMiddleware);
+app.use(metricsHttpMiddleware);
+app.use(tenantRateLimitMiddleware);
+
+app.get("/metrics", async (_req, res) => {
+  res.set("Content-Type", metricsRegistry.contentType);
+  res.end(await metricsRegistry.metrics());
+});
 
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);
@@ -82,5 +102,9 @@ app.use("/webhooks", webhooksRouter);
 app.use("/stripe", stripeRouter);
 app.use("/pricing", pricingRouter);
 app.use("/analytics", analyticsRouter);
+app.use("/admin", adminRouter);
+app.use("/referrals", referralRouter);
+app.use("/ai", aiRouter);
+app.use("/growth", growthRouter);
 
 export { app };

@@ -30,6 +30,7 @@ pricingRouter.get("/current", requireAuth, async (req, res) => {
       stripeSubscriptionStatus: true,
       customDomain: true,
       themeJson: true,
+      onboardedAt: true,
     },
   });
   if (!tenant) return res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found" });

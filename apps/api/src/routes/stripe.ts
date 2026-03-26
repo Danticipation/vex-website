@@ -6,6 +6,8 @@ import { requireAuth } from "../middleware/auth.js";
 import { stripeCheckoutSchema, type StripeCheckoutInput } from "@vex/shared";
 import { createCheckoutSession, getStripeClient, type StripePlanId } from "../lib/stripe.js";
 import { withTenantScope, prisma as tenantPrisma } from "../lib/tenant.js";
+import { sendLifecycleNotification } from "../lib/notify.js";
+import { enqueueProvisionTenant } from "../lib/queue.js";
 
 export const stripeRouter: Router = Router();
 
@@ -122,6 +124,22 @@ stripeRouter.post("/webhook", express.raw({ type: "application/json" }), async (
               },
             });
           }
+        }
+
+        const owner = await prisma.user.findFirst({ where: { tenantId }, select: { email: true, phone: true } });
+        if (owner?.email) {
+          void sendLifecycleNotification({
+            type: "PAYMENT_EVENT",
+            toEmail: owner.email,
+            smsTo: owner.phone ?? undefined,
+            subject: "Subscription activated",
+            message: "Your Stripe checkout completed successfully. Billing is active.",
+          });
+          void enqueueProvisionTenant({
+            tenantId,
+            tier: planId ?? "STARTER",
+            email: owner.email,
+          });
         }
       });
     }

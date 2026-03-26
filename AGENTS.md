@@ -38,9 +38,49 @@ Build a best-in-class **B2B SaaS platform for auto dealers** (CRM + Inventory + 
 - White-label domains (tenant theming + domain mapping)
 - Analytics dashboard
 
+## Phase 4 — Appraisals + launch readiness
+- **Prisma `Appraisal`**: `vehicleId`, `customerId`, `value`, `notes`, `status` (default `pending`), relations to `Vehicle` / `Customer`; `Tenant.onboardedAt` for first-login wizard.
+- **API**: `GET/POST/PUT/DELETE /appraisals` — **STAFF | ADMIN** only, tenant-scoped Prisma, responses `{ data, error }` where applicable.
+- **Public trade-in** (no auth): `POST /public/quick-appraisal`, `GET /public/quick-appraisal/:id` — resolve tenant via `?tenantId=`, `Host` → `customDomain`, or `PUBLIC_APPRAISAL_TENANT_ID`.
+- **Valuation**: `apps/api/src/lib/appraisalValuation.ts` — replace with external API using env `VALUATION_*` when ready.
+- **CRM**: `/appraisals` list, `/appraisals/new`, `/appraisals/[id]` with shared Zod + `react-hook-form`; PDF via `@react-pdf/renderer` (`AppraisalPdfButton`).
+- **Onboarding**: `POST /auth/onboarding/complete` sets `Tenant.onboardedAt`; wizard surfaces in CRM + web portal until dismissed.
+- **Health**: `GET /health` includes DB ping (`db: ok|error`).
+- **E2E**: `pnpm --filter @vex/api run test:e2e:appraisal` — creates two tenants + appraisal; asserts DB rows (SQL) cannot appear under the wrong `tenant_id`.
+
 ## Required Verification Commands
 - Build: `pnpm -w turbo run build`
 - API only: `pnpm --filter @vex/api run build`
 - Web only: `pnpm --filter @vex/web run build`
 - CRM only: `pnpm --filter @vex/crm run build`
 
+
+
+## Phase 4.5 — Valuation API integration
+- Add `ValuationService` with Edmunds primary, MarketCheck fallback, and formula fallback.
+- Add `POST /appraisals/valuate` (STAFF|ADMIN, tenant-scoped), caching via `ValuationCache` (24h TTL).
+- Enforce daily cost cap (`$5/day`) and sanitize VIN/API logs.
+- Store `valuationData`, `valuationSource`, `valuationFetchedAt` on `Appraisal`.
+- Verification: `pnpm --filter @vex/api run test:valuation:unit` and `test:valuation:integration`.
+
+## Billion-scale platform (sharding, queues, observability)
+- **Tenant partition key**: every domain model includes `tenantId`; hot tables (`valuation_cache`, `event_logs`) are partition-ready via ops SQL in `apps/api/prisma/sql/`.
+- **Prisma Accelerate / pooling**: `DATABASE_URL` + optional `DIRECT_DATABASE_URL`; comma `READ_REPLICA_URLS` for future read routing.
+- **Queues**: BullMQ + Redis (`apps/api/src/lib/queue.ts`) — jobs `appraisal-pdf-generate`, `valuation-cache-warm`, `stripe-sync`, `analytics-rollup`; idempotent, tenant-scoped, DLQ via BullMQ failed retention.
+- **Cache**: Redis cache-aside (`apps/api/src/lib/cache.ts`) for branding/themes; valuation TTL still backed by `ValuationCache` in Postgres.
+- **Auth**: short-lived access JWT (default 5m) + refresh in Redis (or memory fallback); JWT denylist on logout.
+- **Rate limits**: per-tenant / per-IP sliding window (`RATE_LIMIT_POINTS_PER_TENANT` / `RATE_LIMIT_WINDOW_SEC`).
+- **Observability**: Prometheus `GET /metrics`, OpenTelemetry API hooks (`observability.ts`), valuation audit rows in `EventLog` with VIN **hash** only.
+- **Frontends**: React Query v5 + lazy-loaded CRM appraisals module; PWA manifests; CRM edge CSS hook at `/edge-theme.css`.
+- **Verification**: `pnpm -w turbo run build`, `pnpm --filter @vex/api run test:e2e`, `pnpm --filter @vex/api run load-test:scale`.
+
+## Go-to-market launch + revenue pipeline
+- **Onboarding SLA**: self-serve onboarding must complete in <90 seconds and be idempotent (safe retry on any step).
+- **Provisioning**: paid checkout triggers async tenant provisioning with demo data and audit trail.
+- **Revenue hooks**: referral generation/apply, usage logging for appraisal overages, owner dashboard metrics.
+- **Compliance baseline**: immutable `AuditLog` entries on critical tenant CRUD paths; privacy policy route published.
+
+## Phase 6 — AI + PWA + Growth
+- **AI insights**: model outputs must include version; enforce per-tenant inference caps and fallback scoring.
+- **PWA**: offline-first appraisal drafts with background sync queue behavior.
+- **Growth**: referral/claim flows must be idempotent and audited.

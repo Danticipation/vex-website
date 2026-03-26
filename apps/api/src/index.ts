@@ -1,7 +1,22 @@
 import "dotenv/config";
 import { app } from "./app.js";
+import { valuationConfig } from "./config/valuation.js";
+import { startObservability } from "./lib/observability.js";
+import { startQueueWorkers } from "./lib/queue.js";
 
 const PORT = Number(process.env.PORT) || 3001;
+
+const requiredValuationEnvs = ["EDMUNDS_API_KEY", "EDMUNDS_SECRET", "MARKETCHECK_API_KEY"] as const;
+const missingValuation = requiredValuationEnvs.filter((k) => !process.env[k]);
+if (missingValuation.length > 0) {
+  console.error("Missing valuation API env vars:", missingValuation.join(", "));
+  console.error("Refusing to start to protect valuation reliability and billing guardrails.");
+  process.exit(1);
+}
+void valuationConfig;
+
+startObservability();
+startQueueWorkers();
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(JSON.stringify({

@@ -62,7 +62,16 @@ function CheckoutPageInner() {
   useEffect(() => {
     if (tradeInId) {
       getAppraisal(tradeInId)
-        .then((a) => setTradeInSnapshot({ id: a.id, estimatedValue: a.estimatedValue, vehicleInfo: a.vehicleInfo }))
+        .then((a) => {
+          let vehicleInfo: unknown = null;
+          try {
+            vehicleInfo = a.notes ? JSON.parse(a.notes) : null;
+          } catch {
+            vehicleInfo = null;
+          }
+          const v = a.value ?? null;
+          setTradeInSnapshot({ id: a.id, estimatedValue: v, value: v, vehicleInfo });
+        })
         .catch(() => {});
     }
   }, [tradeInId]);
@@ -117,10 +126,13 @@ function CheckoutPageInner() {
     }
   };
 
+  const tradeInSnap = tradeInSnapshot as { estimatedValue?: number; value?: number } | null;
   const tradeInValue =
-    tradeInSnapshot && typeof (tradeInSnapshot as { estimatedValue?: number }).estimatedValue === "number"
-      ? (tradeInSnapshot as { estimatedValue: number }).estimatedValue
-      : 0;
+    tradeInSnap && typeof tradeInSnap.value === "number"
+      ? tradeInSnap.value
+      : tradeInSnap && typeof tradeInSnap.estimatedValue === "number"
+        ? tradeInSnap.estimatedValue
+        : 0;
 
   const grandTotal = effectiveTotal + (shippingQuote?.amount ?? 0) - tradeInValue;
 
