@@ -6,7 +6,7 @@ import { basePrisma, prisma, runWithTenant } from "../lib/tenant.js";
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
-  return new Stripe(key, { apiVersion: "2026-03-25.dahlia" });
+  return new Stripe(key);
 }
 
 function addInterval(from: Date, interval: "monthly" | "yearly"): Date {
