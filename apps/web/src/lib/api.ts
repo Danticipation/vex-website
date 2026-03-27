@@ -11,6 +11,12 @@ function unwrap<T>(payload: unknown): T {
   return payload as T;
 }
 
+function errorMessageFromBody(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const msg = (body as { message?: unknown }).message;
+  return typeof msg === "string" ? msg : null;
+}
+
 export interface InventoryItem {
   id: string;
   source: string;
@@ -199,15 +205,25 @@ export async function createAppraisal(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(typeof body.message === "string" ? body.message : "Failed to get appraisal");
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    throw new Error("Failed to parse appraisal response");
+  }
+  if (!res.ok) throw new Error(errorMessageFromBody(body) ?? "Failed to get appraisal");
   const data = unwrap<{ id: string; value: number | null; notes: string | null }>(body);
   return data;
 }
 
 export async function getAppraisal(id: string): Promise<{ id: string; value: number | null; notes: string | null }> {
   const res = await fetch(`${API_BASE}/public/quick-appraisal/${encodeURIComponent(id)}${publicAppraisalTenantQuery()}`);
-  const body = await res.json().catch(() => ({}));
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    throw new Error("Failed to parse appraisal response");
+  }
   if (!res.ok) throw new Error("Appraisal not found");
   return unwrap<{ id: string; value: number | null; notes: string | null }>(body);
 }
@@ -469,6 +485,128 @@ export async function getInvestorPackageByToken(token: string): Promise<{
 }> {
   const res = await fetch(`${API_BASE}/capital/investor/${encodeURIComponent(token)}`);
   if (!res.ok) throw new Error("Investor link expired or invalid");
+  return unwrap(await res.json());
+}
+
+export async function getScalingOverview(token: string): Promise<{
+  mrr: number;
+  targetMrr: number;
+  marketingConversionUsd: number;
+  partnerSpendUsd: number;
+  partnerSpendPctOfMrr: number;
+  projectionTo100kMonths: number;
+  generatedAt: string;
+}> {
+  const res = await fetch(`${API_BASE}/scaling/overview`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load scaling overview");
+  return unwrap(await res.json());
+}
+
+export async function createMarketingCampaign(
+  payload: {
+    name: string;
+    audience: "new_leads" | "trial" | "at_risk" | "all";
+    channels: Array<"email" | "sms">;
+    seoLandingSlug: string;
+    requireDoubleOptIn?: boolean;
+    variants: Array<{ id: string; name: string; channel: "email" | "sms"; weight: number; subject?: string; body: string }>;
+  },
+  token: string
+): Promise<{ campaignId: string; status: "draft" }> {
+  const res = await fetch(`${API_BASE}/marketing/campaigns`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(errorMessageFromBody(err) ?? "Failed to create campaign");
+  }
+  return unwrap(await res.json());
+}
+
+export async function runMarketingCampaign(campaignId: string, token: string): Promise<{ queued: boolean }> {
+  const res = await fetch(`${API_BASE}/marketing/campaigns/${encodeURIComponent(campaignId)}/run`, {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) throw new Error("Failed to queue campaign");
+  return unwrap(await res.json());
+}
+
+export async function getSeriesADataRoom(token: string): Promise<{
+  generatedAt: string;
+  mrr: number;
+  growthMoM: number;
+  burnMonthlyUsd: number;
+  runwayMonths: number;
+  highlights: string[];
+}> {
+  const res = await fetch(`${API_BASE}/capital/series-a/data-room`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load data room");
+  return unwrap(await res.json());
+}
+
+export async function simulateTermSheet(
+  payload: { valuationPreMoneyUsd: number; raiseAmountUsd: number; optionPoolPct: number },
+  token: string
+): Promise<{
+  valuationPreMoneyUsd: number;
+  raiseAmountUsd: number;
+  optionPoolPct: number;
+  investorOwnershipPct: number;
+  founderDilutionPct: number;
+}> {
+  const res = await fetch(`${API_BASE}/capital/series-a/term-sheet`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to simulate term sheet");
+  return unwrap(await res.json());
+}
+
+export async function getForecastingMrr(token: string): Promise<{
+  generatedAt: string;
+  currentMrr: number;
+  projectedMrr90d: number;
+  projectedMrr180d: number;
+  confidence: number;
+}> {
+  const res = await fetch(`${API_BASE}/forecasting/mrr`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load forecast");
+  return unwrap(await res.json());
+}
+
+export async function getInvestorLiveV2(token: string): Promise<{
+  room: { mrr: number; growthMoM: number; runwayMonths: number };
+  liveMetrics: { mrr: number; ltvProxy: number; churnPct: number; growthMoM: number };
+  generatedAt: string;
+}> {
+  const res = await fetch(`${API_BASE}/capital/investor-v2/live`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load investor v2 data");
+  return unwrap(await res.json());
+}
+
+export async function getBoardPack(token: string): Promise<{
+  generatedAt: string;
+  quarter: string;
+  mrr: number;
+  burnUsd: number;
+  keyRisks: string[];
+}> {
+  const res = await fetch(`${API_BASE}/governance/board-pack`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load board pack");
+  return unwrap(await res.json());
+}
+
+export async function getLiquiditySimulation(token: string): Promise<{
+  generatedAt: string;
+  acquisition: { estimatedEnterpriseValue: number; monthsToTarget: number };
+  ipo: { estimatedEnterpriseValue: number; monthsToTarget: number };
+}> {
+  const res = await fetch(`${API_BASE}/liquidity/simulate`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load liquidity simulation");
   return unwrap(await res.json());
 }
 

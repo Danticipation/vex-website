@@ -35,11 +35,17 @@ model Tenant {
   customDomain            String? @unique @map("custom_domain")
   themeJson               Json?   @map("theme_json")
   parentTenantId          String? @map("parent_tenant_id")
+  holdingCompanyId        String? @map("holding_company_id")
+  entityType              String   @default("OPERATING") @map("entity_type")
+  consolidatedReporting   Boolean  @default(false) @map("consolidated_reporting")
   locationType            LocationType @default(SINGLE) @map("location_type")
   groupSettings           Json?   @map("group_settings")
   region                  TenantRegion @default(US)
+  primaryRegion           TenantRegion @default(US) @map("primary_region")
+  supportedRegions        Json?   @map("supported_regions")
   currency                String   @default("USD")
   taxId                   String?  @map("tax_id")
+  taxSettings             Json?    @map("tax_settings")
   locale                  String   @default("en-US")
   dataResidency           String   @default("US") @map("data_residency")
   onboardedAt             DateTime? @map("onboarded_at")
@@ -71,10 +77,29 @@ model Tenant {
   countryCompliances   CountryCompliance[]
   complianceLogs       ComplianceLog[]
   iterationBacklogItems IterationBacklog[]
+  multiEntityLedgerRows MultiEntityLedger[]
   locations            Location[] @relation("LocationTenant")
   groupLocations       Location[] @relation("LocationGroup")
 
   @@map("tenants")
+}
+
+model MultiEntityLedger {
+  id            String   @id @default(cuid())
+  tenantId      String   @map("tenant_id")
+  entityId      String   @map("entity_id")
+  ledgerType    String   @map("ledger_type")
+  amountUsd     Decimal  @map("amount_usd") @db.Decimal(14, 2)
+  currency      String   @default("USD")
+  occurredAt    DateTime @map("occurred_at")
+  payload       Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, ledgerType, occurredAt])
+  @@map("multi_entity_ledger")
 }
 
 enum LocationType {

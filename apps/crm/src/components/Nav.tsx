@@ -12,6 +12,7 @@ export function Nav() {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/appraisals", label: "Appraisals" },
     { href: "/analytics", label: "Analytics" },
+    { href: "/autonomous", label: "Autonomous" },
     { href: "/leads", label: "Leads" },
     { href: "/orders", label: "Orders" },
     { href: "/inventory", label: "Inventory" },

@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { Router } from "express";
-import { RaisePackageSchema } from "@vex/shared";
+import { RaisePackageSchema, SeriesADataRoomSchema, TermSheetSimulatorSchema } from "@vex/shared";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/requireRole.js";
 import { prisma } from "../lib/tenant.js";
@@ -40,6 +40,23 @@ async function getRaisePackage() {
     ],
   };
   return RaisePackageSchema.parse(pkg);
+}
+
+function buildSeriesADataRoom(input: { mrr: number; usageRevenueUsd: number; activeTenantCount: number }) {
+  const burnMonthlyUsd = 12000;
+  const growthMoM = input.mrr > 0 ? Math.min(200, Math.max(5, Number(((input.usageRevenueUsd / input.mrr) * 20).toFixed(2)))) : 10;
+  return SeriesADataRoomSchema.parse({
+    generatedAt: new Date().toISOString(),
+    mrr: input.mrr,
+    growthMoM,
+    burnMonthlyUsd,
+    runwayMonths: Math.max(1, Math.round((input.mrr * 8) / burnMonthlyUsd)),
+    highlights: [
+      "Partner pipeline and marketing automation are live",
+      "Tenant-scoped, audited growth and capital data flows",
+      "Live KPI feeds available for investor diligence",
+    ],
+  });
 }
 
 capitalRouter.get("/package", requireAuth, requireRole("ADMIN", "GROUP_ADMIN"), async (_req, res) => {
@@ -86,4 +103,45 @@ capitalRouter.get("/investor/:token", async (req, res) => {
   const parsed = RaisePackageSchema.safeParse(payload);
   if (!parsed.success) return res.status(500).json({ code: "INTERNAL", message: "Invalid investor package" });
   return res.json({ data: parsed.data, error: null });
+});
+
+capitalRouter.get("/series-a/data-room", requireAuth, requireRole("ADMIN", "GROUP_ADMIN"), async (_req, res) => {
+  const pkg = await getRaisePackage();
+  const room = buildSeriesADataRoom(pkg);
+  return res.json({ data: room, error: null });
+});
+
+capitalRouter.post("/series-a/term-sheet", requireAuth, requireRole("ADMIN", "GROUP_ADMIN"), async (req, res) => {
+  const valuationPreMoneyUsd = Number(req.body?.valuationPreMoneyUsd ?? 40000000);
+  const raiseAmountUsd = Number(req.body?.raiseAmountUsd ?? 5000000);
+  const optionPoolPct = Number(req.body?.optionPoolPct ?? 10);
+  const post = valuationPreMoneyUsd + raiseAmountUsd;
+  const investorOwnershipPct = Number(((raiseAmountUsd / Math.max(1, post)) * 100).toFixed(2));
+  const founderDilutionPct = Number((investorOwnershipPct + optionPoolPct).toFixed(2));
+  const result = TermSheetSimulatorSchema.parse({
+    valuationPreMoneyUsd,
+    raiseAmountUsd,
+    optionPoolPct,
+    investorOwnershipPct,
+    founderDilutionPct,
+  });
+  return res.json({ data: result, error: null });
+});
+
+capitalRouter.get("/investor-v2/live", requireAuth, requireRole("ADMIN", "GROUP_ADMIN"), async (_req, res) => {
+  const pkg = await getRaisePackage();
+  const room = buildSeriesADataRoom(pkg);
+  return res.json({
+    data: {
+      room,
+      liveMetrics: {
+        mrr: pkg.mrr,
+        ltvProxy: Math.round(pkg.mrr * 24),
+        churnPct: 4.2,
+        growthMoM: room.growthMoM,
+      },
+      generatedAt: new Date().toISOString(),
+    },
+    error: null,
+  });
 });

@@ -116,6 +116,22 @@ export async function enqueueIterationAnalysis(data: { tenantId: string }): Prom
   await q.add("iteration-analysis", data, { jobId: `iteration:${data.tenantId}` });
 }
 
+export async function enqueueMarketingCampaignRun(data: { tenantId: string; campaignId: string }): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add("marketing-campaign-run", data, { jobId: `marketing:${data.tenantId}:${data.campaignId}` });
+}
+
+export async function enqueuePartnerPayout(data: {
+  tenantId: string;
+  idempotencyKey: string;
+  payoutUsd: number;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add("partner-payout-run", data, { jobId: `partner-payout:${data.tenantId}:${data.idempotencyKey}` });
+}
+
 let workerInstance: Worker | null = null;
 
 async function processJob(job: Job): Promise<void> {
@@ -247,6 +263,47 @@ async function processJob(job: Job): Promise<void> {
           tenantId,
           type: "job.iteration_analysis",
           payload: metric,
+        },
+      });
+      return;
+    }
+    if (name === "marketing-campaign-run") {
+      await prisma.usageLog.create({
+        data: {
+          tenantId,
+          kind: "marketing_send",
+          quantity: 100,
+          amountUsd: 0,
+          meta: { campaignId: String(data.campaignId ?? "") },
+        },
+      });
+      await prisma.eventLog.create({
+        data: {
+          tenantId,
+          type: "job.marketing_campaign_run",
+          payload: { campaignId: String(data.campaignId ?? "") },
+        },
+      });
+      return;
+    }
+    if (name === "partner-payout-run") {
+      await prisma.usageLog.create({
+        data: {
+          tenantId,
+          kind: "partner_payout",
+          quantity: 1,
+          amountUsd: Number(data.payoutUsd ?? 0),
+          meta: { idempotencyKey: String(data.idempotencyKey ?? "") },
+        },
+      });
+      await prisma.eventLog.create({
+        data: {
+          tenantId,
+          type: "job.partner_payout_run",
+          payload: {
+            idempotencyKey: String(data.idempotencyKey ?? ""),
+            payoutUsd: Number(data.payoutUsd ?? 0),
+          },
         },
       });
       return;

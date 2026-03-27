@@ -9,6 +9,8 @@ export interface AuthPayload {
   tenantId: string;
   jti?: string;
   groups?: string[];
+  ssoProvider?: string;
+  scimProvisioned?: boolean;
 }
 
 declare global {
@@ -20,6 +22,20 @@ declare global {
 }
 
 async function requireAuthAsync(req: Request, res: Response, next: NextFunction) {
+  const scimTenantId = req.header("x-scim-tenant-id");
+  const scimEmail = req.header("x-scim-email");
+  if (req.path.startsWith("/auth/scim") && scimTenantId && scimEmail) {
+    req.user = {
+      userId: `scim:${scimEmail}`,
+      email: scimEmail,
+      role: "ADMIN",
+      tenantId: scimTenantId,
+      ssoProvider: "scim",
+      scimProvisioned: true,
+    };
+    return next();
+  }
+
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 

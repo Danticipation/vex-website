@@ -27,4 +27,16 @@ alwaysApply: true
   - Feed pilot usage and feedback into an auditable iteration backlog.
   - Keep upsell/referral automations tenant-scoped, idempotent, and consent-aware.
   - Retention cycles must log churn prediction outputs and campaign actions for auditability.
+- **Hypergrowth engine**
+  - Marketing campaigns must enforce consent and send-cap guardrails per tenant tier.
+  - Partner referrals/payouts must be idempotent with immutable payout/audit records.
+  - Scaling and Series A dashboards must expose only authorized tenant/group data.
+- **Global unicorn OS**
+  - Region routing must enforce data residency and supported-region checks by tenant policy.
+  - Autonomous workflows require explicit run audit logs and per-tenant concurrency/cost caps.
+  - Forecasting/capital endpoints must remain role-restricted and tenant-scoped.
+- **Scale + exit readiness**
+  - Multi-entity accounting entries must be immutable, tenant-scoped, and auditable.
+  - Liquidity simulations and investor exports must be read-controlled and watermark-capable.
+  - Enterprise auth (SSO/SCIM) paths must be isolated, explicit, and non-bypassable for protected APIs.
 

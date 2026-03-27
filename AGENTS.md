@@ -102,3 +102,21 @@ Build a best-in-class **B2B SaaS platform for auto dealers** (CRM + Inventory + 
 - **Upsell automation**: usage events and offers must be server-signed, idempotent, and margin-aware.
 - **Pilot-scale telemetry**: customer success signals should be captured without blocking critical API paths.
 - **Capital package**: expose investor-facing KPI pages with access controls and auditability.
+
+## Phase 13 — Hypergrowth engine
+- **Marketing automation**: multi-channel campaign runs must be tenant-scoped, consent-aware, and fully audited.
+- **Strategic partnerships**: partner lead intake and payouts must be idempotent, capped, and margin-guarded.
+- **Scaling dashboard**: show MRR trajectory and partner spend with GROUP_ADMIN-only access.
+- **Series A closing**: live data-room + term-sheet simulation endpoints require secure role checks and access logs.
+
+## Phase 14 — Global unicorn OS
+- **Global markets**: enforce tenant primary/supported regions with strict residency controls and auditable overrides.
+- **Autonomous OS v2**: workflow orchestration and decision logs must be sandboxed, capped, and recoverable.
+- **Predictive BI**: forecasting APIs must be role-restricted and derived from tenant-safe aggregates.
+- **Capital/governance**: investor v2 live room, board packs, and equity controls must be auditable and access-controlled.
+
+## Phase 15 — Scale + pre-IPO + exit
+- **Multi-entity accounting**: consolidated ledger and reporting must be tenant-scoped with immutable audit trails.
+- **Institutional governance**: board resolutions, equity actions, and 409A-adjacent workflows require strict RBAC and logs.
+- **Liquidity modeling**: acquisition/IPO scenario APIs should remain deterministic, exportable, and access-controlled.
+- **Enterprise security**: SSO/SCIM flows must be explicit and isolated without weakening normal auth guarantees.

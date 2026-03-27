@@ -111,3 +111,8 @@ Place your **VEX logo (no background)** at `apps/web/public/vex-logo.png`. The h
 - Live SOC2 status: `https://app.vex.example/compliance/soc2-report` (replace with your production domain).
 - Live MRR dashboard URL: `https://app.vex.example/admin/mrr` (replace with your production domain).
 - Secure investor data-room URL: `https://app.vex.example/capital` (replace with your production domain).
+- Scaling dashboard URL: `https://app.vex.example/scaling` (replace with your production domain).
+- Secure investor CRM URL: `https://app.vex.example/raise/series-a` (replace with your production domain).
+- Forecasting suite URL: `https://app.vex.example/forecasting` (replace with your production domain).
+- Autonomous operations dashboard URL: `https://crm.vex.example/autonomous` (replace with your production domain).
+- Exit readiness dashboard URL: `https://app.vex.example/raise/exit` (replace with your production domain).

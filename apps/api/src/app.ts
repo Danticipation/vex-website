@@ -38,6 +38,14 @@ import { successRouter } from "./routes/success.js";
 import { iterationRouter } from "./routes/iteration.js";
 import { upsellRouter } from "./routes/upsell.js";
 import { capitalRouter } from "./routes/capital.js";
+import { marketingRouter } from "./routes/marketing.js";
+import { partnersRouter } from "./routes/partners.js";
+import { scalingRouter } from "./routes/scaling.js";
+import { autonomousRouter } from "./routes/autonomous.js";
+import { forecastingRouter } from "./routes/forecasting.js";
+import { governanceRouter } from "./routes/governance.js";
+import { accountingRouter } from "./routes/accounting.js";
+import { liquidityRouter } from "./routes/liquidity.js";
 
 const app: Express = express();
 
@@ -120,5 +128,13 @@ app.use("/success", successRouter);
 app.use("/iteration", iterationRouter);
 app.use("/upsell", upsellRouter);
 app.use("/capital", capitalRouter);
+app.use("/marketing", marketingRouter);
+app.use("/partners", partnersRouter);
+app.use("/scaling", scalingRouter);
+app.use("/autonomous", autonomousRouter);
+app.use("/forecasting", forecastingRouter);
+app.use("/governance", governanceRouter);
+app.use("/accounting", accountingRouter);
+app.use("/liquidity", liquidityRouter);
 
 export { app };
