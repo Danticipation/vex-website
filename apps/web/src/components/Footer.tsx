@@ -2,13 +2,13 @@ import Link from "next/link";
 import styles from "./Footer.module.css";
 
 const FOOTER_LINKS = [
-  { href: "/inventory", label: "Cars" },
+  { href: "/collections", label: "Collections" },
   { href: "/build", label: "Build" },
   { href: "/#pillars", label: "How it works" },
   { href: "/#services", label: "Services" },
   { href: "/#test-drive", label: "Book a visit" },
   { href: "/#about", label: "About" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const SOCIAL = [

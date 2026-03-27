@@ -9,10 +9,10 @@ import styles from "./Header.module.css";
 
 /** Short labels, few choices — easier to scan on every screen size. */
 const NAV_LINKS = [
-  { href: "/inventory", label: "Cars" },
+  { href: "/collections", label: "Collections" },
   { href: "/build", label: "Build" },
   { href: "/#pillars", label: "How it works" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
 export function Header() {

@@ -60,6 +60,9 @@
   align-items: center;
   min-height: 44px;
   padding: 0 0.15rem;
+  min-width: 6.5rem;
+  justify-content: center;
+  text-align: center;
 }
 
 .navLink[aria-current="page"] {
