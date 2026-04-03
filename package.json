@@ -19,6 +19,7 @@
     "quality:web": "pnpm --filter @vex/web run test:e2e && pnpm --filter @vex/web run test:a11y && pnpm --filter @vex/web run test:lighthouse",
     "release:pilot-check": "pnpm -w turbo run build && pnpm --filter @vex/api run test:e2e",
     "ship:gate": "bash scripts/ship-gate.sh",
+    "verify:ship": "bash scripts/verify-ship-local.sh",
     "pilot:verify": "node scripts/pilot-verify.mjs",
     "smoke:cdk-drive": "pnpm --filter @vex/api run smoke:cdk-drive",
     "git:save": "bash scripts/git-save.sh",
