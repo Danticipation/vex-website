@@ -27,6 +27,25 @@ if (!base) {
   process.exit(0);
 }
 
+/** Skip placeholder / RFC 2606 hosts so local pipelines do not fail DNS (e.g. your-api.example). */
+try {
+  const origin = base.startsWith("http") ? base : `https://${base}`;
+  const host = new URL(origin).hostname.toLowerCase();
+  const isPlaceholder =
+    host.endsWith(".example") ||
+    host === "example.com" ||
+    /^your(-real)?-api\.example$/.test(host);
+  if (isPlaceholder) {
+    console.log(
+      "pilot-verify: skipped (placeholder hostname; use a real deploy URL, or unset PILOT_VERIFY_API_URL)"
+    );
+    process.exit(0);
+  }
+} catch {
+  console.error("pilot-verify: invalid PILOT_VERIFY_API_URL", base);
+  process.exit(1);
+}
+
 async function assertOk(res, label) {
   const text = await res.text();
   let json;

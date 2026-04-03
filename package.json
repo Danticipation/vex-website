@@ -20,6 +20,7 @@
     "release:pilot-check": "pnpm -w turbo run build && pnpm --filter @vex/api run test:e2e",
     "ship:gate": "bash scripts/ship-gate.sh",
     "verify:ship": "bash scripts/verify-ship-local.sh",
+    "fix:perms": "bash scripts/fix-repo-permissions.sh",
     "pilot:verify": "node scripts/pilot-verify.mjs",
     "smoke:cdk-drive": "pnpm --filter @vex/api run smoke:cdk-drive",
     "git:save": "bash scripts/git-save.sh",

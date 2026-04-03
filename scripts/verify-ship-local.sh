@@ -41,5 +41,8 @@ pnpm --filter @vex/api run test:e2e
 echo "==> ship:gate"
 pnpm run ship:gate
 
-echo "==> Done (pilot:verify is optional — set PILOT_VERIFY_API_URL)"
+echo "==> Done."
+echo "    Optional: PILOT_VERIFY_API_URL=https://api.yourdomain.com pnpm run pilot:verify"
+echo "    (Skip placeholder hosts like *.example — script exits 0.)"
+echo "    If build showed EACCES on dist/: run pnpm run fix:perms"
 exit 0
