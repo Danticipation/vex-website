@@ -53,7 +53,13 @@ fi
 
 git add -A
 
-MSG="${*:-}"
+# pnpm may forward a literal "--" separator; never put it in the commit subject
+args=()
+for a in "$@"; do
+  [[ "$a" == "--" ]] && continue
+  args+=("$a")
+done
+MSG="${args[*]:-}"
 if [[ -z "$MSG" ]]; then
   MSG="${GIT_SAVE_MSG:-}"
 fi
