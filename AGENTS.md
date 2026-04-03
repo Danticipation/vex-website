@@ -3,6 +3,10 @@
 ## Vision
 Build a best-in-class **B2B SaaS platform for auto dealers** (CRM + Inventory + Customer Portal + Appraisals).
 
+## Single Workspace Rule
+- Use `PROJECT_SPACE.md` as the live execution hub.
+- Keep sprint status and must-ship checklist updated there first.
+
 ## Repo Structure
 - `apps/web`: marketing + auth + pricing/checkout entrypoints
 - `apps/api`: Express REST API + Prisma + Postgres

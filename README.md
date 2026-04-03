@@ -2,6 +2,10 @@
 
 Luxury automotive marketplace: customer-facing site, build-your-own configurator, CRM, and full deal flow (inventory, financing, shipping, trade-in).
 
+## Start Here
+
+- **Project command center:** [PROJECT_SPACE.md](PROJECT_SPACE.md)
+
 ## Docs
 
 - **Design:** [docs/plans/2025-03-15-vex-luxury-marketplace-design.md](docs/plans/2025-03-15-vex-luxury-marketplace-design.md)
