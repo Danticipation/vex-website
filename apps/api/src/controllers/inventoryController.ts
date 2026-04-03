@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { InventorySource, InventoryStatus, Prisma } from "@prisma/client";
-import type { CreateInventoryInput, UpdateInventoryInput } from "@vex/shared";
+import type {
+  CreateInventoryInput,
+  InventorySyndicationRequestInput,
+  UpdateInventoryInput,
+} from "@vex/shared";
 import { isDealerStaffRole } from "../lib/dealerRole.js";
 import { optionalJson } from "../utils/prismaJson.js";
 import { prisma } from "../lib/tenant.js";
@@ -238,4 +242,76 @@ export async function remove(req: Request, res: Response) {
   const deleted = await prisma.inventory.deleteMany({ where: { id } });
   if (deleted.count === 0) return res.status(404).json({ code: "NOT_FOUND", message: "Inventory item not found" });
   return res.json({ data: { id }, error: null });
+}
+
+export async function requestSyndication(req: Request, res: Response) {
+  const user = req.user;
+  if (!user) return res.status(401).json({ code: "UNAUTHORIZED", message: "Login required" });
+  if (!isDealerStaffRole(user.role)) {
+    return res.status(403).json({ code: "FORBIDDEN", message: "Staff or admin required" });
+  }
+
+  const { id: inventoryId } = req.params;
+  const body = req.body as InventorySyndicationRequestInput;
+
+  const inventory = await prisma.inventory.findFirst({
+    where: { id: inventoryId },
+    select: { id: true, source: true, status: true, listPrice: true, vehicleId: true },
+  });
+  if (!inventory) {
+    return res.status(404).json({ code: "NOT_FOUND", message: "Inventory item not found" });
+  }
+  if (inventory.source !== "COMPANY") {
+    return res.status(400).json({
+      code: "BAD_REQUEST",
+      message: "Only dealer-owned inventory can be syndicated",
+    });
+  }
+  if (inventory.status !== "AVAILABLE") {
+    return res.status(400).json({
+      code: "BAD_REQUEST",
+      message: "Only AVAILABLE inventory can be syndicated",
+    });
+  }
+
+  const event = await prisma.eventLog.create({
+    data: {
+      tenantId: req.tenantId!,
+      type: "inventory.syndication_request",
+      payload: {
+        inventoryId: inventory.id,
+        vehicleId: inventory.vehicleId,
+        targetDealerId: body.targetDealerId,
+        requestedByUserId: user.userId,
+        askingPrice: body.askingPrice ?? Number(inventory.listPrice),
+        expiresAt: body.expiresAt ?? null,
+        note: body.note ?? null,
+      },
+    },
+    select: { id: true, createdAt: true },
+  });
+
+  await prisma.usageLog.create({
+    data: {
+      tenantId: req.tenantId!,
+      kind: "syndication_request",
+      quantity: 1,
+      amountUsd: 0,
+      meta: {
+        inventoryId: inventory.id,
+        targetDealerId: body.targetDealerId,
+        eventId: event.id,
+      },
+    },
+  });
+
+  return res.status(201).json({
+    data: {
+      eventId: event.id,
+      inventoryId: inventory.id,
+      targetDealerId: body.targetDealerId,
+      createdAt: event.createdAt,
+    },
+    error: null,
+  });
 }

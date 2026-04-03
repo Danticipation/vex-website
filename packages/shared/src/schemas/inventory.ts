@@ -28,5 +28,13 @@ export const updateInventorySchema = z.object({
   modelSourcePhotoIds: z.array(z.string()).nullable().optional(),
 });
 
+export const inventorySyndicationRequestSchema = z.object({
+  targetDealerId: z.string().min(1),
+  note: z.string().max(1000).optional(),
+  askingPrice: z.number().positive().optional(),
+  expiresAt: z.string().datetime().optional(),
+});
+
 export type CreateInventoryInput = z.infer<typeof createInventorySchema>;
 export type UpdateInventoryInput = z.infer<typeof updateInventorySchema>;
+export type InventorySyndicationRequestInput = z.infer<typeof inventorySyndicationRequestSchema>;

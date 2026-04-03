@@ -7,6 +7,7 @@ Use this file as the primary command center for execution.
 - Ship dealer-facing revenue path in a tight loop.
 - Keep tenant isolation + RBAC + Stripe idempotency non-negotiable.
 - Convert pilots to paid usage, not feature sprawl.
+- Execute competitive plan: `docs/VEX_COMPETITIVE_EXECUTION_PLAN_2026-04-02.md`.
 
 ## 14-Day Beachhead Sprint
 
@@ -30,6 +31,7 @@ Use this file as the primary command center for execution.
 - Ship gate details: `docs/SHIP.md`
 - Tenant/RBAC details: `docs/TENANT_RBAC.md`
 - Reality check memo: `docs/ENGINEERING_REALITY.md`
+- Competitive execution system: `docs/VEX_COMPETITIVE_EXECUTION_PLAN_2026-04-02.md`
 
 ## Standard Commands
 
@@ -45,3 +47,25 @@ Use this file as the primary command center for execution.
 - Treat this file as the live sprint board and update checkboxes as work lands.
 - Add new docs only if they are linked from this hub.
 - Keep generated or local-only files out of git where possible.
+
+## Daily Execution Cadence
+
+- Morning: run `pnpm -w turbo run build` and `pnpm --filter @vex/api run test:e2e`.
+- Before any pilot-facing release: run `pnpm run ship:gate`.
+- After deploy: run `PILOT_VERIFY_API_URL=... pnpm run pilot:verify`.
+- End of day: update KPI and checklist progress in the competitive execution plan.
+
+## Day 1 Execution Checklist
+
+- [ ] Run gate commands in order:
+  - `pnpm -w turbo run build`
+  - `pnpm --filter @vex/api run test:e2e`
+  - `pnpm run ship:gate`
+  - `PILOT_VERIFY_API_URL=https://your-staging-api pnpm run pilot:verify`
+- [ ] If any command is red, fix gate blockers before feature work.
+- [ ] Trust layer tasks:
+  - [ ] Implement AsyncLocalStorage wrapper in `apps/api/src/lib/tenantScope.ts`.
+  - [ ] Add route-level RBAC guard coverage using `docs/TENANT_RBAC.md`.
+  - [ ] Ensure Prisma queries execute through tenant-scoped client paths.
+- [ ] Pass/Fail target: `pnpm --filter @vex/api run test:e2e` green with zero cross-tenant leakage.
+- [ ] Pilot outreach: send one-line offer to 3 Cavin contacts and log status in this file.

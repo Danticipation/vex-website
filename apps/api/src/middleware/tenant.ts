@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { authJwtSchema } from "@vex/shared";
 import { requireAuth } from "./auth.js";
-import { runWithTenant, systemPrisma } from "../lib/tenant.js";
+import { systemPrisma } from "../lib/tenant.js";
+import { withTenantRequestContext } from "../lib/tenantScope.js";
 
 declare global {
   namespace Express {
@@ -126,7 +127,7 @@ export async function tenantMiddleware(req: Request, res: Response, next: NextFu
 
     req.tenantId = tenantId;
 
-    return runWithTenant(tenantId, () => next());
+    return withTenantRequestContext(req, res, next);
   });
 }
 
