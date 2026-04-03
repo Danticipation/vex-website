@@ -3,11 +3,27 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+load_api_env() {
+  local files=("apps/api/.env.local" "apps/api/.env")
+  for f in "${files[@]}"; do
+    if [[ -f "$f" ]]; then
+      set -a
+      # shellcheck disable=SC1090
+      source "$f"
+      set +a
+    fi
+  done
+}
+
+load_api_env
+
 echo "==> Prisma generate"
 pnpm --filter @vex/api run db:generate
 
 echo "==> Monorepo build"
 pnpm -w turbo run build
+
+pnpm --filter @vex/api run env:check -- --require DATABASE_URL --context ship:gate
 
 if [[ -z "${DATABASE_URL:-}" ]]; then
   echo ""
@@ -26,5 +42,9 @@ export DIRECT_DATABASE_URL="${DIRECT_DATABASE_URL:-$DATABASE_URL}"
 
 echo "==> API tenant isolation E2E (appraisal + inventory)"
 pnpm --filter @vex/api run test:e2e
+
+echo "==> Web Playwright E2E (install Chromium if needed)"
+pnpm --filter @vex/web exec playwright install chromium
+pnpm --filter @vex/web run test:e2e
 
 echo "ship-gate: OK"

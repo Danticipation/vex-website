@@ -34,4 +34,6 @@ export * from "./schemas/governance.js";
 export * from "./types/user.js";
 export * from "./types/vehicle.js";
 export * from "./types/inventory.js";
+export * from "./types/rbac.js";
+export * from "./decorators/roles.decorator.js";
 export * from "./featureFlags.js";

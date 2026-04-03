@@ -1,5 +1,6 @@
 import { Router, type Request } from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import { validateBody } from "../middleware/validate.js";
 import {
   onboardingStartSchema,
@@ -12,6 +13,8 @@ import {
 } from "@vex/shared";
 import { enqueueProvisionTenant } from "../lib/queue.js";
 import { systemPrisma, prisma, runWithTenant } from "../lib/tenant.js";
+import { createCheckoutSession, type StripePlanId } from "../lib/stripe.js";
+import { sendLifecycleNotification } from "../lib/notify.js";
 
 export const onboardRouter: Router = Router();
 
@@ -184,6 +187,7 @@ onboardRouter.post("/pilot", validateBody(PilotOnboardSchema), async (req, res) 
   }
 
   const created = await systemPrisma.$transaction(async (tx) => {
+    const passwordHash = await bcrypt.hash(body.password, 12);
     const tenant = await tx.tenant.create({
       data: {
         name: body.dealerName,
@@ -196,7 +200,7 @@ onboardRouter.post("/pilot", validateBody(PilotOnboardSchema), async (req, res) 
       data: {
         tenantId: tenant.id,
         email: body.email,
-        passwordHash: `pilot:${Date.now()}`,
+        passwordHash,
         role: "ADMIN",
         name: body.dealerName,
       },
@@ -214,6 +218,15 @@ onboardRouter.post("/pilot", validateBody(PilotOnboardSchema), async (req, res) 
     return { tenantId: tenant.id, userId: user.id };
   });
 
+  const interval = body.interval === "yearly" ? "yearly" : "monthly";
+  let checkout: { id: string; url: string | null } | null = null;
+  try {
+    const session = await createCheckoutSession(body.tier as StripePlanId, created.tenantId, interval);
+    checkout = { id: session.id, url: session.url };
+  } catch {
+    checkout = null;
+  }
+
   if (body.enableDemoData) {
     await enqueueProvisionTenant({
       tenantId: created.tenantId,
@@ -222,5 +235,16 @@ onboardRouter.post("/pilot", validateBody(PilotOnboardSchema), async (req, res) 
     });
   }
 
-  return res.status(201).json({ data: { ...created, billingStatus: "PENDING" }, error: null });
+  void sendLifecycleNotification({
+    type: "WELCOME",
+    toEmail: body.email,
+    subject: "Welcome to VEX pilot",
+    message:
+      "Your pilot tenant is created. Complete checkout to activate billing, then sign in to CRM at /login with your onboarding email.",
+  });
+
+  return res.status(201).json({
+    data: { ...created, billingStatus: "PENDING", checkout },
+    error: null,
+  });
 });

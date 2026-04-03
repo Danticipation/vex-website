@@ -69,6 +69,8 @@ model Tenant {
   plans                Plan[]
   valuationCaches      ValuationCache[]
   eventLogs            EventLog[]
+  integrationLogs      IntegrationLog[]
+  externalSyncs        ExternalSync[]
   auditLogs            AuditLog[]
   usageLogs            UsageLog[]
   referrals            Referral[]
@@ -245,6 +247,7 @@ model Vehicle {
 enum InventorySource {
   COMPANY
   PRIVATE_SELLER
+  APPRAISAL
 }
 
 enum InventoryStatus {
@@ -569,6 +572,47 @@ model UsageLog {
 
   @@index([tenantId, kind, createdAt])
   @@map("usage_logs")
+}
+
+model IntegrationLog {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  vendor      String
+  eventType   String   @map("event_type")
+  externalId  String   @map("external_id")
+  status      String   @default("PROCESSED")
+  payload     Json?
+  error       String?
+  receivedAt  DateTime @default(now()) @map("received_at")
+  processedAt DateTime? @map("processed_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, externalId, eventType])
+  @@index([tenantId, vendor, receivedAt])
+  @@index([tenantId, eventType, receivedAt])
+  @@map("integration_logs")
+}
+
+model ExternalSync {
+  id         String   @id @default(cuid())
+  tenantId   String   @map("tenant_id")
+  vendor     String
+  entityType String   @map("entity_type")
+  externalId String   @map("external_id")
+  direction  String   @default("INBOUND")
+  status     String   @default("PENDING")
+  payload    Json?
+  syncedAt   DateTime? @map("synced_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, externalId, entityType])
+  @@index([tenantId, vendor, entityType])
+  @@index([tenantId, status, updatedAt])
+  @@map("external_syncs")
 }
 
 model Referral {

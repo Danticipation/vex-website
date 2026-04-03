@@ -142,8 +142,8 @@ export async function create(req: Request, res: Response) {
   if (!user) {
     return res.status(401).json({ code: "UNAUTHORIZED", message: "Login required" });
   }
-  if (body.source === "COMPANY" && !isDealerStaffRole(user.role)) {
-    return res.status(403).json({ code: "FORBIDDEN", message: "Only staff can add company inventory" });
+  if (body.source !== "PRIVATE_SELLER" && !isDealerStaffRole(user.role)) {
+    return res.status(403).json({ code: "FORBIDDEN", message: "Only staff can add dealer inventory" });
   }
 
   const vehicle = await prisma.vehicle.findFirst({ where: { id: body.vehicleId } });
@@ -156,7 +156,9 @@ export async function create(req: Request, res: Response) {
       tenant: { connect: { id: req.tenantId! } },
       source: body.source,
       vehicle: { connect: { id: body.vehicleId } },
-      ...(body.source === "PRIVATE_SELLER" ? { listedBy: { connect: { id: user.userId } } } : {}),
+      ...(body.source === "PRIVATE_SELLER" || body.source === "APPRAISAL"
+        ? { listedBy: { connect: { id: user.userId } } }
+        : {}),
       location: body.location ?? null,
       listPrice: body.listPrice,
       mileage: body.mileage ?? null,

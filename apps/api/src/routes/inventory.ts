@@ -13,9 +13,9 @@ export const inventoryRouter: Router = Router();
 
 inventoryRouter.get("/", requireAnyAuthenticatedRole(), inventoryController.list);
 inventoryRouter.get("/:id", requireAnyAuthenticatedRole(), inventoryController.getById);
-inventoryRouter.post("/", requireAuth, requireAnyAuthenticatedRole(), validateBody(createInventorySchema), inventoryController.create);
-inventoryRouter.patch("/:id", requireAuth, requireAnyAuthenticatedRole(), validateBody(updateInventorySchema), inventoryController.update);
-inventoryRouter.put("/:id", requireAuth, requireAnyAuthenticatedRole(), validateBody(updateInventorySchema), inventoryController.update);
+inventoryRouter.post("/", requireAuth, requireStaffOrAbove(), validateBody(createInventorySchema), inventoryController.create);
+inventoryRouter.patch("/:id", requireAuth, requireStaffOrAbove(), validateBody(updateInventorySchema), inventoryController.update);
+inventoryRouter.put("/:id", requireAuth, requireStaffOrAbove(), validateBody(updateInventorySchema), inventoryController.update);
 inventoryRouter.delete("/:id", requireAuth, requireStaffOrAbove(), inventoryController.remove);
 inventoryRouter.post(
   "/:id/syndication/request",

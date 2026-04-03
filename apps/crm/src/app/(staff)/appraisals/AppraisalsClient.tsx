@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { listAppraisals } from "@/lib/api";
 import type { AppraisalOutput } from "@vex/shared";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 
 function vehicleLabel(a: AppraisalOutput) {
   if (a.vehicle) return `${a.vehicle.year} ${a.vehicle.make} ${a.vehicle.model}`;
@@ -21,6 +22,8 @@ function vehicleLabel(a: AppraisalOutput) {
 
 export function AppraisalsClient() {
   const { token, role, loading } = useAuth();
+  const [newAlert, setNewAlert] = useState<string | null>(null);
+  const lastTopIdRef = useRef<string | null>(null);
   const { data, error, isLoading } = useQuery({
     queryKey: ["appraisals", token],
     queryFn: async () => {
@@ -34,6 +37,19 @@ export function AppraisalsClient() {
   const items = data?.items ?? [];
   const err = error ? "Failed to load appraisals" : null;
 
+  useEffect(() => {
+    const nextTopId = items[0]?.id ?? null;
+    if (!nextTopId) return;
+    if (lastTopIdRef.current && lastTopIdRef.current !== nextTopId) {
+      setNewAlert("New appraisal received in deal desk.");
+    }
+    if (!lastTopIdRef.current) {
+      lastTopIdRef.current = nextTopId;
+    } else {
+      lastTopIdRef.current = nextTopId;
+    }
+  }, [items]);
+
   if (loading) {
     return (
       <main style={{ padding: "1.5rem", maxWidth: "1200px", margin: "0 auto" }}>
@@ -41,7 +57,7 @@ export function AppraisalsClient() {
       </main>
     );
   }
-  if (!role || (role !== "STAFF" && role !== "ADMIN")) {
+  if (!role || (role !== "STAFF" && role !== "ADMIN" && role !== "GROUP_ADMIN")) {
     return (
       <main style={{ padding: "1.5rem", maxWidth: "1200px", margin: "0 auto" }}>
         <h1>Forbidden</h1>
@@ -67,6 +83,11 @@ export function AppraisalsClient() {
           New appraisal
         </Link>
       </div>
+      {newAlert && (
+        <div style={{ marginBottom: "0.9rem", padding: "0.65rem 0.8rem", border: "1px solid rgba(127,255,212,0.35)", background: "rgba(127,255,212,0.08)", borderRadius: 8 }}>
+          <p style={{ margin: 0, color: "#7fffd4" }}>{newAlert}</p>
+        </div>
+      )}
       {isLoading && <p style={{ color: "var(--text-muted)" }}>Loading…</p>}
       {err && <p style={{ color: "#f66" }}>{err}</p>}
       <div style={{ overflowX: "auto" }}>
@@ -77,6 +98,7 @@ export function AppraisalsClient() {
               <th>Customer</th>
               <th>Value</th>
               <th>Status</th>
+              <th>Deal Desk</th>
               <th>Date</th>
               <th />
             </tr>
@@ -88,9 +110,10 @@ export function AppraisalsClient() {
                 <td>{a.customer ? a.customer.name ?? a.customer.email ?? "—" : "—"}</td>
                 <td>{a.value != null ? `$${a.value.toLocaleString()}` : "—"}</td>
                 <td>{a.status}</td>
+                <td>{String(a.status).toUpperCase()}</td>
                 <td>{new Date(a.createdAt).toLocaleString()}</td>
                 <td>
-                  <Link href={`/appraisals/${a.id}`}>View</Link>
+                  <Link href={`/appraisals/${a.id}`}>Open deal desk</Link>
                 </td>
               </tr>
             ))}

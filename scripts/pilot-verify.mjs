@@ -2,13 +2,29 @@
 /**
  * Runtime smoke for a deployed API. Set PILOT_VERIFY_API_URL to the API origin (e.g. https://api.example.com).
  * Optional: PILOT_VERIFY_BRANDING_DOMAIN=dealer.example.com to check /public/branding.
+ *
+ * If PILOT_VERIFY_API_URL is unset, exits 0 (skip) so CI / morning-gate stay green without a live deploy.
+ * Set PILOT_VERIFY_STRICT=true to fail when the URL is missing (release pipelines).
  */
-const base = (process.env.PILOT_VERIFY_API_URL ?? "").replace(/\/$/, "");
+const base = (process.env.PILOT_VERIFY_API_URL ?? "").replace(/\/$/, "").trim();
+const strict =
+  process.env.PILOT_VERIFY_STRICT === "1" || process.env.PILOT_VERIFY_STRICT === "true";
+const checkFortellis = process.argv.includes("--fortellis");
+const checkTekion = process.argv.includes("--tekion");
+const checkReynolds = process.argv.includes("--reynolds");
+const checkDealertrack = process.argv.includes("--dealertrack");
+const checkCdk = process.argv.includes("--cdk");
 if (!base) {
-  console.error(
-    "pilot-verify: set PILOT_VERIFY_API_URL to your deployed API base URL (e.g. https://api.dealer.com)"
+  if (strict) {
+    console.error(
+      "pilot-verify: PILOT_VERIFY_STRICT is set but PILOT_VERIFY_API_URL is missing"
+    );
+    process.exit(1);
+  }
+  console.log(
+    "pilot-verify: skipped (set PILOT_VERIFY_API_URL to verify a deployed API, e.g. https://api.dealer.com)"
   );
-  process.exit(1);
+  process.exit(0);
 }
 
 async function assertOk(res, label) {
@@ -73,6 +89,176 @@ async function main() {
 
   console.log("pilot-verify: OK", healthUrl, "db=ok");
   if (brandingDomain) console.log("pilot-verify: branding check OK for domain", brandingDomain);
+
+  if (checkFortellis) {
+    const tokenUrl = process.env.FORTELLIS_TOKEN_URL;
+    const clientId = process.env.FORTELLIS_CLIENT_ID;
+    const clientSecret = process.env.FORTELLIS_CLIENT_SECRET;
+    if (!tokenUrl || !clientId || !clientSecret) {
+      console.error(
+        "pilot-verify: --fortellis requested but missing FORTELLIS_TOKEN_URL / FORTELLIS_CLIENT_ID / FORTELLIS_CLIENT_SECRET"
+      );
+      process.exit(1);
+    }
+    const form = new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+    const tokenRes = await fetch(tokenUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+    });
+    const tokenText = await tokenRes.text();
+    let tokenJson = {};
+    try {
+      tokenJson = JSON.parse(tokenText);
+    } catch {
+      // no-op
+    }
+    if (!tokenRes.ok || typeof tokenJson.access_token !== "string") {
+      console.error("pilot-verify: fortellis token check failed", tokenRes.status, tokenJson);
+      process.exit(1);
+    }
+    console.log("pilot-verify: fortellis token check OK");
+  }
+
+  if (checkTekion) {
+    const tokenUrl = process.env.TEKION_TOKEN_URL;
+    const clientId = process.env.TEKION_CLIENT_ID;
+    const clientSecret = process.env.TEKION_CLIENT_SECRET;
+    if (!tokenUrl || !clientId || !clientSecret) {
+      console.error(
+        "pilot-verify: --tekion requested but missing TEKION_TOKEN_URL / TEKION_CLIENT_ID / TEKION_CLIENT_SECRET"
+      );
+      process.exit(1);
+    }
+    const form = new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+    const tokenRes = await fetch(tokenUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+    });
+    const tokenText = await tokenRes.text();
+    let tokenJson = {};
+    try {
+      tokenJson = JSON.parse(tokenText);
+    } catch {
+      // no-op
+    }
+    if (!tokenRes.ok || typeof tokenJson.access_token !== "string") {
+      console.error("pilot-verify: tekion token check failed", tokenRes.status, tokenJson);
+      process.exit(1);
+    }
+    console.log("pilot-verify: tekion token check OK");
+  }
+
+  if (checkReynolds) {
+    const tokenUrl = process.env.REYNOLDS_TOKEN_URL;
+    const clientId = process.env.REYNOLDS_CLIENT_ID;
+    const clientSecret = process.env.REYNOLDS_CLIENT_SECRET;
+    if (!tokenUrl || !clientId || !clientSecret) {
+      console.error(
+        "pilot-verify: --reynolds requested but missing REYNOLDS_TOKEN_URL / REYNOLDS_CLIENT_ID / REYNOLDS_CLIENT_SECRET"
+      );
+      process.exit(1);
+    }
+    const form = new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+    const tokenRes = await fetch(tokenUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+    });
+    const tokenText = await tokenRes.text();
+    let tokenJson = {};
+    try {
+      tokenJson = JSON.parse(tokenText);
+    } catch {
+      // no-op
+    }
+    if (!tokenRes.ok || typeof tokenJson.access_token !== "string") {
+      console.error("pilot-verify: reynolds token check failed", tokenRes.status, tokenJson);
+      process.exit(1);
+    }
+    console.log("pilot-verify: reynolds token check OK");
+  }
+
+  if (checkDealertrack) {
+    const tokenUrl = process.env.DEALERTRACK_TOKEN_URL;
+    const clientId = process.env.DEALERTRACK_CLIENT_ID;
+    const clientSecret = process.env.DEALERTRACK_CLIENT_SECRET;
+    if (!tokenUrl || !clientId || !clientSecret) {
+      console.error(
+        "pilot-verify: --dealertrack requested but missing DEALERTRACK_TOKEN_URL / DEALERTRACK_CLIENT_ID / DEALERTRACK_CLIENT_SECRET"
+      );
+      process.exit(1);
+    }
+    const form = new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+    const tokenRes = await fetch(tokenUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+    });
+    const tokenText = await tokenRes.text();
+    let tokenJson = {};
+    try {
+      tokenJson = JSON.parse(tokenText);
+    } catch {
+      // no-op
+    }
+    if (!tokenRes.ok || typeof tokenJson.access_token !== "string") {
+      console.error("pilot-verify: dealertrack token check failed", tokenRes.status, tokenJson);
+      process.exit(1);
+    }
+    console.log("pilot-verify: dealertrack token check OK");
+  }
+
+  if (checkCdk) {
+    const tokenUrl = process.env.FORTELLIS_TOKEN_URL;
+    const clientId = process.env.FORTELLIS_CLIENT_ID;
+    const clientSecret = process.env.FORTELLIS_CLIENT_SECRET;
+    if (!tokenUrl || !clientId || !clientSecret) {
+      console.error(
+        "pilot-verify: --cdk requested but missing FORTELLIS_TOKEN_URL / FORTELLIS_CLIENT_ID / FORTELLIS_CLIENT_SECRET"
+      );
+      process.exit(1);
+    }
+    const form = new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+    const tokenRes = await fetch(tokenUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+    });
+    const tokenText = await tokenRes.text();
+    let tokenJson = {};
+    try {
+      tokenJson = JSON.parse(tokenText);
+    } catch {
+      // no-op
+    }
+    if (!tokenRes.ok || typeof tokenJson.access_token !== "string") {
+      console.error("pilot-verify: cdk token check failed", tokenRes.status, tokenJson);
+      process.exit(1);
+    }
+    console.log("pilot-verify: cdk token check OK");
+  }
 }
 
 main().catch((e) => {

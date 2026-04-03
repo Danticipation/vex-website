@@ -1,6 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getOrSetTenantJson } from "./cache.js";
+import { requireEnv } from "./env.js";
+
+requireEnv(["DATABASE_URL"], "prisma tenant bootstrap");
 
 type TenantContext = { tenantId: string };
 

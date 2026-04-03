@@ -38,6 +38,11 @@ jobs:
           cache: pnpm
       - name: Install
         run: pnpm install --frozen-lockfile
+      - name: Turbo Remote Cache
+        uses: turborepo/action@v2
+        with:
+          token: ${{ secrets.TURBO_TOKEN }}
+          team: ${{ secrets.TURBO_TEAM }}
       - name: Prisma generate
         run: pnpm --filter @vex/api run db:generate
       - name: Migrate (API E2E prerequisite)
@@ -46,7 +51,10 @@ jobs:
       - name: Security scan
         run: pnpm audit --prod
       - name: Build
-        run: pnpm -w turbo run build
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+        run: pnpm -w turbo run build --filter=[HEAD^1] --concurrency=6
       - name: Install Playwright browsers
         run: pnpm --filter @vex/web exec playwright install --with-deps chromium
       - name: Web e2e

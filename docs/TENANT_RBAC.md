@@ -3,8 +3,10 @@
 ## Tenant isolation
 
 - **Prisma:** `runWithTenant` + `$use` middleware on `prisma` (`lib/tenant.ts`). The **`Tenant` model is exempt** from auto-scoping — `tenant.findMany()` without a `where` clause can return **all** tenants. Call sites must use `where: { id: req.tenantId }` (or `findFirst`) whenever the caller is a normal tenant-scoped request.
+- **Route wrapper:** `tenantMiddleware` delegates to `withTenantRequestContext` (`lib/tenantScope.ts`), so every authenticated route executes inside one ALS tenant scope automatically.
 - **Fixed leak class (2026-04):** `adminController`, `capital` raise package, `scaling` overview, `liquidity` / `forecasting` helpers previously aggregated **every** tenant; they are now **scoped to `req.tenantId`** (or `tenantId` argument). Platform-wide admin, if needed later, should use an explicit `basePrisma` + separate auth (e.g. env-gated operator role), not tenant JWTs.
 - **Health:** `GET /health` uses **`healthPrisma`** only — no tenant ALS (see `ENGINEERING_REALITY.md`).
+- **DB safety net (ops-applied):** `apps/api/prisma/sql/tenant_rls.sql` provides optional Postgres RLS policies for hot tenant tables via `app.current_tenant`.
 
 ## RBAC
 

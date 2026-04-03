@@ -7,6 +7,7 @@ import { sendLifecycleNotification } from "../lib/notify.js";
 import { ValuationService } from "../lib/valuation.js";
 import { enqueueAppraisalPdfGenerate } from "../lib/queue.js";
 import { isDealerStaffRole } from "../lib/dealerRole.js";
+import { addAppraisalToInventory, updateDealDeskStatus } from "../services/dealDeskService.js";
 
 const valuationService = new ValuationService();
 
@@ -347,4 +348,87 @@ export async function valuate(req: Request, res: Response) {
     },
     error: null,
   });
+}
+
+export async function openDealDesk(req: Request, res: Response) {
+  const user = req.user;
+  if (!user) return res.status(401).json({ code: "UNAUTHORIZED", message: "Login required" });
+  if (!isDealerStaffRole(user.role)) {
+    return res.status(403).json({ code: "FORBIDDEN", message: "Staff or admin required" });
+  }
+  if (!req.tenantId) {
+    return res.status(401).json({ code: "UNAUTHORIZED", message: "Tenant context missing" });
+  }
+
+  const { id } = req.params;
+  const status = String(req.body?.status ?? "OPEN") as "OPEN" | "ACCEPTED" | "REJECTED" | "NEGOTIATING" | "CLOSED";
+  const note = typeof req.body?.note === "string" ? req.body.note : null;
+  try {
+    const result = await updateDealDeskStatus(prisma, {
+      tenantId: req.tenantId,
+      appraisalId: id,
+      status,
+      note,
+      actorUserId: user.userId,
+    });
+
+    return res.status(201).json({
+      data: {
+        appraisalId: id,
+        dealDesk: {
+          status: result.status,
+          note: result.note,
+          inventoryId: result.inventoryId,
+          orderId: result.orderId,
+          updatedBy: user.userId,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      error: null,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "APPRAISAL_NOT_FOUND") {
+      return res.status(404).json({ code: "NOT_FOUND", message: "Appraisal not found" });
+    }
+    throw error;
+  }
+}
+
+export async function addToInventoryFromAppraisal(req: Request, res: Response) {
+  const user = req.user;
+  if (!user) return res.status(401).json({ code: "UNAUTHORIZED", message: "Login required" });
+  if (!isDealerStaffRole(user.role)) {
+    return res.status(403).json({ code: "FORBIDDEN", message: "Staff or admin required" });
+  }
+  if (!req.tenantId) {
+    return res.status(401).json({ code: "UNAUTHORIZED", message: "Tenant context missing" });
+  }
+
+  const { id } = req.params;
+  const listPriceRaw = req.body?.listPrice;
+  const location = typeof req.body?.location === "string" ? req.body.location : null;
+  const listPrice = typeof listPriceRaw === "number" ? listPriceRaw : undefined;
+
+  try {
+    const inventory = await addAppraisalToInventory(prisma, {
+      tenantId: req.tenantId,
+      appraisalId: id,
+      actorUserId: user.userId,
+      listPrice,
+      location,
+    });
+    return res.status(201).json({
+      data: {
+        appraisalId: id,
+        inventoryId: inventory.id,
+        source: inventory.source,
+      },
+      error: null,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "APPRAISAL_NOT_FOUND") {
+      return res.status(404).json({ code: "NOT_FOUND", message: "Appraisal not found" });
+    }
+    throw error;
+  }
 }

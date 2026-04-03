@@ -7,5 +7,12 @@ dist
 *.log
 .DS_Store
 .turbo
+.prisma
 .pnpm-store
 .cursor/worktrees.json
+
+# Playwright / web E2E
+apps/web/test-results/
+apps/web/playwright-report/
+playwright-report/
+test-results/

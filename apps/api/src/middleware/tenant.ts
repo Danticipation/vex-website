@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { authJwtSchema } from "@vex/shared";
 import { requireAuth } from "./auth.js";
 import { systemPrisma } from "../lib/tenant.js";
-import { withTenantRequestContext } from "../lib/tenantScope.js";
+import { withTenantRequestContext } from "./tenantScope.js";
 
 declare global {
   namespace Express {
@@ -18,6 +18,11 @@ export async function tenantMiddleware(req: Request, res: Response, next: NextFu
   if (req.path === "/metrics") return next();
   if (req.path.startsWith("/webhooks/")) return next();
   if (req.path.startsWith("/stripe/webhook")) return next();
+  if (req.path.startsWith("/integrations/webhooks/fortellis")) return next();
+  if (req.path.startsWith("/integrations/webhooks/tekion")) return next();
+  if (req.path.startsWith("/integrations/webhooks/reynolds")) return next();
+  if (req.path.startsWith("/integrations/webhooks/dealertrack")) return next();
+  if (req.path.startsWith("/integrations/webhooks/cdk-neuron")) return next();
   if (req.path === "/pricing/plans" && req.method === "GET") return next();
   if (req.path === "/auth/register" || req.path === "/auth/login" || req.path === "/auth/refresh") return next();
   if (req.path.startsWith("/public/")) return next();

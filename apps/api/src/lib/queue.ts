@@ -5,6 +5,11 @@ import { prisma } from "./tenant.js";
 import { provisionTenantDemo } from "./provision.js";
 import { sendLifecycleNotification } from "./notify.js";
 import { PilotAnalyticsService } from "./iteration.js";
+import { fortellisRequest } from "./fortellis.js";
+import { cdkDriveRequest } from "./cdk.js";
+import { tekionRequest } from "./tekion.js";
+import { reynoldsRequest } from "./reynolds.js";
+import { dealertrackRequest } from "./dealertrack.js";
 
 const QUEUE_NAME = "vex-main";
 const pilotAnalyticsService = new PilotAnalyticsService();
@@ -86,6 +91,151 @@ export async function enqueueDmsSync(data: { tenantId: string; vendor: string; m
   const q = getQueue();
   if (!q) return;
   await q.add("dms-sync", data, { jobId: `dms:${data.tenantId}:${data.vendor}:${data.mode ?? "delta"}` });
+}
+
+export async function enqueueFortellisInventorySync(data: {
+  tenantId: string;
+  externalId?: string;
+  vin?: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "fortellis-inventory-sync",
+    data,
+    { jobId: `fortellis-inventory-sync:${data.tenantId}:${data.vin ?? data.externalId ?? "unknown"}` }
+  );
+}
+
+export async function enqueueFortellisAppraisalPush(data: {
+  tenantId: string;
+  externalId: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "fortellis-appraisal-push",
+    data,
+    { jobId: `fortellis-appraisal-push:${data.tenantId}:${data.externalId}` }
+  );
+}
+
+export async function enqueueCdkInventorySync(data: {
+  tenantId: string;
+  externalId: string;
+  vin?: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "cdk-inventory-sync",
+    data,
+    { jobId: `cdk-inventory-sync:${data.tenantId}:${data.vin ?? data.externalId}` }
+  );
+}
+
+export async function enqueueCdkValuationPush(data: {
+  tenantId: string;
+  externalId: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "cdk-valuation-push",
+    data,
+    { jobId: `cdk-valuation-push:${data.tenantId}:${data.externalId}` }
+  );
+}
+
+export async function enqueueTekionInventorySync(data: {
+  tenantId: string;
+  externalId?: string;
+  vin?: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "tekion-inventory-sync",
+    data,
+    { jobId: `tekion-inventory-sync:${data.tenantId}:${data.vin ?? data.externalId ?? "unknown"}` }
+  );
+}
+
+export async function enqueueTekionAppraisalPush(data: {
+  tenantId: string;
+  externalId: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "tekion-appraisal-push",
+    data,
+    { jobId: `tekion-appraisal-push:${data.tenantId}:${data.externalId}` }
+  );
+}
+
+export async function enqueueReynoldsInventorySync(data: {
+  tenantId: string;
+  externalId?: string;
+  vin?: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "reynolds-inventory-sync",
+    data,
+    { jobId: `reynolds-inventory-sync:${data.tenantId}:${data.vin ?? data.externalId ?? "unknown"}` }
+  );
+}
+
+export async function enqueueReynoldsAppraisalPush(data: {
+  tenantId: string;
+  externalId: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "reynolds-appraisal-push",
+    data,
+    { jobId: `reynolds-appraisal-push:${data.tenantId}:${data.externalId}` }
+  );
+}
+
+export async function enqueueDealertrackCreditAppSync(data: {
+  tenantId: string;
+  externalId: string;
+  vin?: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "dealertrack-credit-app-sync",
+    data,
+    { jobId: `dealertrack-credit-app-sync:${data.tenantId}:${data.vin ?? data.externalId}` }
+  );
+}
+
+export async function enqueueDealertrackFinanceQuoteSync(data: {
+  tenantId: string;
+  externalId: string;
+  payload: Record<string, unknown>;
+}): Promise<void> {
+  const q = getQueue();
+  if (!q) return;
+  await q.add(
+    "dealertrack-finance-quote-sync",
+    data,
+    { jobId: `dealertrack-finance-quote-sync:${data.tenantId}:${data.externalId}` }
+  );
 }
 
 export async function enqueueRetentionScore(data: { tenantId: string }): Promise<void> {
@@ -206,6 +356,424 @@ async function processJob(job: Job): Promise<void> {
           tenantId,
           type: "job.dms_sync",
           payload: { vendor: String(data.vendor ?? ""), mode: String(data.mode ?? "delta") },
+        },
+      });
+      return;
+    }
+    if (name === "fortellis-inventory-sync") {
+      const externalId = String(data.externalId ?? data.vin ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await fortellisRequest("POST", process.env.FORTELLIS_INVENTORY_SYNC_ENDPOINT ?? "/cdkdrive/inventory/v1/vehicles", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "vehicle",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "FORTELLIS",
+          entityType: "vehicle",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "FORTELLIS",
+          eventType: "inventory.sync",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "fortellis-appraisal-push") {
+      const externalId = String(data.externalId ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await fortellisRequest("POST", process.env.FORTELLIS_APPRAISAL_PUSH_ENDPOINT ?? "/cdkdrive/sales/v1/appraisals", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "appraisal",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "FORTELLIS",
+          entityType: "appraisal",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "FORTELLIS",
+          eventType: "appraisal.push",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "cdk-inventory-sync") {
+      const externalId = String(data.externalId ?? data.vin ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await cdkDriveRequest("POST", process.env.CDK_INVENTORY_SYNC_ENDPOINT ?? "/inventory/v1/vehicles", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "cdk_vehicle",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "CDK",
+          entityType: "cdk_vehicle",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "CDK",
+          eventType: "cdk.drive.inventory.sync",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "cdk-valuation-push") {
+      const externalId = String(data.externalId ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await cdkDriveRequest("POST", process.env.CDK_VALUATION_PUSH_ENDPOINT ?? "/sales/v1/valuations", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "cdk_valuation",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "CDK",
+          entityType: "cdk_valuation",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "CDK",
+          eventType: "cdk.drive.valuation.push",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "tekion-inventory-sync") {
+      const externalId = String(data.externalId ?? data.vin ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await tekionRequest("POST", process.env.TEKION_INVENTORY_SYNC_ENDPOINT ?? "/arc/inventory/v1/vehicles", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "vehicle",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "TEKION",
+          entityType: "vehicle",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "TEKION",
+          eventType: "inventory.sync",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "tekion-appraisal-push") {
+      const externalId = String(data.externalId ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await tekionRequest("POST", process.env.TEKION_APPRAISAL_PUSH_ENDPOINT ?? "/arc/sales/v1/appraisals", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "appraisal",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "TEKION",
+          entityType: "appraisal",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "TEKION",
+          eventType: "appraisal.push",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "reynolds-inventory-sync") {
+      const externalId = String(data.externalId ?? data.vin ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await reynoldsRequest("POST", process.env.REYNOLDS_INVENTORY_SYNC_ENDPOINT ?? "/spark/inventory/v1/vehicles", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "vehicle",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "REYNOLDS",
+          entityType: "vehicle",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "REYNOLDS",
+          eventType: "inventory.sync",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "reynolds-appraisal-push") {
+      const externalId = String(data.externalId ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await reynoldsRequest("POST", process.env.REYNOLDS_APPRAISAL_PUSH_ENDPOINT ?? "/spark/sales/v1/appraisals", payload);
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "appraisal",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "REYNOLDS",
+          entityType: "appraisal",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "REYNOLDS",
+          eventType: "appraisal.push",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "dealertrack-credit-app-sync") {
+      const externalId = String(data.externalId ?? data.vin ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await dealertrackRequest(
+        "POST",
+        process.env.DEALERTRACK_CREDIT_APP_SYNC_ENDPOINT ?? "/digital-retailing/v1/credit-applications",
+        payload
+      );
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "fi_credit_application",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "DEALERTRACK",
+          entityType: "fi_credit_application",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "DEALERTRACK",
+          eventType: "fi.credit_application.sync",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
+        },
+      });
+      return;
+    }
+    if (name === "dealertrack-finance-quote-sync") {
+      const externalId = String(data.externalId ?? "");
+      const payload = (data.payload ?? {}) as Record<string, unknown>;
+      await dealertrackRequest(
+        "POST",
+        process.env.DEALERTRACK_FINANCE_QUOTE_SYNC_ENDPOINT ?? "/digital-retailing/v1/finance-quotes",
+        payload
+      );
+      await prisma.externalSync.upsert({
+        where: {
+          tenantId_externalId_entityType: {
+            tenantId,
+            externalId,
+            entityType: "fi_finance_quote",
+          },
+        },
+        create: {
+          tenantId,
+          vendor: "DEALERTRACK",
+          entityType: "fi_finance_quote",
+          externalId,
+          direction: "OUTBOUND",
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+        update: {
+          status: "SUCCESS",
+          payload: payload as unknown as object,
+          syncedAt: new Date(),
+        },
+      });
+      await prisma.integrationLog.create({
+        data: {
+          tenantId,
+          vendor: "DEALERTRACK",
+          eventType: "fi.finance_quote.sync",
+          externalId,
+          status: "PROCESSED",
+          payload: payload as unknown as object,
+          processedAt: new Date(),
         },
       });
       return;

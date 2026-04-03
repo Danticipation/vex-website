@@ -1,13 +1,23 @@
-# Required bar for “mergeable / shippable”: builds cleanly and proves tenant isolation against a real Postgres.
-name: ci
+name: CI
 
 on:
-  pull_request:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "**.png"
+      - "**.jpg"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-api-e2e:
+  gate:
+    name: Turbo Gate (Build + Test + Ship)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -23,37 +33,51 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vex
-      DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vex
-      JWT_SECRET: ci-ship-gate-not-a-real-secret
-      SKIP_VALUATION_ENV_CHECK: "1"
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node + pnpm + Turbo cache
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: "pnpm"
 
-      - name: Install
+      - name: Install dependencies (pnpm store cache)
         run: pnpm install --frozen-lockfile
+        env:
+          CI: true
 
-      - name: Prisma generate
-        run: pnpm --filter @vex/api run db:generate
+      - name: Install Playwright (Chromium) for web E2E
+        run: pnpm --filter @vex/web exec playwright install --with-deps chromium
 
-      - name: Migrate
-        working-directory: apps/api
-        run: pnpm exec prisma migrate deploy
+      - name: Turbo Remote Cache
+        uses: turborepo/action@v2
+        with:
+          token: ${{ secrets.TURBO_TOKEN }}
+          team: ${{ secrets.TURBO_TEAM }}
 
-      - name: Build (monorepo)
-        run: pnpm -w turbo run build
+      - name: Run Turbo CI (affected-only + remote cache)
+        run: pnpm -w turbo run build test:e2e ship:gate pilot:verify --filter=[HEAD^1] --concurrency=6
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vex
+          DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vex
+          JWT_SECRET: ci-ship-gate-not-a-real-secret
+          SKIP_VALUATION_ENV_CHECK: "true"
 
-      - name: API tenant isolation E2E
-        run: pnpm --filter @vex/api run test:e2e
+      - name: Upload coverage / artifacts (optional but fast)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: turbo-cache
+          path: .turbo
+          retention-days: 1

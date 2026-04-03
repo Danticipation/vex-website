@@ -197,7 +197,7 @@ export async function createOrder(
 }
 
 export async function listAppraisals(token: string) {
-  const res = await fetch(`${API_BASE}/appraisals`, { headers: authHeaders(token) });
+  const res = await fetch(`${API_BASE}/dealer/appraisals`, { headers: authHeaders(token) });
   if (!res.ok) throw new Error("Failed to load appraisals");
   return unwrap(await res.json()) as { items: AppraisalOutput[]; total: number; limit: number; offset: number };
 }
@@ -213,7 +213,7 @@ export async function createAppraisalRecord(token: string, data: CreateAppraisal
 }
 
 export async function getAppraisalById(token: string, id: string) {
-  const res = await fetch(`${API_BASE}/appraisals/${id}`, { headers: authHeaders(token) });
+  const res = await fetch(`${API_BASE}/dealer/appraisals/${id}`, { headers: authHeaders(token) });
   if (!res.ok) throw new Error("Failed to load appraisal");
   return unwrap(await res.json()) as AppraisalOutput;
 }
@@ -226,6 +226,93 @@ export async function updateAppraisalRecord(token: string, id: string, data: Upd
   });
   if (!res.ok) throw new Error("Failed to update appraisal");
   return unwrap(await res.json()) as AppraisalOutput;
+}
+
+export async function openAppraisalDealDesk(
+  token: string,
+  id: string,
+  data: { status: "OPEN" | "ACCEPTED" | "REJECTED" | "NEGOTIATING" | "CLOSED"; note?: string }
+) {
+  const res = await fetch(`${API_BASE}/dealer/appraisals/${id}/status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(typeof err.message === "string" ? err.message : "Failed to update deal desk");
+  }
+  return unwrap(await res.json());
+}
+
+export async function addAppraisalToInventory(
+  token: string,
+  id: string,
+  data?: { listPrice?: number; location?: string }
+) {
+  const res = await fetch(`${API_BASE}/dealer/appraisals/${id}/add-to-inventory`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(data ?? {}),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(typeof err.message === "string" ? err.message : "Failed to add appraisal to inventory");
+  }
+  return unwrap(await res.json()) as { appraisalId: string; inventoryId: string; source: string };
+}
+
+export async function createErpOrder(
+  token: string,
+  data: { appraisalId: string; listPrice?: number; location?: string }
+) {
+  const res = await fetch(`${API_BASE}/erp/orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(typeof err.message === "string" ? err.message : "Failed to create ERP order");
+  }
+  return unwrap(await res.json()) as {
+    order: { id: string; status: string; totalAmount: number | null; createdAt: string };
+    invoice: { invoiceNumber: string; orderId: string; amountUsd: number | null; issuedAt: string };
+    inventoryId: string;
+  };
+}
+
+export async function listErpOrders(token: string) {
+  const res = await fetch(`${API_BASE}/erp/orders`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load ERP orders");
+  return unwrap(await res.json()) as {
+    items: Array<{
+      id: string;
+      appraisalId: string;
+      inventoryId: string | null;
+      vehicleId: string | null;
+      status: string;
+      totalAmount: number | null;
+      createdAt: string;
+    }>;
+    total: number;
+  };
+}
+
+export async function listErpInvoices(token: string) {
+  const res = await fetch(`${API_BASE}/erp/invoices`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load ERP invoices");
+  return unwrap(await res.json()) as {
+    items: Array<{
+      invoiceNumber: string;
+      orderId: string;
+      appraisalId: string;
+      status: string;
+      amountUsd: number | null;
+      issuedAt: string;
+    }>;
+    total: number;
+  };
 }
 
 export async function deleteAppraisalRecord(token: string, id: string) {

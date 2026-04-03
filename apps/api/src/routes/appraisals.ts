@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { z } from "zod";
 import { validateBody } from "../middleware/validate.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/requireRole.js";
@@ -6,6 +7,14 @@ import { createAppraisalSchema, updateAppraisalSchema, ValuationInputSchema } fr
 import * as appraisalsController from "../controllers/appraisalsController.js";
 
 export const appraisalsRouter: Router = Router();
+const dealDeskSchema = z.object({
+  status: z.enum(["OPEN", "ACCEPTED", "REJECTED", "NEGOTIATING", "CLOSED"]).default("OPEN"),
+  note: z.string().max(2000).optional(),
+});
+const addToInventorySchema = z.object({
+  listPrice: z.number().positive().optional(),
+  location: z.string().max(200).optional(),
+});
 
 appraisalsRouter.get("/", requireAuth, requireRole("STAFF", "ADMIN", "GROUP_ADMIN"), appraisalsController.list);
 appraisalsRouter.post(
@@ -32,3 +41,17 @@ appraisalsRouter.put(
 );
 appraisalsRouter.delete("/:id", requireAuth, requireRole("STAFF", "ADMIN", "GROUP_ADMIN"), appraisalsController.remove);
 appraisalsRouter.get("/:id", requireAuth, requireRole("STAFF", "ADMIN", "GROUP_ADMIN"), appraisalsController.getById);
+appraisalsRouter.post(
+  "/:id/deal-desk",
+  requireAuth,
+  requireRole("STAFF", "ADMIN", "GROUP_ADMIN"),
+  validateBody(dealDeskSchema),
+  appraisalsController.openDealDesk
+);
+appraisalsRouter.post(
+  "/:id/add-to-inventory",
+  requireAuth,
+  requireRole("STAFF", "ADMIN", "GROUP_ADMIN"),
+  validateBody(addToInventorySchema),
+  appraisalsController.addToInventoryFromAppraisal
+);

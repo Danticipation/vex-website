@@ -1,5 +1,26 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "package.json",
+    ".github/workflows/**"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "DIRECT_DATABASE_URL",
+    "READ_REPLICA_URLS",
+    "JWT_SECRET",
+    "REDIS_URL",
+    "CORS_ORIGIN",
+    "SKIP_VALUATION_ENV_CHECK"
+  ],
+  "globalPassThroughEnv": [
+    "NEXT_PUBLIC_*",
+    "VALUATION_*",
+    "STRIPE_*"
+  ],
   "tasks": {
     "build": {
       "dependsOn": [
@@ -7,13 +28,106 @@
       ],
       "outputs": [
         ".next/**",
-        "dist/**"
+        "dist/**",
+        ".prisma/**",
+        ".turbo/**"
+      ],
+      "inputs": [
+        "**/*.{ts,tsx,js,jsx,mjs,cjs,json,prisma,sql,mdx}",
+        "apps/**/next.config.*",
+        "apps/**/tailwind.config.*",
+        "apps/**/postcss.config.*",
+        "packages/**/tsconfig.json",
+        "packages/shared/**",
+        "packages/ui/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_SITE_URL",
+        "NEXT_PUBLIC_WEB_URL",
+        "NEXT_PUBLIC_HERO_VIDEO_URL",
+        "VALUATION_*",
+        "STRIPE_SECRET_KEY"
       ]
     },
-    "lint": {},
+    "db:generate": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".prisma/**"
+      ],
+      "inputs": [
+        "apps/api/prisma/schema.prisma",
+        "apps/api/prisma/sql/**",
+        "apps/api/prisma/migrations/**"
+      ],
+      "env": [
+        "DATABASE_URL",
+        "DIRECT_DATABASE_URL"
+      ]
+    },
+    "test:e2e": {
+      "dependsOn": [
+        "build",
+        "db:generate"
+      ],
+      "outputs": [],
+      "inputs": [
+        "**/*.{test,spec,e2e}.{ts,tsx}",
+        "apps/api/prisma/schema.prisma"
+      ],
+      "env": [
+        "DATABASE_URL",
+        "SKIP_VALUATION_ENV_CHECK"
+      ]
+    },
+    "ship:gate": {
+      "dependsOn": [
+        "build",
+        "test:e2e"
+      ],
+      "outputs": [],
+      "cache": true,
+      "env": [
+        "DATABASE_URL",
+        "PILOT_VERIFY_API_URL",
+        "PILOT_VERIFY_STRICT"
+      ]
+    },
+    "pilot:verify": {
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [],
+      "cache": true,
+      "env": [
+        "PILOT_VERIFY_API_URL",
+        "PILOT_VERIFY_STRICT",
+        "PILOT_VERIFY_BRANDING_DOMAIN",
+        "FORTELLIS_TOKEN_URL",
+        "FORTELLIS_CLIENT_ID",
+        "FORTELLIS_CLIENT_SECRET",
+        "TEKION_TOKEN_URL",
+        "TEKION_CLIENT_ID",
+        "TEKION_CLIENT_SECRET",
+        "REYNOLDS_TOKEN_URL",
+        "REYNOLDS_CLIENT_ID",
+        "REYNOLDS_CLIENT_SECRET",
+        "DEALERTRACK_TOKEN_URL",
+        "DEALERTRACK_CLIENT_ID",
+        "DEALERTRACK_CLIENT_SECRET"
+      ]
+    },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "lint": {
+      "outputs": [],
+      "inputs": [
+        "**/*.{ts,tsx,js,jsx}"
+      ]
     }
   }
 }

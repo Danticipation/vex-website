@@ -57,15 +57,25 @@ Use this file as the primary command center for execution.
 
 ## Day 1 Execution Checklist
 
-- [x] Run gate commands in order (log 2026-04-02, this workspace):
+- [x] Run gate commands in order (log 2026-04-03, this workspace):
   - [x] `pnpm -w turbo run build` — green (all 5 packages).
   - [x] `pnpm --filter @vex/api run test:e2e` — green after E2E scripts use `systemPrisma` + scoped `prisma` from `lib/tenant.ts` (raw `PrismaClient()` had no `$use` tenant merge).
-  - [ ] `pnpm run ship:gate` — red here with `P1000` on `prisma migrate deploy` (Postgres at `127.0.0.1:5432` rejected credentials). Re-run with valid `DATABASE_URL` matching your DB (e.g. `deploy/docker-compose.yml`).
-  - [ ] `PILOT_VERIFY_API_URL=https://your-staging-api pnpm run pilot:verify` — red: placeholder host `your-staging-api` → `ENOTFOUND`. Re-run with a real deployed API origin.
-- [ ] If any command is red, fix gate blockers before feature work.
+  - [x] `DATABASE_URL=postgresql://vex:vex@127.0.0.1:5432/vex DIRECT_DATABASE_URL=postgresql://vex:vex@127.0.0.1:5432/vex pnpm run ship:gate` — green after Prisma migration ledger recovery (`migrate resolve`) and clean `migrate status`.
+  - [x] `PILOT_VERIFY_API_URL=http://127.0.0.1:3001 pnpm run pilot:verify` — green (`pilot-verify: OK ... db=ok`).
+- [x] If any command is red, fix gate blockers before feature work.
 - [ ] Trust layer tasks:
   - [x] AsyncLocalStorage / tenant context wrapper in `apps/api/src/lib/tenantScope.ts` (delegates to `runWithTenant` / `getTenantId`).
   - [ ] Add route-level RBAC guard coverage using `docs/TENANT_RBAC.md` (ongoing audit; shim in `apps/api/src/middleware/rbac.ts`).
   - [ ] Ensure Prisma queries execute through tenant-scoped client paths (controllers + scripts; E2E now asserts scoped reads).
 - [x] Pass/Fail target: `pnpm --filter @vex/api run test:e2e` green with zero cross-tenant leakage (appraisal + inventory isolation scripts).
 - [ ] Pilot outreach: send one-line offer to 3 Cavin contacts and log status in this file.
+
+## Realtime Scaling Sprint (Kickoff)
+
+- [x] Add API WebSocket runtime at `WS /ws/auctions?token=<jwt>` with JWT tenant auth.
+- [x] Add Redis Streams fan-out foundation for cross-instance room broadcasts (`vex:auction:{tenant}:{room}:events`).
+- [x] Add 15s heartbeat/ping-pong and stale-connection termination.
+- [x] Add premium-first broadcast ordering (STAFF/ADMIN/GROUP_ADMIN before CUSTOMER).
+- [x] Add Prometheus telemetry: `vex_ws_active_connections`, `vex_auction_broadcast_latency_ms`, `vex_ws_messages_total`.
+- [ ] Run horizontal proof with 2+ API pods + Redis and capture latency/throughput report.
+- [ ] Wire web live salon UI (`Live Bidder Count` / energy meter / bid-reactive visuals) to WS stream.

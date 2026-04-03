@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createInventorySchema = z.object({
-  source: z.enum(["COMPANY", "PRIVATE_SELLER"]),
+  source: z.enum(["COMPANY", "PRIVATE_SELLER", "APPRAISAL"]),
   vehicleId: z.string().min(1),
   location: z.string().optional(),
   listPrice: z.number().positive(),

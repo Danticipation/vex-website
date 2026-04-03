@@ -4,6 +4,7 @@ import { metricsRegistry } from "./lib/metrics.js";
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { metricsHttpMiddleware } from "./middleware/metricsHttp.js";
 import { tenantRateLimitMiddleware } from "./middleware/rateLimitTenant.js";
+import { rbacAnyAuthenticated } from "./middleware/rbac.js";
 import { healthRouter } from "./routes/health.js";
 import { authRouter } from "./routes/auth.js";
 import { vehiclesRouter } from "./routes/vehicles.js";
@@ -46,11 +47,29 @@ import { forecastingRouter } from "./routes/forecasting.js";
 import { governanceRouter } from "./routes/governance.js";
 import { accountingRouter } from "./routes/accounting.js";
 import { liquidityRouter } from "./routes/liquidity.js";
+import { billingRouter } from "./routes/billing.js";
+import { dealerRouter } from "./routes/dealer.js";
+import { integrationsInventoryRouter } from "./routes/integrations/inventory.js";
+import { fortellisWebhookRouter } from "./routes/integrations/webhooks/fortellis.js";
+import { tekionInventoryRouter } from "./routes/integrations/tekion-inventory.js";
+import { tekionWebhookRouter } from "./routes/integrations/webhooks/tekion.js";
+import { reynoldsInventoryRouter } from "./routes/integrations/reynolds-inventory.js";
+import { reynoldsWebhookRouter } from "./routes/integrations/webhooks/reynolds.js";
+import { erpRouter } from "./routes/erp.js";
+import { dealertrackFiRouter } from "./routes/integrations/dealertrack-fi.js";
+import { dealertrackWebhookRouter } from "./routes/integrations/webhooks/dealertrack.js";
+import { cdkDriveRouter } from "./routes/integrations/cdk-drive.js";
+import { cdkNeuronWebhookRouter } from "./routes/integrations/webhooks/cdk-neuron.js";
 
 const app: Express = express();
 
 // Stripe needs raw body for signature verification.
 app.use("/stripe/webhook", express.raw({ type: "application/json" }));
+app.use("/integrations/webhooks/fortellis", express.raw({ type: "application/json" }));
+app.use("/integrations/webhooks/tekion", express.raw({ type: "application/json" }));
+app.use("/integrations/webhooks/reynolds", express.raw({ type: "application/json" }));
+app.use("/integrations/webhooks/dealertrack", express.raw({ type: "application/json" }));
+app.use("/integrations/webhooks/cdk-neuron", express.raw({ type: "application/json" }));
 
 app.use(requestContextMiddleware);
 app.use(express.json());
@@ -104,6 +123,27 @@ app.get("/", (_req, res) => {
 });
 
 app.use(tenantMiddleware);
+app.use((req, res, next) => {
+  if (
+    req.path === "/health" ||
+    req.path === "/" ||
+    req.path === "/metrics" ||
+    req.path.startsWith("/public/") ||
+    req.path.startsWith("/onboard/") ||
+    req.path.startsWith("/pilot/") ||
+    req.path.startsWith("/stripe/webhook") ||
+    req.path.startsWith("/integrations/webhooks/fortellis") ||
+    req.path.startsWith("/integrations/webhooks/tekion") ||
+    req.path.startsWith("/integrations/webhooks/reynolds") ||
+    req.path.startsWith("/integrations/webhooks/dealertrack") ||
+    req.path.startsWith("/integrations/webhooks/cdk-neuron") ||
+    req.path.startsWith("/webhooks/") ||
+    (req.path === "/pricing/plans" && req.method === "GET")
+  ) {
+    return next();
+  }
+  return rbacAnyAuthenticated()(req, res, next);
+});
 app.use(metricsHttpMiddleware);
 app.use(tenantRateLimitMiddleware);
 
@@ -130,6 +170,19 @@ app.use("/customers", customersRouter);
 app.use("/webhooks", webhooksRouter);
 app.use("/stripe", stripeRouter);
 app.use("/pricing", pricingRouter);
+app.use("/billing", billingRouter);
+app.use("/dealer", dealerRouter);
+app.use("/integrations/inventory", integrationsInventoryRouter);
+app.use("/integrations/webhooks/fortellis", fortellisWebhookRouter);
+app.use("/integrations/tekion-inventory", tekionInventoryRouter);
+app.use("/integrations/webhooks/tekion", tekionWebhookRouter);
+app.use("/integrations/reynolds-inventory", reynoldsInventoryRouter);
+app.use("/integrations/webhooks/reynolds", reynoldsWebhookRouter);
+app.use("/integrations/dealertrack-fi", dealertrackFiRouter);
+app.use("/integrations/webhooks/dealertrack", dealertrackWebhookRouter);
+app.use("/integrations/cdk-drive", cdkDriveRouter);
+app.use("/integrations/webhooks/cdk-neuron", cdkNeuronWebhookRouter);
+app.use("/erp", erpRouter);
 app.use("/analytics", analyticsRouter);
 app.use("/admin", adminRouter);
 app.use("/referrals", referralRouter);

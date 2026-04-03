@@ -51,7 +51,7 @@
 
 .copyright {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: #b9b6af;
 }
 
 @media (max-width: 768px) {

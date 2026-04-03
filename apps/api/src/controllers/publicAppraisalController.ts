@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import type { QuickAppraisalInput } from "@vex/shared";
 import { prisma, runWithTenant, findTenantByCustomDomain, normalizeHost } from "../lib/tenant.js";
-import { estimateFromQuickInput } from "../lib/appraisalValuation.js";
 import { mapAppraisalToOutput } from "../lib/appraisalMapper.js";
+import { createPublicQuickAppraisal } from "../lib/appraisalService.js";
 
 async function resolvePublicTenantId(req: Request): Promise<string | null> {
   const q = req.query.tenantId;
@@ -28,39 +28,13 @@ export async function postQuickAppraisal(req: Request, res: Response) {
   }
 
   const body = req.body as QuickAppraisalInput;
-  const value = estimateFromQuickInput(body);
-  const notes = JSON.stringify({
-    make: body.make,
-    model: body.model,
-    year: body.year,
-    mileage: body.mileage,
-    condition: body.condition ?? null,
-    source: "quick_estimate",
-  });
-
-  const appraisal = await runWithTenant(tenantId, async () => {
-    const row = await prisma.appraisal.create({
-      data: {
-        tenantId,
-        value,
-        notes,
-        status: "completed",
-      },
-    });
-    await prisma.usageLog.create({
-      data: {
-        tenantId,
-        kind: "QUICK_APPRAISAL",
-        quantity: 1,
-        amountUsd: 0,
-        meta: { source: "quick_estimate", appraisalId: row.id },
-      },
-    });
-    return row;
-  });
+  const { appraisal, estimatedValue } = await createPublicQuickAppraisal(tenantId, body);
 
   return res.status(201).json({
-    data: mapAppraisalToOutput(appraisal),
+    data: {
+      ...mapAppraisalToOutput(appraisal),
+      estimatedValue,
+    },
     error: null,
   });
 }

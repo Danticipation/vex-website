@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { createInventoryItem, getInventory } from "@/lib/api";
+import { addAppraisalToInventory, createInventoryItem, getInventory, listAppraisals } from "@/lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL || "http://localhost:3000";
@@ -14,12 +14,26 @@ export default function InventoryPage() {
   const [vehicleId, setVehicleId] = useState("");
   const [listPrice, setListPrice] = useState("");
   const [location, setLocation] = useState("");
+  const [pendingAppraisals, setPendingAppraisals] = useState<
+    Array<{ id: string; value: number | null; status: string; createdAt: string }>
+  >([]);
+  const [actionMsg, setActionMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
     getInventory(token)
       .then(setData)
       .catch(() => setData({ items: [] }));
+    listAppraisals(token)
+      .then((r) => {
+        const items = (r.items ?? []) as Array<{ id: string; value: number | null; status: string; createdAt: string }>;
+        setPendingAppraisals(
+          items
+            .filter((a) => String(a.status).toLowerCase() !== "closed")
+            .slice(0, 8)
+        );
+      })
+      .catch(() => setPendingAppraisals([]));
   }, [token]);
 
   const items = (data?.items ?? []) as {
@@ -53,6 +67,21 @@ export default function InventoryPage() {
     refresh();
   };
 
+  const onAddFromAppraisal = async (appraisalId: string, appraisalValue: number | null) => {
+    if (!token) return;
+    setActionMsg(null);
+    try {
+      const result = await addAppraisalToInventory(token, appraisalId, {
+        listPrice: appraisalValue ?? undefined,
+      });
+      setActionMsg(`Added appraisal ${appraisalId.slice(0, 8)}… to inventory (${result.inventoryId.slice(0, 8)}…).`);
+      refresh();
+      setPendingAppraisals((prev) => prev.filter((a) => a.id !== appraisalId));
+    } catch (error) {
+      setActionMsg(error instanceof Error ? error.message : "Failed to add appraisal to inventory");
+    }
+  };
+
   return (
     <main className="crm-shell">
       <h1 className="crm-title" style={{ marginBottom: "0.4rem" }}>Inventory</h1>
@@ -65,6 +94,31 @@ export default function InventoryPage() {
         <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" />
         <button type="button" onClick={onCreate} className="crm-btn crm-btn-primary">Add</button>
       </div>
+      <div className="crm-panel" style={{ marginBottom: "1rem", padding: "0.8rem" }}>
+        <h2 style={{ margin: 0, marginBottom: "0.5rem", fontSize: "1rem" }}>Add from Appraisal</h2>
+        <p style={{ color: "var(--text-muted)", margin: 0, marginBottom: "0.7rem" }}>
+          Turn incoming trade-ins into inventory with one click.
+        </p>
+        <div style={{ display: "grid", gap: "0.45rem" }}>
+          {pendingAppraisals.map((a) => (
+            <div key={a.id} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "0.6rem", alignItems: "center" }}>
+              <span style={{ color: "var(--text-muted)" }}>
+                {a.id.slice(0, 8)}… · {String(a.status).toUpperCase()} · {a.value != null ? `$${a.value.toLocaleString("en-US")}` : "No value"}
+              </span>
+              <Link href={`/appraisals/${a.id}`}>Open</Link>
+              <button type="button" className="crm-btn" onClick={() => void onAddFromAppraisal(a.id, a.value)}>
+                Add to inventory
+              </button>
+            </div>
+          ))}
+          {pendingAppraisals.length === 0 && <span style={{ color: "var(--text-muted)" }}>No open appraisals to import.</span>}
+        </div>
+      </div>
+      {actionMsg && (
+        <p style={{ marginBottom: "0.7rem", color: actionMsg.toLowerCase().includes("failed") ? "#ff6b6b" : "#7fffd4" }}>
+          {actionMsg}
+        </p>
+      )}
       <div className="crm-panel" style={{ padding: "0.45rem 0.8rem 0.8rem" }}>
         <table>
           <thead>

@@ -675,3 +675,75 @@ export async function applyPilot(input: { name: string; email: string; dealershi
   if (!res.ok) throw new Error((body as { message?: string }).message || "Pilot application failed");
   return unwrap<{ leadId: string; status: string; autoApprove: boolean }>(body);
 }
+
+export async function onboardPilotSelfServe(input: {
+  email: string;
+  dealerName: string;
+  password: string;
+  tier: "STARTER" | "PRO" | "ENTERPRISE";
+  interval: "monthly" | "yearly";
+  captchaToken: string;
+  customDomain?: string;
+  enableDemoData: boolean;
+}): Promise<{
+  tenantId: string;
+  userId: string;
+  billingStatus: string;
+  checkout: { id: string; url: string | null } | null;
+}> {
+  const res = await fetch(`${API_BASE}/onboard/pilot`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((body as { message?: string }).message || "Pilot onboarding failed");
+  return unwrap(body);
+}
+
+export async function getBillingUsage(token: string): Promise<{
+  tenantId: string;
+  valuation: { dailyCapUsd: number; spentTodayUsd: number; remainingTodayUsd: number; callsToday: number };
+  usageMonth: { quantity: number; amountUsd: number };
+  overage: { amountUsdToday: number };
+}> {
+  const res = await fetch(`${API_BASE}/billing/usage`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error("Failed to load billing usage");
+  return unwrap(await res.json());
+}
+
+export async function inviteFirstCustomer(token: string, input: { name?: string; email: string; phone?: string }) {
+  const res = await fetch(`${API_BASE}/leads`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify({
+      source: "PILOT_DASHBOARD",
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      notes: "Invite first customer from dealer pilot dashboard",
+      status: "NEW",
+    }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((body as { message?: string }).message || "Failed to invite customer");
+  return unwrap(body);
+}
+
+export async function submitPilotNps(
+  token: string,
+  input: { rating: number; message: string; channel?: "in_app" | "email" | "sms" }
+) {
+  const res = await fetch(`${API_BASE}/success/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify({
+      rating: input.rating,
+      message: input.message,
+      channel: input.channel ?? "in_app",
+    }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((body as { message?: string }).message || "Failed to submit NPS");
+  return unwrap(body);
+}

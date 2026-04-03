@@ -10,13 +10,17 @@
     "dev:web": "pnpm --filter @vex/web dev",
     "dev:crm": "pnpm --filter @vex/crm dev",
     "build": "turbo run build",
+    "turbo:build": "turbo run build --filter=[HEAD^1]",
+    "turbo:ci": "turbo run build test:e2e ship:gate --filter=[HEAD^1] --concurrency=4",
+    "morning-gate": "pnpm turbo run build test:e2e ship:gate pilot:verify",
     "build:api": "pnpm --filter @vex/api build",
     "build:web": "pnpm --filter @vex/web build",
     "build:crm": "pnpm --filter @vex/crm build",
     "quality:web": "pnpm --filter @vex/web run test:e2e && pnpm --filter @vex/web run test:a11y && pnpm --filter @vex/web run test:lighthouse",
     "release:pilot-check": "pnpm -w turbo run build && pnpm --filter @vex/api run test:e2e",
     "ship:gate": "bash scripts/ship-gate.sh",
-    "pilot:verify": "node scripts/pilot-verify.mjs"
+    "pilot:verify": "node scripts/pilot-verify.mjs",
+    "smoke:cdk-drive": "pnpm --filter @vex/api run smoke:cdk-drive"
   },
   "engines": {
     "node": ">=20"
