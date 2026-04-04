@@ -15,8 +15,9 @@
   --accent-deep: #7a6230;
   --accent-glow: rgba(201, 169, 98, 0.45);
   --text-primary: #f4f2ed;
-  --text-secondary: #a8a6a1;
-  --text-muted: #5c5a56;
+  /* Default body copy: slightly brighter than before so long pages don’t read “washed out” */
+  --text-secondary: #bdbbb5;
+  --text-muted: #6a6863;
   --line: rgba(255, 255, 255, 0.06);
   --line-gold: rgba(201, 169, 98, 0.35);
   --accent-06: rgba(201, 169, 98, 0.06);

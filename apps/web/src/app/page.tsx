@@ -25,7 +25,7 @@ export default async function HomePage() {
     <>
       <Header />
       <AmbientIdentityModule />
-      <main id="main-content" className="home-main home-landing" aria-label="Vortex Exotic Exchange home">
+      <main id="main-content" className="home-main home-landing" aria-label="Vex dealer platform home">
         <DealerProgramHero />
         <AutonomousAgentsShowcase />
         <PlatformEnginesSection initial={platformEngines} />

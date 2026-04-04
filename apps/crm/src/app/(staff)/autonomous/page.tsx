@@ -1,9 +1,10 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { VexAnimatedMetric, VexPageHeader, VexPanel } from "@vex/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { submitAutonomousWorkflow } from "@/lib/api";
+import styles from "./page.module.css";
 
 const WORKFLOWS = [
   { value: "valuation_sweep" as const, label: "Valuation sweep" },
@@ -24,6 +25,13 @@ export default function AutonomousDashboardPage() {
   const [err, setErr] = useState<string | null>(null);
 
   const canSubmit = (role === "ADMIN" || role === "GROUP_ADMIN") && !!token;
+
+  const workflowLabel = useMemo(
+    () => WORKFLOWS.find((w) => w.value === workflowType)?.label ?? workflowType,
+    [workflowType]
+  );
+
+  const statusLabel = busy ? "Queueing…" : result ? "Last request sent" : "Ready";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,43 +63,40 @@ export default function AutonomousDashboardPage() {
 
   return (
     <main className="crm-shell">
-      <VexPageHeader title="Autonomous Dealer OS v2" subtitle="Monitor workflow orchestration, decision trails, and guardrails." />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: "0.85rem", marginBottom: "1rem" }}>
-        <VexAnimatedMetric label="Workflow" value="Daily valuation sweep" />
-        <VexAnimatedMetric label="Status" value="Running" />
-        <VexAnimatedMetric label="Circuit breaker" value="Healthy" />
-        <VexAnimatedMetric label="Parallel limit" value="50 / tenant" />
+      <VexPageHeader title="Autonomous Dealer OS v2" subtitle="Workflow orchestration, guardrails, and queue submission." />
+      <div className={styles.metrics}>
+        <VexAnimatedMetric label="Selected workflow" value={workflowLabel} />
+        <VexAnimatedMetric label="Queue status" value={statusLabel} />
+        <VexAnimatedMetric label="Parallel runs (max)" value={String(maxParallelRuns)} />
+        <VexAnimatedMetric label="Daily cost cap" value={`$${tenantDailyCostCapUsd}`} />
       </div>
-      <VexPanel style={{ padding: "1rem", marginBottom: "1rem" }}>
-        <p style={{ color: "var(--text-secondary)" }}>
-          Autonomous operations remain tenant-scoped and auditable, with manual override pathways for protected workflows.
-        </p>
-      </VexPanel>
+      <div className={styles.notice}>
+        Tenant-scoped and auditable. Caps and workflow type above match what will be sent when you queue a run.
+      </div>
 
-      <VexPanel style={{ padding: "1rem" }}>
-        <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem", color: "var(--text-primary)" }}>Queue workflow</h2>
+      <VexPanel style={{ padding: "1.15rem 1.25rem" }}>
+        <h2 className={styles.sectionTitle}>Queue workflow</h2>
         {!canSubmit && (
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "0.75rem" }}>
-            Admin or group admin sign-in required to enqueue autonomous jobs.
-          </p>
+          <p className={styles.adminOnly}>Admin or group admin sign-in required to enqueue autonomous jobs.</p>
         )}
-        <form id={formId} onSubmit={(e) => void onSubmit(e)} style={{ display: "flex", flexDirection: "column", gap: "0.75rem", maxWidth: "420px" }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-            <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Run ID</span>
+        <form id={formId} onSubmit={(e) => void onSubmit(e)} className={styles.form}>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Run ID</span>
             <input
+              className={styles.input}
               value={workflowId}
               onChange={(e) => setWorkflowId(e.target.value)}
               disabled={!canSubmit}
-              style={{ padding: "0.5rem", background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6 }}
+              autoComplete="off"
             />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-            <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Workflow type</span>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Workflow type</span>
             <select
+              className={styles.select}
               value={workflowType}
               onChange={(e) => setWorkflowType(e.target.value as (typeof WORKFLOWS)[number]["value"])}
               disabled={!canSubmit}
-              style={{ padding: "0.5rem", background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6 }}
             >
               {WORKFLOWS.map((w) => (
                 <option key={w.value} value={w.value}>
@@ -100,25 +105,26 @@ export default function AutonomousDashboardPage() {
               ))}
             </select>
           </label>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: canSubmit ? "pointer" : "default" }}>
+          <label className={styles.toggle}>
             <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} disabled={!canSubmit} />
-            <span style={{ fontSize: "0.9rem" }}>Enabled</span>
+            <span>Enabled</span>
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-            <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Max parallel runs (1–50)</span>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Max parallel runs (1–50)</span>
             <input
+              className={styles.input}
               type="number"
               min={1}
               max={50}
               value={maxParallelRuns}
               onChange={(e) => setMaxParallelRuns(Number(e.target.value))}
               disabled={!canSubmit}
-              style={{ padding: "0.5rem", background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6 }}
             />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-            <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Daily cost cap (USD)</span>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>Daily cost cap (USD)</span>
             <input
+              className={styles.input}
               type="number"
               min={0}
               max={500}
@@ -126,41 +132,14 @@ export default function AutonomousDashboardPage() {
               value={tenantDailyCostCapUsd}
               onChange={(e) => setTenantDailyCostCapUsd(Number(e.target.value))}
               disabled={!canSubmit}
-              style={{ padding: "0.5rem", background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6 }}
             />
           </label>
-          <button
-            type="submit"
-            disabled={!canSubmit || busy}
-            style={{
-              padding: "0.65rem",
-              background: "var(--accent)",
-              color: "#111",
-              border: "none",
-              borderRadius: 6,
-              fontWeight: 600,
-              cursor: canSubmit && !busy ? "pointer" : "not-allowed",
-            }}
-          >
+          <button type="submit" disabled={!canSubmit || busy} className={styles.submit}>
             {busy ? "Queueing…" : "Queue workflow"}
           </button>
         </form>
-        {err && <p style={{ marginTop: "0.75rem", color: "#f66", fontSize: "0.9rem" }}>{err}</p>}
-        {result && (
-          <pre
-            style={{
-              marginTop: "0.75rem",
-              padding: "0.75rem",
-              background: "rgba(0,0,0,0.25)",
-              borderRadius: 6,
-              fontSize: "0.8rem",
-              overflow: "auto",
-              color: "var(--text-secondary)",
-            }}
-          >
-            {result}
-          </pre>
-        )}
+        {err && <p className={styles.error}>{err}</p>}
+        {result && <pre className={styles.result}>{result}</pre>}
       </VexPanel>
     </main>
   );

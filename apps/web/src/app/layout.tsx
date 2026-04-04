@@ -60,9 +60,9 @@ const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  title: "VEX | Vortex Exotic Exchange",
+  title: "Vex | Dealer OS — CRM, inventory, portal, appraisals",
   description:
-    "The private exchange for exotic vehicles — curated lots, sealed bids, and white-glove delivery for collectors worldwide.",
+    "White-label dealer platform: tenant-scoped CRM, inventory, customer portal, and appraisals — with a public marketplace layer for discovery and consignment.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Vex" },
   openGraph: {
