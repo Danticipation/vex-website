@@ -3,7 +3,7 @@
 **Date:** 2026-04-05  
 **Status:** Active — single expanded spec for marketing, 3D, CRM mirror, and GTM tiers.  
 **Supersedes breadth of:** [2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md) (summary) — use **this file** for wireframes, paths, Gantt, and acceptance criteria.  
-**Operational WebGL + GTM detail:** [2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md](2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md) §21+ (LOD, draw calls, reduced motion), §26–30 (revenue, Cox, autonomy, firepower).
+**Operational WebGL + GTM detail:** [2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md](2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md) §21+ (LOD, draw calls, reduced motion), §26–31 (revenue, Cox, autonomy, firepower, pitch deck).
 
 **Branch target:** `elite-digital-presence-v1` → `main` per [PILOT_SHIP.md](../PILOT_SHIP.md).
 
