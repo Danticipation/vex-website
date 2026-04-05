@@ -1,0 +1,13 @@
+.wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.88;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap {
+    display: none;
+  }
+}

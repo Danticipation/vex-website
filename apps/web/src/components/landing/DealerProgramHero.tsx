@@ -1,11 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { EnterpriseWidgetCard } from "@vex/ui";
 import { useReveal } from "@/hooks/useReveal";
 import { HeroCinematicLayer } from "@/components/HeroCinematicLayer";
 import { HeroScrollHint } from "@/components/HeroScrollHint";
 import styles from "./DealerProgramHero.module.css";
+
+const HeroParticleField = dynamic(
+  () => import("./HeroParticleField").then((m) => ({ default: m.HeroParticleField })),
+  { ssr: false, loading: () => null },
+);
 
 export function DealerProgramHero() {
   const revealRef = useReveal<HTMLDivElement>();
@@ -14,6 +20,7 @@ export function DealerProgramHero() {
     <section className={styles.hero} id="universe" aria-labelledby="dealer-hero-heading">
       <HeroCinematicLayer />
       <div className={styles.ambient} aria-hidden />
+      <HeroParticleField />
       <div className={styles.overlay} />
       <div className={styles.vignette} aria-hidden />
       <div className={styles.sheen} aria-hidden />
