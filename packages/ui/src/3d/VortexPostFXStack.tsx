@@ -19,16 +19,20 @@ export type VortexPostFXStackProps = {
   cinematicMode?: boolean;
   /** Ref to a small emissive mesh used as god-rays source. */
   sunRef: MutableRefObject<Mesh | null>;
+  /** Apex v4: 0–1 scroll / hero visibility — ramps bloom + god-ray weight. */
+  apexBoost?: number;
 };
 
 /**
  * Full cinematic stack: bloom, DOF, god rays, chroma, film grain, vignette.
  * Bloom intensity scales up in cinematic mode (local dev).
  */
-export function VortexPostFXStack({ cinematicMode = false, sunRef }: VortexPostFXStackProps) {
+export function VortexPostFXStack({ cinematicMode = false, sunRef, apexBoost = 0 }: VortexPostFXStackProps) {
   const chroma = useMemo(() => new Vector2(0.0014, 0.0018), []);
-  const bloomIntensity = cinematicMode ? 2.8 : 0.62;
-  const bloomThreshold = cinematicMode ? 0.28 : 0.48;
+  const ab = Math.min(1, Math.max(0, apexBoost));
+  const bloomIntensity = (cinematicMode ? 2.8 : 0.62) + ab * 0.55;
+  const bloomThreshold = cinematicMode ? 0.28 - ab * 0.04 : 0.48 - ab * 0.06;
+  const godWeight = (cinematicMode ? 0.9 : 0.55) + ab * 0.42;
 
   return (
     <EffectComposer multisampling={2} enableNormalPass depthBuffer>
@@ -37,7 +41,7 @@ export function VortexPostFXStack({ cinematicMode = false, sunRef }: VortexPostF
         luminanceThreshold={bloomThreshold}
         luminanceSmoothing={cinematicMode ? 0.09 : 0.055}
         mipmapBlur
-        radius={cinematicMode ? 0.72 : 0.52}
+        radius={cinematicMode ? 0.72 + ab * 0.08 : 0.52 + ab * 0.12}
       />
       <DepthOfField
         focusDistance={0.012}
@@ -49,8 +53,8 @@ export function VortexPostFXStack({ cinematicMode = false, sunRef }: VortexPostF
         sun={sunRef as MutableRefObject<Mesh>}
         density={0.96}
         decay={0.92}
-        weight={cinematicMode ? 0.9 : 0.55}
-        exposure={0.55}
+        weight={godWeight}
+        exposure={0.55 + ab * 0.12}
         blur
       />
       <ChromaticAberration offset={chroma} radialModulation={true} modulationOffset={0.42} />

@@ -179,16 +179,20 @@ export function LiquidMetalCTA({
   children,
   className,
   strength = 0.42,
+  onLiquidFlash,
 }: {
   children: ReactNode;
   className?: string;
   strength?: number;
+  /** Fires with the rim flash — e.g. sync WebGL burst particles (Apex hero). */
+  onLiquidFlash?: () => void;
 }) {
   const [flash, setFlash] = useState(0);
   const onEnter = useCallback(() => {
     setFlash(1);
+    onLiquidFlash?.();
     window.setTimeout(() => setFlash(0), 200);
-  }, []);
+  }, [onLiquidFlash]);
 
   return (
     <div

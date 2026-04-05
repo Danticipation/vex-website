@@ -1,5 +1,6 @@
 "use client";
 
+import type { CinematicPaintUniforms } from "@vex/cinematic";
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
@@ -10,10 +11,17 @@ import { SpeedStreaks } from "./SpeedStreaks.js";
 export type CinematicCarViewerProps = {
   glbUrl: string;
   className?: string;
+  paintMode?: "standard" | "cinematicLuxury";
+  cinematicUniforms?: Partial<CinematicPaintUniforms>;
 };
 
 /** Compact orbit viewer for `/configure` and marketplace previews — same PBR path as hero. */
-export function CinematicCarViewer({ glbUrl, className }: CinematicCarViewerProps) {
+export function CinematicCarViewer({
+  glbUrl,
+  className,
+  paintMode = "cinematicLuxury",
+  cinematicUniforms,
+}: CinematicCarViewerProps) {
   return (
     <div className={className} style={{ width: "100%", height: "100%", minHeight: 320 }}>
       <Canvas camera={{ position: [3.1, 1.6, 4.2], fov: 42 }} style={{ width: "100%", height: "100%" }}>
@@ -23,7 +31,11 @@ export function CinematicCarViewer({ glbUrl, className }: CinematicCarViewerProp
         <MouseFillLight />
         <Suspense fallback={null}>
           <Environment preset="city" />
-          <HeroGltfCar url={glbUrl} />
+          <HeroGltfCar
+            url={glbUrl}
+            paintMode={paintMode}
+            cinematicUniforms={cinematicUniforms}
+          />
           <SpeedStreaks />
           <OrbitControls maxPolarAngle={Math.PI / 2.05} minDistance={2.5} maxDistance={9} />
         </Suspense>

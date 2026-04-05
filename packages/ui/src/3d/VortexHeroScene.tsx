@@ -7,6 +7,7 @@ import * as THREE from "three";
 import type { HeroLuxuryPaintOptions } from "./heroCarMaterial.js";
 import { HeroGltfCar } from "./HeroGltfCar.js";
 import { ParticleVortex } from "./ParticleVortex.js";
+import { SpeedStreaks } from "./SpeedStreaks.js";
 import { VortexBurstParticles } from "./VortexBurstParticles.js";
 import { VortexPostFXStack } from "./VortexPostFXStack.js";
 
@@ -23,6 +24,18 @@ export type VortexHeroSceneProps = {
   cinematicMode?: boolean;
   /** White-label: tie 3D to tenant CSS / server `TenantCinematic3d` */
   brand?: VortexHeroBrand;
+  /** Pass from Next (`NEXT_PUBLIC_CINEMATIC_SHADERS_V3`) — default cinematic luxury shaders. */
+  paintMode?: "standard" | "cinematicLuxury";
+  /** Apex v4: particle formation + scroll-linked streaks + post FX ramp */
+  apexMode?: boolean;
+  /** Apex: 0–1 hero visibility / scroll depth — god-rays + bloom */
+  apexScrollBoost?: number;
+  /** Apex: scroll velocity 0–1 for speed streaks */
+  apexScrollVelocity?: MutableRefObject<number>;
+  /** Apex: 0→1 particle formation; parent animates on load */
+  formationProgress?: MutableRefObject<number>;
+  /** Apex: CTA hover flash → burst particle opacity */
+  burstFlashRef?: MutableRefObject<number>;
 };
 
 function CursorRimLight() {
@@ -42,20 +55,26 @@ function RotatingCar({
   scrollY,
   glbUrl,
   paintOptions,
+  paintMode,
+  apexScrollBoost = 0,
 }: {
   scrollY: MutableRefObject<number>;
   glbUrl: string;
   paintOptions?: HeroLuxuryPaintOptions;
+  paintMode?: "standard" | "cinematicLuxury";
+  apexScrollBoost?: number;
 }) {
   const group = useRef<THREE.Group>(null);
   useFrame((state) => {
     const g = group.current;
     if (!g) return;
-    g.rotation.y = state.clock.elapsedTime * 0.055 + scrollY.current * 0.00032;
+    const boost = Math.min(1, Math.max(0, apexScrollBoost));
+    g.rotation.y =
+      state.clock.elapsedTime * 0.055 + scrollY.current * 0.00032 + boost * 0.2;
   });
   return (
     <group ref={group}>
-      <HeroGltfCar url={glbUrl} paintOptions={paintOptions} />
+      <HeroGltfCar url={glbUrl} paintOptions={paintOptions} paintMode={paintMode} />
     </group>
   );
 }
@@ -64,7 +83,18 @@ function RotatingCar({
  * Full-viewport hero: PBR car, vortex particles, god-rays + post stack.
  * Consumers pass `glbUrl` (e.g. Khronos ToyCar or tenant CDN asset).
  */
-export function VortexHeroScene({ scrollY, glbUrl, cinematicMode = false, brand }: VortexHeroSceneProps) {
+export function VortexHeroScene({
+  scrollY,
+  glbUrl,
+  cinematicMode = false,
+  brand,
+  paintMode = "cinematicLuxury",
+  apexMode = false,
+  apexScrollBoost = 0,
+  apexScrollVelocity,
+  formationProgress,
+  burstFlashRef,
+}: VortexHeroSceneProps) {
   const sunRef = useRef<THREE.Mesh>(null);
   const burstIntensity = cinematicMode ? 1.35 : 1;
   const envPreset = brand?.environmentPreset ?? "city";
@@ -94,17 +124,29 @@ export function VortexHeroScene({ scrollY, glbUrl, cinematicMode = false, brand 
       </mesh>
       <Suspense fallback={null}>
         <Environment preset={envPreset} />
-        <RotatingCar scrollY={scrollY} glbUrl={glbUrl} paintOptions={paintOptions} />
+        <RotatingCar
+          scrollY={scrollY}
+          glbUrl={glbUrl}
+          paintOptions={paintOptions}
+          paintMode={paintMode}
+          apexScrollBoost={apexScrollBoost}
+        />
         <group position={[0, 1.2, 0]}>
           <ParticleVortex
             intensity={burstIntensity}
             scrollY={scrollY}
             accentColor={brand?.particleAccent ?? "#e8d5a4"}
+            formationProgress={apexMode ? formationProgress : undefined}
           />
-          <VortexBurstParticles intensity={burstIntensity * 0.65} />
+          <VortexBurstParticles intensity={burstIntensity * 0.65} flashRef={burstFlashRef} />
+          {apexMode && apexScrollVelocity ? <SpeedStreaks velocityRef={apexScrollVelocity} /> : null}
         </group>
       </Suspense>
-      <VortexPostFXStack sunRef={sunRef} cinematicMode={cinematicMode} />
+      <VortexPostFXStack
+        sunRef={sunRef}
+        cinematicMode={cinematicMode}
+        apexBoost={apexMode ? apexScrollBoost : 0}
+      />
     </Canvas>
   );
 }

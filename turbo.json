@@ -42,6 +42,7 @@
         "packages/**/tsconfig.json",
         "packages/shared/**",
         "packages/ui/**",
+        "packages/cinematic/**",
         "packages/3d-configurator/**"
       ],
       "env": [
@@ -151,6 +152,33 @@
       "cache": true
     },
     "moat:build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**"
+      ],
+      "cache": true
+    },
+    "webgpu:build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**"
+      ],
+      "cache": true
+    },
+    "glsl:build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**"
+      ],
+      "cache": true
+    },
+    "cinematic:apex": {
       "dependsOn": [
         "^build"
       ],

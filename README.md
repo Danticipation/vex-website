@@ -20,6 +20,27 @@ cd ~/Documents/vex-website   # or: cd /path/to/your/vex-website
 - **Implementation plan:** [docs/plans/2025-03-15-vex-luxury-marketplace-implementation.md](docs/plans/2025-03-15-vex-luxury-marketplace-implementation.md) (includes **Digital Presence v2 — Cinematic Layer**)
 - **Digital presence v2 (elite framework):** [docs/plans/2026-04-05-vex-DIGITAL-PRESENCE-v2-ELITE.md](docs/plans/2026-04-05-vex-DIGITAL-PRESENCE-v2-ELITE.md)
 - **Moat expansion (luxury vs legacy DMS giants):** [docs/plans/2026-04-05-vex-moat-expansion.md](docs/plans/2026-04-05-vex-moat-expansion.md)
+- **Shader moat (GLSL + WebGPU roadmap):** [docs/plans/2026-04-05-vex-shader-moat-expansion.md](docs/plans/2026-04-05-vex-shader-moat-expansion.md)
+- **Site generation v3 (WebGPU strategy):** [docs/plans/2026-04-05-vex-website-generation-v3.md](docs/plans/2026-04-05-vex-website-generation-v3.md)
+
+### Cinematic Apex v4.0 — the engagement electrification layer
+
+- **What it is:** Scroll-orchestrated bloom + god-ray weight, particle “VEX” formation on load, velocity-driven speed streaks, and CTA-synced burst flash — wired through `@vex/ui/3d` `VortexHeroScene` + `useApexHeroOrchestration` in `apps/web`.
+- **Run locally:** `pnpm dev:apex` from repo root (`NEXT_PUBLIC_CINEMATIC_SHADERS_V3` + `NEXT_PUBLIC_CINEMATIC_APEX`). Set `NEXT_PUBLIC_CINEMATIC_APEX=0` to disable Apex without losing GLSL paint.
+- **Build task:** `pnpm cinematic:apex` (Turbo → `@vex/web` production build with the `cinematic:apex` pipeline).
+- **Blueprint + KPI framing:** [docs/plans/2026-04-05-vex-cinematic-apex-v4.md](docs/plans/2026-04-05-vex-cinematic-apex-v4.md) · internal narrative: [docs/internal/vex-cinematic-investor-narrative-v4.md](docs/internal/vex-cinematic-investor-narrative-v4.md).
+
+### WebGPU-powered cinematic engine (luxury moat)
+
+- **`@vex/cinematic`** — GLSL `onBeforeCompile` iridescent / flake / clear-coat / chrome patches; `hasWebGPU()` / `WebGPUEngine` (WebGL2 renderer today; native WebGPU + TSL in Phase 2).
+- **Configure:** `/configure` — live sliders → `cinematicUniforms` (flake, iridescence, clear-coat, chrome).
+- **Env:** `NEXT_PUBLIC_CINEMATIC_SHADERS_V3` — set `0` to use standard PBR only (no custom fragment inject).
+
+### Advanced GLSL shader engine — the visual moat
+
+- **Modular GLSL:** `IridescentPaintGLSL`, `MetallicFlakeLayer`, `MultiLayerClearCoat`, `AnisotropicChromeGLSL` composed in `iridescentCarPaint.ts` — pixel control on WebGL2, ports to TSL later.
+- **`VortexCarMaterialGLSL`** — declarative `applyCinematicLuxuryPaint` + `CinematicPaintTimeTicker` for hero / configurator GLTF.
+- **Turbo:** `pnpm glsl:build` — same as web production build (shader strings ship with `@vex/cinematic` + Next).
 
 ### Investor + cinematic surfaces
 
@@ -42,6 +63,7 @@ cd ~/Documents/vex-website   # or: cd /path/to/your/vex-website
 - **apps/crm** — Next.js CRM for staff
 - **packages/shared** — Shared TypeScript types and Zod schemas
 - **packages/ui** — Shared UI primitives for web + CRM (`@vex/ui`); **3D** entry: `@vex/ui/3d` (`VortexHeroScene`, `CinematicCarViewer`, post stack)
+- **packages/cinematic** — Luxury car shaders (`@vex/cinematic`) consumed by `@vex/ui` `HeroGltfCar`
 
 ## Fresh clone: full build verification
 

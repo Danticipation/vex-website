@@ -1,5 +1,6 @@
 "use client";
 
+import type { MutableRefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -7,7 +8,14 @@ import * as THREE from "three";
 const COUNT = 420;
 
 /** Spiral vortex particle field — pairs with hero lighting (stylized “VEX” energy). */
-export function VortexBurstParticles({ intensity = 1 }: { intensity?: number }) {
+export function VortexBurstParticles({
+  intensity = 1,
+  flashRef,
+}: {
+  intensity?: number;
+  /** Apex: transient boost (e.g. CTA hover) — multiplied into opacity, decays in parent. */
+  flashRef?: MutableRefObject<number>;
+}) {
   const ref = useRef<THREE.Points>(null);
   const geometry = useMemo(() => {
     const pos = new Float32Array(COUNT * 3);
@@ -31,6 +39,11 @@ export function VortexBurstParticles({ intensity = 1 }: { intensity?: number }) 
     pts.rotation.y = t * 0.14 * intensity;
     pts.rotation.x = Math.sin(t * 0.16) * 0.07 * intensity;
     pts.rotation.z = Math.cos(t * 0.11) * 0.04 * intensity;
+    const mat = pts.material;
+    if (mat instanceof THREE.PointsMaterial) {
+      const flash = flashRef?.current ?? 0;
+      mat.opacity = 0.4 * intensity * (1 + flash * 0.95);
+    }
   });
 
   return (

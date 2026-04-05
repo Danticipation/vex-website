@@ -15,6 +15,12 @@ export const TenantCinematic3dSchema = z.object({
     .string()
     .regex(/^#([0-9a-fA-F]{6})$/)
     .optional(),
+  /** @vex/cinematic shader uniforms (white-label) */
+  flakeDensity: z.number().min(0).max(2).optional(),
+  iridescenceStrength: z.number().min(0).max(2).optional(),
+  clearCoatIntensity: z.number().min(0).max(3).optional(),
+  anisotropicChrome: z.number().min(0).max(2).optional(),
+  iridescenceAngle: z.number().min(0).max(3).optional(),
 });
 
 export type TenantCinematic3d = z.infer<typeof TenantCinematic3dSchema>;

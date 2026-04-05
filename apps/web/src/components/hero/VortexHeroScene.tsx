@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { GlassKPI, LiquidMetalCTA, MagneticButton } from "@vex/ui";
 import { VortexHeroScene as VortexHeroWebGL, type VortexHeroBrand } from "@vex/ui/3d";
 import { useWebglEligible } from "@/hooks/useWebglEligible";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useApexHeroOrchestration } from "@/hooks/useApexHeroOrchestration";
 import { HeroScrollHint } from "@/components/HeroScrollHint";
 import { DEFAULT_PUBLIC_VEHICLE_GLB } from "@/lib/vehicle3d/defaults";
 import styles from "../cinematic-hero-v2/CinematicHeroV2.module.css";
@@ -16,15 +17,36 @@ function cinematicModeFromEnv(): boolean {
   );
 }
 
+function paintModeFromEnv(): "standard" | "cinematicLuxury" {
+  const v = process.env.NEXT_PUBLIC_CINEMATIC_SHADERS_V3;
+  if (v === "0" || v === "false") return "standard";
+  return "cinematicLuxury";
+}
+
+function apexModeFromEnv(): boolean {
+  const v = process.env.NEXT_PUBLIC_CINEMATIC_APEX;
+  if (v === "0" || v === "false") return false;
+  return v === "1" || v === "true";
+}
+
 /**
  * Elite full-viewport hero: `@vex/ui/3d` WebGL + magnetic CTAs + glass KPIs.
  * Loaded with `dynamic(..., { ssr: false })` from `DynamicHeroShell`.
  */
 export default function VortexHeroScene() {
-  const scrollY = useRef(0);
   const webgl = useWebglEligible();
   const reduced = usePrefersReducedMotion();
   const cinematicMode = cinematicModeFromEnv();
+  const paintMode = paintModeFromEnv();
+  const apexMode = apexModeFromEnv();
+  const {
+    scrollY,
+    apexScrollBoost,
+    apexScrollVelocity,
+    formationProgress,
+    burstFlashRef,
+    triggerBurstFlash,
+  } = useApexHeroOrchestration({ apexMode, heroId: "universe" });
   const [brand, setBrand] = useState<VortexHeroBrand | undefined>(undefined);
 
   useEffect(() => {
@@ -42,18 +64,15 @@ export default function VortexHeroScene() {
     });
   }, []);
 
-  useEffect(() => {
-    const onScroll = () => {
-      scrollY.current = window.scrollY;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const show3d = webgl === true && !reduced;
 
   return (
-    <section className={styles.hero} id="universe" aria-labelledby="dealer-hero-heading">
+    <section
+      className={styles.hero}
+      id="universe"
+      aria-labelledby="dealer-hero-heading"
+      data-apex-hero={apexMode ? "on" : "off"}
+    >
       {show3d ? (
         <div className={styles.canvasWrap}>
           <VortexHeroWebGL
@@ -61,6 +80,12 @@ export default function VortexHeroScene() {
             glbUrl={DEFAULT_PUBLIC_VEHICLE_GLB}
             cinematicMode={cinematicMode}
             brand={brand}
+            paintMode={paintMode}
+            apexMode={apexMode}
+            apexScrollBoost={apexScrollBoost}
+            apexScrollVelocity={apexMode ? apexScrollVelocity : undefined}
+            formationProgress={apexMode ? formationProgress : undefined}
+            burstFlashRef={apexMode ? burstFlashRef : undefined}
           />
         </div>
       ) : (
@@ -81,7 +106,7 @@ export default function VortexHeroScene() {
             PBR showroom lighting, luxury motion, and tenant-scoped CRM — built for conversions, not templates.
           </p>
           <div className={styles.ctas}>
-            <LiquidMetalCTA strength={0.42}>
+            <LiquidMetalCTA strength={0.42} onLiquidFlash={apexMode ? triggerBurstFlash : undefined}>
               <Link href="/build" className={styles.ctaPrimary}>
                 Configure your Vortex
               </Link>

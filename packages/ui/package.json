@@ -21,6 +21,9 @@
     "build": "tsc",
     "dev": "tsc --watch"
   },
+  "dependencies": {
+    "@vex/cinematic": "workspace:*"
+  },
   "peerDependencies": {
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
