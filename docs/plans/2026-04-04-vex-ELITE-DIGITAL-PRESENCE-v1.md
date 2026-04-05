@@ -390,7 +390,7 @@ apps/crm
 
 ## 25. Documentation corpus — cross-links (policy)
 
-- **Single source of truth:** this file (**§0–§27**, **`VLR`** halt criteria) for **WebGL perf + 2026 luxury UX + revenue narrative**. Do not fork competing matrices in Slack or Notion without linking back.
+- **Single source of truth:** this file (**§0–§28**, **`VLR`** halt criteria, **Cox gap** §28) for **WebGL perf + 2026 luxury UX + revenue + competitive narrative**. Do not fork competing matrices in Slack or Notion without linking back.
 - **Entry points** (canonical one-liners already wired): `PROJECT_SPACE.md`, `AGENTS.md`, `README.md`, `docs/SHIP.md`, `docs/ENGINEERING_REALITY.md`, plus [Crown Jewel v2.0](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.0.md), [v2 summary](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md), [Apex Studio `/build`](2026-04-05-vex-apex-studio-configurator-v1.0.md).
 - **Other markdown:** add a pointer **when you touch** a file for marketing, web perf, 3D, or pilot narrative — **no** repo-wide mechanical edit of every `.md` (noise + merge pain). Pure API/vendor memos stay lean unless the change affects customer-facing surfaces.
 - **Do not** duplicate §21–§25 into playbooks; **link** here for WebGL + luxury UX supremacy specs.
@@ -414,6 +414,46 @@ apps/crm
 - **Optimized WebGL hero** (`vortex`) is the **live Series A asset**: screen-record **≤60 fps** — scroll → god-ray ramp → particle formation → **LiquidMetalCTA** burst; second clip with **`NEXT_PUBLIC_ENABLE_HERO_WEBGL=0`** showing **legacy** vault + neon sheen to prove **zero** broken layouts.
 - **Pitch deck embed:** Use **full-screen** `https://<deployed-web>/` in deck tools that support live iframe, or **OBS / mmhmm** browser source; for **data room**, token-gated **read-only** tenant demo subdomain (same isolation narrative as API).
 - **Narrative:** “Luxury commerce = **perceived performance** + trust; VEX ships both in one monorepo.”
+
+---
+
+## 28. Cox Automotive gap analysis (luxury segment — positioning, not “beat Cox at Cox”)
+
+**Headline:** VEX does **not** win by cloning Cox Automotive’s **mass-market, full-stack empire** (DMS depth, auction infrastructure, national shopper volume). VEX wins by **owning the luxury / exotic emotional + digital-twin layer** where Cox’s products are **optimized for throughput**, not **white-glove desire, rarity narrative, and cinematic trust**.
+
+### 28.1 Scale reality (why “reign over Cox” is the wrong frame)
+
+Cox-scale operators combine **Dealertrack-class DMS**, **VinSolutions-class CRM**, **vAuto-class** velocity, **Manheim-class** wholesale, **Dealer.com-class** syndication, and **billions** of first-party shopper signals across **tens of thousands** of rooftops. VEX today is a **focused monorepo**: cinematic **`apps/web`**, dealer **`apps/crm`**, tenant-scoped **`apps/api`**, and **3D gating** in **`@vex/3d-configurator`** — aimed at **high-trust exotic retail**, not national used-car throughput. **Honest audit:** we are **not** “close” to Cox on **breadth**; we are **different by design**.
+
+### 28.2 Capability matrix (illustrative — luxury lens)
+
+| Dimension | Cox (representative portfolio) | VEX today (repo truth) | Luxury-segment intent |
+|-----------|--------------------------------|-------------------------|------------------------|
+| **Emotional / 3D flagship** | Functional digital retail; limited cinematic parity | **`vortex`** hero + **`ConfiguratorVehicleCanvas`** + **`/build`** Apex Studio shell | **Lead** — vault + digital twin as **category differentiator** |
+| **Unified product feel** | Many brands / integrations (powerful, can feel **fragmented**) | **One** design system + shared tokens web ↔ CRM | **Lead** — “one solution” **DNA** for HNW dealers |
+| **DMS / core F&I ledger** | **Dealertrack** depth | **Roadmap** / partner strategy (`AGENTS.md` Phase 7+) | **Partner or acquire path** — not P0 for VLR |
+| **CRM + automation** | **VinSolutions** scale | CRM cockpit + **tenant RBAC** + phased AI (`AGENTS.md`) | **Tenant-scoped**, **consent-aware** luxury workflows |
+| **Inventory intelligence** | **vAuto** velocity | Tenant inventory + APIs | **P1** exotic **syndication** + niche channels |
+| **Wholesale / auctions** | **Manheim** + logistics | Not in product scope | **P2** exotic wholesale **connector** (optional) |
+| **Digital retail checkout** | **MakeMyDeal** / Showroom apps | Stripe + portal + checkout routes | **Exotic** pacing + trust copy |
+| **Service / Xtime-class** | **Xtime** scheduling | Not shipped as first-class | **P2** CRM service module |
+
+### 28.3 Prioritized gap list (surgical — aligned to VLR + luxury GTM)
+
+| Tier | Focus | Notes |
+|------|--------|--------|
+| **P0 (VLR)** | **WebGL vault on home** via **`DynamicHeroShell` → `vortex`** (not `HeroCinematicLayer` — see **VLR** §) + **legacy** video/CSS pristine | **Do not** duplicate R3F into `HeroCinematicLayer` |
+| **P0** | **Flagship GLB** + **real-time material** class swaps + **pricing preview** in configure + `/build` | Harden **Apex Studio** + shared schemas |
+| **P0** | **BullMQ** idempotent **tenant 3D / demo asset** provisioning | e.g. `tenant-3d-demo-seed` + **`apex-studio-360-export`** handler paths in `apps/api` — complete **worker coverage** + audit |
+| **P1** | **Luxury syndication** exports, **trade-in 3D visualizer**, **white-label 3D embed** (Apex tier) | Revenue §26 **Apex** row |
+| **P1** | **PWA** + future native wrapper | Offline appraisal queue (`AGENTS.md` Phase 6) |
+| **P1** | **AI co-pilot** (mood / layout hints) in configurator | **Consent + tenant caps** |
+| **P2** | **DMS** API hooks, **F&I + titling**, **service** scheduling, **wholesale** connector, **vAuto-style** velocity BI | Enterprise scale — **explicit** phase gates |
+
+### 28.4 One-solution → revenue engine (competitive wording)
+
+- **Positioning line (external):** *“VEX is the unified luxury automotive OS: one cinematic customer vault, one dealer cockpit, one tenant-safe API — built for vehicles and buyers that Cox’s mass-market stack was never designed to romance.”*
+- **Internal rule:** Never claim **parity** with Cox on **DMS or auctions** until **named** integrations ship; **do** claim **differentiation** on **cinematic 3D**, **unified luxury UX**, and **tenant-isolated** trust **today**.
 
 ---
 
