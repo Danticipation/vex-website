@@ -9,6 +9,7 @@ on:
       - "pnpm-lock.yaml"
       - "package.json"
       - "turbo.json"
+      - ".github/workflows/quality.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,6 +39,9 @@ jobs:
 
       - name: Install Playwright (Chromium) for a11y
         run: pnpm --filter @vex/web exec playwright install --with-deps chromium
+
+      - name: Build @vex/web dependency graph
+        run: pnpm -w turbo run build --filter=@vex/web
 
       - name: quality:web
         run: pnpm --filter @vex/web run quality:web
