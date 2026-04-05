@@ -311,7 +311,7 @@ The first viewport should read as an **obsidian vault**: soft **violet–gold** 
 | Instancing | **`VEX_INSTANCING_SPEC`** | `heroFleetInstancesFull: 4`, `inventoryPreviewMaxDrawn: 12` — one `Points` + **`InstancedMesh`** bodies beats N full scenes (fleet previews) |
 | DPR / pixel load | **Adaptive cap** | Live: `resolveConfiguratorMaxDpr()` — **1.25** reduced motion, **1.5** low-memory/low-core, else **2.2**; Canvas `dpr={[1, maxDpr]}` |
 | Textures | **Mipmaps + anisotropy** | Live: `GltfVehicle` `enhanceLoadedMaps` (mipmap min filter, aniso ≤8); **KTX2/Basis** + **trim atlases** = roadmap |
-| Post-processing | **Forward + `EffectComposer`** today | Showroom: bloom + chroma + vignette; hero: `VortexPostFXStack` (bloom, DOF, god-rays, chroma, grain). **Deferred + lens-flare pass** = profiling-gated roadmap (not default — cost vs clarity) |
+| Post-processing | **Forward + `EffectComposer`** today | Showroom: bloom + chroma + vignette; hero: `VortexPostFXStack` (highlight-weighted bloom, DOF, god-rays, **violet–gold `LensFlare`**, chroma, grain). **MRT / `SelectiveBloom` “deferred-style” pass** = profiling-gated optional upgrade (cost vs clarity) |
 | WebGPU | **Progressive enhancement** | `probeWebGPU()`; **WebGL2 canonical**; `data-vex-webgpu` on configurator wrapper |
 | Model IO | **Idle-deferred preload** | Live: `scheduleDeferredModelWarmup` → `requestIdleCallback` (fallback `setTimeout`) before `preloadVehicleGltf`; **worker Draco/Meshopt** = roadmap |
 
