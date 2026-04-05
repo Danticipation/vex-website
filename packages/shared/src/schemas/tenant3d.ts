@@ -9,6 +9,8 @@ export const TenantCinematic3dSchema = z.object({
   tenantSlug: z.string().min(1).max(96).optional(),
   glbUrl: z.string().url().optional(),
   heroEnvPreset: heroEnvironmentPresetSchema.optional(),
+  /** Optional equirectangular HDR URL (drei `Environment`); overrides `heroEnvPreset` when set. */
+  environmentMapURL: z.string().url().optional(),
   logoUrl: z.string().url().optional(),
   /** Sheen / iridescence tint — e.g. from `--accent-bright` */
   heroPaintAccentHex: z

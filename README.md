@@ -16,6 +16,7 @@ cd ~/Documents/vex-website   # or: cd /path/to/your/vex-website
 
 ## Docs
 
+- **Elite digital presence + WebGL performance / 2026 luxury UX (single source of truth, §21+):** [docs/plans/2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md](docs/plans/2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md)
 - **Design:** [docs/plans/2025-03-15-vex-luxury-marketplace-design.md](docs/plans/2025-03-15-vex-luxury-marketplace-design.md)
 - **Implementation plan:** [docs/plans/2025-03-15-vex-luxury-marketplace-implementation.md](docs/plans/2025-03-15-vex-luxury-marketplace-implementation.md) (includes **Digital Presence v2 — Cinematic Layer**)
 - **Digital presence v2 (elite framework):** [docs/plans/2026-04-05-vex-DIGITAL-PRESENCE-v2-ELITE.md](docs/plans/2026-04-05-vex-DIGITAL-PRESENCE-v2-ELITE.md)

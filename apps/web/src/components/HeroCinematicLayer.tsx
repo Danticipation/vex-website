@@ -7,7 +7,8 @@ import styles from "./Hero.module.css";
  * Optional full-bleed loop **video** behind `DealerProgramHero` (not WebGL).
  * Set NEXT_PUBLIC_HERO_VIDEO_URL (and optionally NEXT_PUBLIC_HERO_VIDEO_POSTER).
  * Disabled when prefers-reduced-motion is on or URL is unset.
- * 3D / WebGL gating lives on `ConfiguratorVehicleCanvas` + `InventoryVehicleViewer` via `@vex/3d-configurator` `shouldUseWebGL()`.
+ * 3D / WebGL gating: `NEXT_PUBLIC_ENABLE_HERO_WEBGL` + `useWebglEligible` / `useHeroWebglDisplayMode` —
+ * marketing **`DynamicHeroShell`** (vortex vs `DealerProgramHero`), **`ConfiguratorVehicleCanvas`**, **`InventoryVehicleViewer`**.
  */
 export function HeroCinematicLayer() {
   const reduced = usePrefersReducedMotion();

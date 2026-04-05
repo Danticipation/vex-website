@@ -1,4 +1,6 @@
 :root {
+  /* v4.4 — marketing “cinematic void” anchor (web hero canvas ≈ #050508) for brand parity */
+  --cinematic-void-marketing: #050508;
   --bg-primary: #05070b;
   --bg-secondary: #090d14;
   --bg-card: rgba(16, 22, 32, 0.68);

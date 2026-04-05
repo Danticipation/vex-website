@@ -95,8 +95,8 @@ export function ParticleVortex({
     <points ref={ref} geometry={geometry}>
       <pointsMaterial
         transparent
-        opacity={0.42 * intensity}
-        size={0.032}
+        opacity={0.46 * intensity}
+        size={0.036}
         sizeAttenuation
         color={accentColor}
         depthWrite={false}

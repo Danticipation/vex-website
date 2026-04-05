@@ -2,7 +2,9 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { EnterpriseWidgetCard } from "@vex/ui";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useReveal } from "@/hooks/useReveal";
 import { HeroCinematicLayer } from "@/components/HeroCinematicLayer";
 import { HeroScrollHint } from "@/components/HeroScrollHint";
@@ -13,6 +15,39 @@ const HeroParticleField = dynamic(
   { ssr: false, loading: () => null },
 );
 
+function VaultNeonCursorSheen() {
+  const reduced = usePrefersReducedMotion();
+  const [pos, setPos] = useState({ x: 50, y: 42 });
+  useEffect(() => {
+    if (reduced) return;
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setPos({
+          x: (e.clientX / Math.max(window.innerWidth, 1)) * 100,
+          y: (e.clientY / Math.max(window.innerHeight, 1)) * 100,
+        });
+      });
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("mousemove", onMove);
+    };
+  }, [reduced]);
+  if (reduced) return null;
+  return (
+    <div
+      className={styles.neonTrail}
+      aria-hidden
+      style={{
+        background: `radial-gradient(circle 32% at ${pos.x}% ${pos.y}%, rgba(160, 32, 240, 0.12), transparent 58%)`,
+      }}
+    />
+  );
+}
+
 export function DealerProgramHero() {
   const revealRef = useReveal<HTMLDivElement>();
 
@@ -20,6 +55,7 @@ export function DealerProgramHero() {
     <section className={styles.hero} id="universe" aria-labelledby="dealer-hero-heading">
       <HeroCinematicLayer />
       <div className={styles.ambient} aria-hidden />
+      <VaultNeonCursorSheen />
       <HeroParticleField />
       <div className={styles.overlay} />
       <div className={styles.vignette} aria-hidden />

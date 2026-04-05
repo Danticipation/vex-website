@@ -16,6 +16,10 @@ export type CinematicCarViewerProps = {
   cinematicUniforms?: Partial<CinematicPaintUniforms>;
   /** When true with cinematic paint, pointer raycast highlights meshes (exploded-view). */
   explodedInteractive?: boolean;
+  /** Drei preset when `environmentMapURL` is omitted. */
+  environmentPreset?: "city" | "studio" | "night" | "sunset" | "dawn" | "warehouse";
+  /** Equirectangular HDR URL — tenant white-label; overrides `environmentPreset`. */
+  environmentMapURL?: string;
 };
 
 /** Compact orbit viewer for `/configure` and marketplace previews — same PBR path as hero. */
@@ -25,6 +29,8 @@ export function CinematicCarViewer({
   paintMode = "cinematicLuxury",
   cinematicUniforms,
   explodedInteractive = false,
+  environmentPreset = "city",
+  environmentMapURL,
 }: CinematicCarViewerProps) {
   const interactive = explodedInteractive && paintMode === "cinematicLuxury";
   return (
@@ -35,7 +41,11 @@ export function CinematicCarViewer({
         <directionalLight position={[5, 4, 6]} intensity={1.2} color="#e8eeff" />
         <MouseFillLight />
         <Suspense fallback={null}>
-          <Environment preset="city" />
+          {environmentMapURL ? (
+            <Environment files={environmentMapURL} />
+          ) : (
+            <Environment preset={environmentPreset} />
+          )}
           <HeroGltfCar
             url={glbUrl}
             paintMode={paintMode}

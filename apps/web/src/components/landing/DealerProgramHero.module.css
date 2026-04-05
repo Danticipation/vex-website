@@ -10,6 +10,17 @@
   overflow: hidden;
 }
 
+/* Cursor-linked violet wash — zero WebGL draw calls; off when prefers-reduced-motion */
+.neonTrail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  transition: opacity 0.4s ease;
+}
+
 .ambient {
   position: absolute;
   inset: -15%;

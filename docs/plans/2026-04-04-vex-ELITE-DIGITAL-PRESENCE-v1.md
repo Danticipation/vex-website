@@ -14,7 +14,7 @@
 |------|------------------|
 | **`HeroCinematicLayer`** | Optional **MP4/WebM** background when `NEXT_PUBLIC_HERO_VIDEO_URL` is set; **off** when `prefers-reduced-motion: reduce` or URL unset. **Not** WebGL. |
 | **`DealerProgramHero`** | Full hero: ambient + overlay + vignette + **CSS vault sheen** (violet/gold blur, GPU `transform`, respects reduced motion) + headline shimmer (reduced motion disables). |
-| **`@vex/3d-configurator`** | `shouldUseWebGL()` + **`useWebglEligible`** hook in **`ConfiguratorVehicleCanvas`** and **`InventoryVehicleViewer`** → static finish-aware fallback when WebGL or motion policy blocks 3D. |
+| **`@vex/3d-configurator`** | `shouldUseWebGL()`, **`VEX_WEBGL_PERF`** targets, async **`probeWebGPU()`** + **`useWebglEligible`** (respects **`NEXT_PUBLIC_ENABLE_HERO_WEBGL`**) on **`ConfiguratorVehicleCanvas`** / **`InventoryVehicleViewer`** → static finish-aware fallback when WebGL or motion policy blocks 3D. |
 | **Design tokens** | `globals.css`: `--bg-elevated`, `--accent-violet*`, radii, shadows; body layered gradient; header/footer glass pass (see recent `style:` commits). |
 | **CRM** | `Nav.module.css` glass nav; `globals.css` type smoothing + `main h1` baseline. |
 
@@ -251,3 +251,104 @@ The first viewport should read as an **obsidian vault**: soft **violet–gold** 
 ---
 
 *This document is the north star; execution remains incremental and reversible.*
+
+---
+
+## 21. WebGL performance budget (2026 — single source of truth)
+
+| Metric | Target | Notes |
+|--------|--------|--------|
+| Frame budget | **60 fps** on mid-range laptop + flagship mobile | Chrome Performance panel; throttle particles under load |
+| Draw calls | **&lt;100 / frame** after batching | Instancing for fleets/particles; merge static meshes; avoid per-frame material churn |
+| Particles | **≤512 points** default hero vortex (tunable); LOD when off-screen | Throttle `useFrame` work; Apex formation already eased |
+| Textures | **Mipmaps on**; atlases for trim sheets | Worker/async decode for glTF (roadmap: `THREE.LoadingManager` + `KTX2Loader` where applicable) |
+| Post-processing | **Efficient stack** — bloom + vignette + DOF via `@react-three/postprocessing`; **no** full deferred rewrite until profiling proves need | `VortexPostFXStack` scales with `apexScrollBoost` |
+| WebGPU | **Progressive enhancement** — `probeWebGPU()` in `@vex/3d-configurator`; **WebGL2 remains canonical** until TSL parity path ships | Feature-detect only; do not branch user-visible contracts |
+
+**Feature flags:** `NEXT_PUBLIC_ENABLE_HERO_WEBGL` — when `0` / `false`, `useWebglEligible` forces **static** previews (configurator + inventory 3D off). Documented in `apps/web/.env.local.example`.
+
+**Live — home hero gate (`DynamicHeroShell`):** `useHeroWebglDisplayMode()` composes the same flag + eligibility:
+
+| Mode | UI |
+|------|-----|
+| `legacy` | **`DealerProgramHero`** — CSS vault sheen, optional **`HeroCinematicLayer`** video, **`VaultNeonCursorSheen`** (violet radial follow-cursor, **off** under `prefers-reduced-motion`), existing **`HeroParticleField`** |
+| `pending` | Full-viewport `#0a0a0a` placeholder until client measures WebGL |
+| `vortex` | **`ApexHeroScene`** → `@vex/ui/3d` **`VortexHeroScene`** — GLTF digital twin, **`ParticleVortex`** (≤**180** points today; **≤512** budget in `VEX_WEBGL_PERF` for fleet/hero iterations), **`VortexPostFXStack`** bloom/god-rays, **`useApexHeroOrchestration`** scroll velocity |
+
+**Lighthouse CI:** `apps/web/lighthouserc.json` asserts performance ≥0.8, a11y ≥0.9 (URLs `/`, `/inventory`, `/build`). **100/100** is a **stretch goal** on production hardware + tuned assets — raise assertions only after baselines are green in CI.
+
+---
+
+## 22. 2026 luxury automotive UX trend matrix → VEX components
+
+| Trend (§21 master plan) | VEX mapping (live or phased) |
+|-------------------------|------------------------------|
+| **Phygital / digital twins** | `ConfiguratorVehicleCanvas` + `InventoryVehicleViewer` WebGL with **static** graceful fallback; roadmap: AR placement embed, signed 360 export |
+| **Bespoke personalization** | Tenant `TenantCinematic3d` + CRM theme tokens; mood = **CSS vault** + optional cinematic shaders (`NEXT_PUBLIC_CINEMATIC_*`) |
+| **Expressive yet accessible** | `prefers-reduced-motion` gates video (`HeroCinematicLayer`), WebGL (`shouldUseWebGL`), hero shimmer; **WCAG** via Lighthouse a11y gate |
+| **Glanceable / safe UI** | Large tap targets on configurator toolbar; CRM glass **metric** patterns (`@vex/ui` enterprise widgets) |
+| **AI-first / multimodal** | Phased: AI co-pilot strings in configurator copy; voice — product backlog (no blocking ship) |
+
+---
+
+## 23. Component tree — Hero + Configurator + CRM orbs (reference)
+
+```
+apps/web
+├── HomeHero
+│   └── (NEXT_PUBLIC_CINEMATIC_HERO_V2 ≠ 0) DynamicHeroShell
+│         ├── useHeroWebglDisplayMode()
+│         ├── legacy → DealerProgramHero (HeroCinematicLayer video + VaultNeonCursorSheen + HeroParticleField)
+│         └── vortex → ApexHeroScene → VortexHeroScene (@vex/ui/3d)
+│   └── (CINEMATIC_HERO_V2 off) DealerProgramHero only
+├── ConfiguratorPreview / ConfiguratorVehicleCanvas → VehicleScene
+│     └── useWebglEligible (+ NEXT_PUBLIC_ENABLE_HERO_WEBGL) → Canvas | StaticVehicleFallback
+└── InventoryVehicleViewer (same gating)
+
+apps/crm
+├── Dashboard / analytics — glass KPI cards, `EnterpriseWidgetCard` (@vex/ui) “metric orbs”
+└── globals.css — cinematic void + `--cinematic-void-marketing` anchor (brand parity)
+```
+
+---
+
+## 24. Animation, reduced motion, phygital roadmap
+
+| Layer | Reduced motion = `reduce` | Full motion |
+|-------|-----------------------------|-------------|
+| Hero video | **Off** (`HeroCinematicLayer`) | Loop MP4/WebM |
+| WebGL configurator | **Off** (`useWebglEligible`) | Orbit + PBR |
+| Cinematic Apex (web) | Respect R3F + CSS hooks | Particles, god-rays, streaks |
+| CRM | No infinite CSS shimmer on critical paths | Glass hover allowed |
+
+**Phygital roadmap (ordered):** (1) stable WebGL + static fallback everywhere; (2) tenant HDR + uniforms live; (3) optional AR Quick Look / USDZ export from API; (4) BullMQ demo asset job (§16) + pilot checklist.
+
+---
+
+## 25. Documentation corpus — cross-links (policy)
+
+- **Entry points** carrying a one-line pointer to this file: `PROJECT_SPACE.md`, `AGENTS.md`, `README.md` (Docs section), and §14 of this document.
+- **Do not** duplicate §21–§25 into playbooks; **link** here for WebGL + luxury UX supremacy specs.
+
+---
+
+## 26. WebGL supremacy → revenue engine v3 (one-pager)
+
+| Pillar | Tie to performance |
+|--------|---------------------|
+| **Conversion** | Hypothesis: **60 fps** **digital-twin hero** (`vortex` mode) + configurator ↑ scroll depth, CTA intent, and `/build` sessions vs **legacy** CSS vault baseline — instrument PostHog/GA4 (no hard % until A/B). |
+| **Provisioning** | **BullMQ** `tenant-3d-demo-seed` (§16): on tenant create, enqueue once — copy demo glTF URLs to tenant storage or reference CDN; seed demo `Inventory` rows; `AuditLog` `TENANT_3D_DEMO_SEEDED`; retry + DLQ on failure. |
+| **Apex tier (~$499/mo illustrative)** | White-label **3D portal** + **iframe/signed embed**, **AR-ready** configurator export (roadmap), **branded CRM** glass cockpit, **custom domain** + SSL, valuation quota bump vs Pro. |
+| **Pilot** | **90 s** self-serve (§18): Stripe → tenant → email → **`DynamicHeroShell`** vault first paint + optional **AI personalization** teaser copy on `/portal` (roadmap). |
+
+---
+
+## 27. Investor attention magnet v2
+
+- **Optimized WebGL hero** (`vortex`) is the **live Series A asset**: screen-record **≤60 fps** — scroll → god-ray ramp → particle formation → **LiquidMetalCTA** burst; second clip with **`NEXT_PUBLIC_ENABLE_HERO_WEBGL=0`** showing **legacy** vault + neon sheen to prove **zero** broken layouts.
+- **Pitch deck embed:** Use **full-screen** `https://<deployed-web>/` in deck tools that support live iframe, or **OBS / mmhmm** browser source; for **data room**, token-gated **read-only** tenant demo subdomain (same isolation narrative as API).
+- **Narrative:** “Luxury commerce = **perceived performance** + trust; VEX ships both in one monorepo.”
+
+---
+
+**Visual QA script (one paragraph):** The visitor lands in an **obsidian vault** with **violet–gold** GPU sheen; optional **cinema loop** or **R3F hero** (when flags allow) reads as a **private hypercar gallery** — not a template dealer site. Configurator **orbits** feel **heavy and smooth** (60 fps target); reduced motion users get **instant clarity** without shimmer or spinning metal. CRM echoes the **same void** so staff never context-switch brands.

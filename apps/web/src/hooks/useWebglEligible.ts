@@ -10,6 +10,11 @@ export function useWebglEligible(): boolean | null {
   const [eligible, setEligible] = useState<boolean | null>(null);
 
   useLayoutEffect(() => {
+    const off = process.env.NEXT_PUBLIC_ENABLE_HERO_WEBGL;
+    if (off === "0" || off === "false") {
+      setEligible(false);
+      return;
+    }
     setEligible(shouldUseWebGL());
   }, []);
 

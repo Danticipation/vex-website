@@ -4,6 +4,7 @@ import { Suspense, useRef, type MutableRefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import type { CinematicPaintUniforms } from "@vex/cinematic";
 import type { HeroLuxuryPaintOptions } from "./heroCarMaterial.js";
 import { HeroGltfCar } from "./HeroGltfCar.js";
 import { ParticleVortex } from "./ParticleVortex.js";
@@ -15,7 +16,11 @@ export type VortexHeroBrand = {
   particleAccent?: string;
   paintAccentHex?: string;
   environmentPreset?: "city" | "studio" | "night" | "sunset" | "dawn" | "warehouse";
+  /** Equirectangular HDR — when set, overrides `environmentPreset` for `Environment`. */
+  environmentMapURL?: string;
   iridescence?: number;
+  /** Tenant / CRM → `@vex/cinematic` uniforms (merged with paint options). */
+  cinematicUniforms?: Partial<CinematicPaintUniforms>;
 };
 
 export type VortexHeroSceneProps = {
@@ -38,7 +43,7 @@ export type VortexHeroSceneProps = {
   burstFlashRef?: MutableRefObject<number>;
 };
 
-function CursorRimLight() {
+function CursorRimLight({ scrollBoost = 0 }: { scrollBoost?: number }) {
   const ref = useRef<THREE.SpotLight>(null);
   const { mouse } = useThree();
   useFrame(() => {
@@ -47,6 +52,8 @@ function CursorRimLight() {
     L.position.x = THREE.MathUtils.lerp(L.position.x, mouse.x * 8, 0.07);
     L.position.y = THREE.MathUtils.lerp(L.position.y, mouse.y * 4 + 3, 0.07);
     L.position.z = 5.5;
+    const b = Math.min(1, Math.max(0, scrollBoost));
+    L.intensity = 1.65 + b * 0.55 + (mouse.x * mouse.x + mouse.y * mouse.y) * 0.08;
   });
   return <spotLight ref={ref} intensity={1.65} angle={0.52} penumbra={0.92} color="#ffe8cc" />;
 }
@@ -57,12 +64,14 @@ function RotatingCar({
   paintOptions,
   paintMode,
   apexScrollBoost = 0,
+  cinematicUniforms,
 }: {
   scrollY: MutableRefObject<number>;
   glbUrl: string;
   paintOptions?: HeroLuxuryPaintOptions;
   paintMode?: "standard" | "cinematicLuxury";
   apexScrollBoost?: number;
+  cinematicUniforms?: Partial<CinematicPaintUniforms>;
 }) {
   const group = useRef<THREE.Group>(null);
   useFrame((state) => {
@@ -74,7 +83,12 @@ function RotatingCar({
   });
   return (
     <group ref={group}>
-      <HeroGltfCar url={glbUrl} paintOptions={paintOptions} paintMode={paintMode} />
+      <HeroGltfCar
+        url={glbUrl}
+        paintOptions={paintOptions}
+        paintMode={paintMode}
+        cinematicUniforms={cinematicUniforms}
+      />
     </group>
   );
 }
@@ -106,6 +120,8 @@ export function VortexHeroScene({
         }
       : undefined;
 
+  const cinematicUniforms = brand?.cinematicUniforms;
+
   useGLTF.preload(glbUrl);
 
   return (
@@ -117,19 +133,24 @@ export function VortexHeroScene({
       <color attach="background" args={["#050508"]} />
       <ambientLight intensity={0.22} />
       <directionalLight position={[4, 7, 5]} intensity={1.15} color="#d0e0ff" />
-      <CursorRimLight />
+      <CursorRimLight scrollBoost={apexMode ? apexScrollBoost : 0} />
       <mesh ref={sunRef} position={[8, 6, -6]}>
         <sphereGeometry args={[0.28, 12, 12]} />
         <meshBasicMaterial color="#ffffee" />
       </mesh>
       <Suspense fallback={null}>
-        <Environment preset={envPreset} />
+        {brand?.environmentMapURL ? (
+          <Environment files={brand.environmentMapURL} />
+        ) : (
+          <Environment preset={envPreset} />
+        )}
         <RotatingCar
           scrollY={scrollY}
           glbUrl={glbUrl}
           paintOptions={paintOptions}
           paintMode={paintMode}
           apexScrollBoost={apexScrollBoost}
+          cinematicUniforms={cinematicUniforms}
         />
         <group position={[0, 1.2, 0]}>
           <ParticleVortex
