@@ -6,9 +6,12 @@ import { Html, useProgress } from "@react-three/drei";
 import { VehicleScene, getCanvasCamera, type CameraPreset } from "@/components/configurator/VehicleScene";
 import { configureVexRenderer } from "@/components/configurator/rendererSetup";
 import { preloadVehicleGltf } from "@/components/configurator/GltfVehicle";
+import { StaticVehicleFallback } from "@/components/configurator/StaticVehicleFallback";
 import { DEFAULT_PUBLIC_VEHICLE_GLB } from "@/lib/vehicle3d/defaults";
 import type { FinishId } from "@/components/configurator/vehicleFinish";
+import { useWebglEligible } from "@/hooks/useWebglEligible";
 import styles from "./InventoryVehicleViewer.module.css";
+import fallbackStyles from "@/components/configurator/StaticVehicleFallback.module.css";
 
 type Props = {
   modelGlbUrl: string | null;
@@ -37,6 +40,7 @@ function Loader() {
  */
 export function InventoryVehicleViewer({ modelGlbUrl, modelSource, title }: Props) {
   const headingId = useId();
+  const webglEligible = useWebglEligible();
   const glb = modelGlbUrl?.trim() || DEFAULT_PUBLIC_VEHICLE_GLB;
   const isListingAsset = Boolean(modelGlbUrl?.trim());
   const cam = getCanvasCamera(false);
@@ -68,37 +72,54 @@ export function InventoryVehicleViewer({ modelGlbUrl, modelSource, title }: Prop
             : "Demo mesh — set modelGlbUrl on this listing (or run photo→3D generation) to show this exact vehicle"}
         </p>
       </div>
-      <div className={styles.toolbar} role="group" aria-label="Camera angle">
-        {PRESETS.map((p) => (
-          <button key={p.id} type="button" className={styles.viewBtn} onClick={() => setCameraPreset(p.id)}>
-            {p.label}
-          </button>
-        ))}
-      </div>
+      {webglEligible !== false && (
+        <div className={styles.toolbar} role="group" aria-label="Camera angle">
+          {PRESETS.map((p) => (
+            <button key={p.id} type="button" className={styles.viewBtn} onClick={() => setCameraPreset(p.id)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className={styles.canvasWrap}>
-        <Canvas
-          shadows
-          dpr={[1, 2.25]}
-          camera={{ position: cam.position, fov: cam.fov, near: 0.1, far: 120 }}
-          gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-          onCreated={({ gl }) => configureVexRenderer(gl)}
-        >
-          <Suspense fallback={<Loader />}>
-            <VehicleScene
-              finishId={"rosso" as FinishId}
-              edition="Launch"
-              powertrain="V12"
-              gltfUrl={glb}
-              cameraTarget={[0, 0, 0]}
-              cameraPreset={cameraPreset}
-              onPresetApplied={onPresetApplied}
-              autoRotate={false}
-              compact={false}
-              premium
-            />
-          </Suspense>
-        </Canvas>
-        <p className={styles.hint}>Drag to orbit · Scroll to zoom · {title}</p>
+        {webglEligible === null ? (
+          <div className={fallbackStyles.loadingShell} aria-busy="true">
+            Preparing 3D inspection…
+          </div>
+        ) : webglEligible === false ? (
+          <StaticVehicleFallback
+            finishId={"rosso"}
+            subtitle={`Static preview for ${title} — orbit controls need WebGL and standard motion settings.`}
+          />
+        ) : (
+          <Canvas
+            shadows
+            dpr={[1, 2.25]}
+            camera={{ position: cam.position, fov: cam.fov, near: 0.1, far: 120 }}
+            gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+            onCreated={({ gl }) => configureVexRenderer(gl)}
+          >
+            <Suspense fallback={<Loader />}>
+              <VehicleScene
+                finishId={"rosso" as FinishId}
+                edition="Launch"
+                powertrain="V12"
+                gltfUrl={glb}
+                cameraTarget={[0, 0, 0]}
+                cameraPreset={cameraPreset}
+                onPresetApplied={onPresetApplied}
+                autoRotate={false}
+                compact={false}
+                premium
+              />
+            </Suspense>
+          </Canvas>
+        )}
+        <p className={styles.hint}>
+          {webglEligible === false
+            ? `Gallery view · ${title}`
+            : `Drag to orbit · Scroll to zoom · ${title}`}
+        </p>
       </div>
     </section>
   );

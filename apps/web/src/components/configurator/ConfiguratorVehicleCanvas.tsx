@@ -6,8 +6,11 @@ import { Html, useProgress } from "@react-three/drei";
 import { VehicleScene, getCanvasCamera, type CameraPreset } from "./VehicleScene";
 import { configureVexRenderer } from "./rendererSetup";
 import type { EditionId, FinishId, PowertrainId } from "./vehicleFinish";
+import { StaticVehicleFallback } from "./StaticVehicleFallback";
 import { useAdaptiveEffects } from "@/hooks/useAdaptiveEffects";
+import { useWebglEligible } from "@/hooks/useWebglEligible";
 import styles from "./ConfiguratorVehicleCanvas.module.css";
+import fallbackStyles from "./StaticVehicleFallback.module.css";
 
 export type ConfiguratorVehicleCanvasProps = {
   finishId: FinishId;
@@ -69,6 +72,7 @@ export function ConfiguratorVehicleCanvas({
   const [cameraPreset, setCameraPreset] = useState<CameraPreset | null>(null);
   const [autoRotate, setAutoRotate] = useState(false);
   const hintId = useId();
+  const webglEligible = useWebglEligible();
   const { maxDpr } = useAdaptiveEffects();
   const cam = getCanvasCamera(compact);
   const controlledPreset = cameraPresetOverride !== undefined;
@@ -128,31 +132,42 @@ export function ConfiguratorVehicleCanvas({
       )}
 
       <div className={`${styles.canvasShell} ${embed ? styles.canvasShellEmbed : ""}`}>
-        <Canvas
-          className={styles.canvas}
-          shadows
-          dpr={[1, maxDpr]}
-          camera={{ position: cam.position, fov: cam.fov, near: 0.1, far: 80 }}
-          gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-          onCreated={({ gl }) => configureVexRenderer(gl)}
-        >
-          <Suspense fallback={<CanvasLoader />}>
-            <VehicleScene
-              finishId={finishId}
-              edition={edition}
-              powertrain={powertrain}
-              cameraPreset={resolvedPreset}
-              onPresetApplied={onPresetApplied}
-              autoRotate={resolvedAutoRotate}
-              compact={compact}
-              premium={premium}
-              compactGrid={compactGrid}
-            />
-          </Suspense>
-        </Canvas>
+        {webglEligible === null ? (
+          <div className={fallbackStyles.loadingShell} aria-busy="true">
+            Preparing preview…
+          </div>
+        ) : webglEligible === false ? (
+          <StaticVehicleFallback finishId={finishId} />
+        ) : (
+          <Canvas
+            className={styles.canvas}
+            shadows
+            dpr={[1, maxDpr]}
+            camera={{ position: cam.position, fov: cam.fov, near: 0.1, far: 80 }}
+            gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+            onCreated={({ gl }) => configureVexRenderer(gl)}
+          >
+            <Suspense fallback={<CanvasLoader />}>
+              <VehicleScene
+                finishId={finishId}
+                edition={edition}
+                powertrain={powertrain}
+                cameraPreset={resolvedPreset}
+                onPresetApplied={onPresetApplied}
+                autoRotate={resolvedAutoRotate}
+                compact={compact}
+                premium={premium}
+                compactGrid={compactGrid}
+              />
+            </Suspense>
+          </Canvas>
+        )}
         <p id={hintId} className={styles.hint}>
-          Drag to orbit · Scroll to zoom
-          {resolvedAutoRotate ? " · Auto-rotating" : ""}
+          {webglEligible === null
+            ? "Loading 3D preview…"
+            : webglEligible === false
+              ? "Static preview — reduced motion or graphics limits 3D"
+              : `Drag to orbit · Scroll to zoom${resolvedAutoRotate ? " · Auto-rotating" : ""}`}
         </p>
       </div>
     </div>

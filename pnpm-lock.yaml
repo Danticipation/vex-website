@@ -173,6 +173,9 @@ importers:
       '@tanstack/react-query':
         specifier: '5'
         version: 5.95.2(react@18.3.1)
+      '@vex/3d-configurator':
+        specifier: workspace:*
+        version: link:../../packages/3d-configurator
       '@vex/shared':
         specifier: workspace:*
         version: link:../../packages/shared

@@ -148,7 +148,7 @@ Map into `globals.css` / theme provider incrementally; avoid breaking existing `
 | Phase | Scope | Gate |
 |-------|--------|------|
 | **P0** | Plan + `@vex/3d-configurator` stub + token docs | `turbo build` |
-| **P1** | Hero WebGL performance budget + reduced-motion fallback | Lighthouse CI threshold (incremental) |
+| **P1** | Configurator + inventory: `useWebglEligible` + finish-aware static fallback; hero video already gated on reduced motion (`HeroCinematicLayer`) | `turbo build`; Lighthouse incremental |
 | **P2** | Configurator PBR + Stripe preview integration | E2E smoke on `/build` |
 | **P3** | CRM glass variants + deal-desk kanban polish | Manual QA + a11y |
 
