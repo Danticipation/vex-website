@@ -39,6 +39,32 @@
   opacity: 0.65;
 }
 
+/* Violet + gold vault wash — CSS-only, GPU transform; no extra WebGL draw calls */
+.sheen {
+  position: absolute;
+  inset: -8%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  background:
+    radial-gradient(ellipse 95% 85% at 45% 110%, rgba(160, 32, 240, 0.14), transparent 58%),
+    radial-gradient(ellipse 75% 65% at 88% 12%, rgba(201, 169, 98, 0.14), transparent 52%);
+  filter: blur(48px);
+  will-change: transform, opacity;
+  animation: heroVaultSheen 22s ease-in-out infinite alternate;
+}
+
+@keyframes heroVaultSheen {
+  0% {
+    transform: translate3d(-1.5%, 0, 0) scale(1);
+    opacity: 0.36;
+  }
+  100% {
+    transform: translate3d(1.8%, 0.8%, 0) scale(1.03);
+    opacity: 0.48;
+  }
+}
+
 .shell {
   position: relative;
   z-index: 1;
@@ -259,6 +285,12 @@
 @media (prefers-reduced-motion: reduce) {
   .headlineAccent {
     animation: none;
+  }
+
+  .sheen {
+    animation: none;
+    opacity: 0.36;
+    transform: none;
   }
 }
 

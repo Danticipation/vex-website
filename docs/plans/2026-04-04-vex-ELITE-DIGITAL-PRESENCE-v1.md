@@ -1,10 +1,24 @@
 # VEX Elite Digital Presence v1 — North Star & Execution Plan
 
-**Date:** 2026-04-04  
+**Date:** 2026-04-04 (updated live snapshot)  
 **Branch:** `elite-digital-presence-v1` (from `cursor/pilot-appraisal-loop` @ `1e84177`)  
-**Status:** Active blueprint — phased implementation; no single PR delivers the full vision.
+**Status:** Active blueprint + **live partial implementation** (see §0). Phased work continues; this file is the **single stakeholder source of truth** — other repo markdown should **link here** rather than duplicate full specs.
 
-**Reality check:** The items below describe the **target experience**. Shipping requires multiple sprints: 3D performance budgets, asset pipelines, a11y fallbacks, and load testing. Each phase must pass `pnpm -w turbo run build` and scoped quality gates.
+**Reality check:** The items below describe the **target experience** plus **what is already shipped**. Shipping requires multiple sprints: 3D performance budgets, asset pipelines, a11y fallbacks, and load testing. Each phase must pass `pnpm -w turbo run build` and scoped quality gates.
+
+---
+
+## 0. Live implementation snapshot (apps/web + packages)
+
+| Area | What is live now |
+|------|------------------|
+| **`HeroCinematicLayer`** | Optional **MP4/WebM** background when `NEXT_PUBLIC_HERO_VIDEO_URL` is set; **off** when `prefers-reduced-motion: reduce` or URL unset. **Not** WebGL. |
+| **`DealerProgramHero`** | Full hero: ambient + overlay + vignette + **CSS vault sheen** (violet/gold blur, GPU `transform`, respects reduced motion) + headline shimmer (reduced motion disables). |
+| **`@vex/3d-configurator`** | `shouldUseWebGL()` + **`useWebglEligible`** hook in **`ConfiguratorVehicleCanvas`** and **`InventoryVehicleViewer`** → static finish-aware fallback when WebGL or motion policy blocks 3D. |
+| **Design tokens** | `globals.css`: `--bg-elevated`, `--accent-violet*`, radii, shadows; body layered gradient; header/footer glass pass (see recent `style:` commits). |
+| **CRM** | `Nav.module.css` glass nav; `globals.css` type smoothing + `main h1` baseline. |
+
+**Not live yet:** particle systems in R3F on the marketing hero, scroll-synced post-FX on the **flat** hero layer, or 60 fps “locked” certification — measure with Chrome Performance + Lighthouse in CI when scheduled.
 
 ---
 
@@ -32,7 +46,7 @@ app/layout.tsx (fonts, AmbientShell, TenantTheme, Footer)
 │   ├── ScrollStorySection
 │   ├── PrestigeMarquee
 │   ├── ExoticPillars
-│   ├── ConfiguratorPreview  → future: @vex/3d-configurator VehicleCanvas
+│   ├── ConfiguratorPreview  → `ConfiguratorVehicleCanvas` + `@vex/3d-configurator` gating + static fallback
 │   ├── FeaturedInventory
 │   ├── PremiumServices
 │   ├── TestDriveStrip
@@ -168,7 +182,71 @@ Map into `globals.css` / theme provider incrementally; avoid breaking existing `
 1. `pnpm install` after pulling branch (new workspace package).
 2. `pnpm -w turbo run build`.
 3. With Postgres: `pnpm --filter @vex/api run test:e2e`.
-4. Pick **one** P1 visual task (e.g. hero reduced-motion fallback) — surgical PR.
+4. Next visual: optional R3F hero strip (behind feature flag) **or** Lighthouse perf budget on `/`.
+
+---
+
+## 14. Documentation corpus policy
+
+- **Do not** paste this entire blueprint into `AGENTS.md`, `SHIP.md`, or integration playbooks — it goes stale.
+- **Do** add one line cross-links: “Elite digital presence north star: `docs/plans/2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md`.”
+- Slide/deck markdown (if any) should **summarize** pillars and link here for depth.
+
+---
+
+## 15. Visual supremacy → revenue engine (hypotheses — measure)
+
+| Lever | Hypothesis | Instrument |
+|-------|------------|------------|
+| Vault hero + configurator 3D | Higher **scroll depth** and **CTA click** on `/` and `/build` vs flat baseline | PostHog / GA4 events + cohort |
+| Static fallback | **No** conversion penalty vs 3D when fallback copy is clear (A/B optional) | Same + funnel |
+| CRM glass nav | Faster **time-to-task** for staff (qualitative + session replay) | Product analytics |
+
+**Conversion-lift numbers** are **not** claimed until an experiment ships; use pre/post or A/B.
+
+---
+
+## 16. BullMQ — auto-provision 3D demo assets (job spec)
+
+- **Queue name:** `tenant-3d-demo-seed` (example).
+- **Trigger:** Idempotent hook after tenant provisioning (paid pilot / admin create) — **once per tenant**.
+- **Payload:** `{ tenantId }`.
+- **Worker steps:** (1) copy bundled glTF + poster URLs into tenant-scoped storage or reference public demo URLs; (2) insert `Inventory` / `Vehicle` demo rows with `source=DEMO`; (3) `AuditLog` entry `TENANT_3D_DEMO_SEEDED`.
+- **Failure:** Retry with backoff; DLQ after N tries; never block HTTP response path.
+
+---
+
+## 17. Apex tier — feature matrix (illustrative $499/mo)
+
+| Feature | Included |
+|---------|----------|
+| White-label **3D embed** (iframe / signed URL) for dealer site | Yes |
+| Branded **customer portal** subdomain | Yes |
+| **CRM** premium theme + priority support lane | Yes |
+| Valuation **quota** bump vs Pro | Yes (exact # TBD pricing) |
+| Custom **domain** + SSL | Yes (ops checklist) |
+
+---
+
+## 18. 90-second self-serve pilot onboarding (playbook)
+
+1. **0:00–0:30** — Stripe checkout → tenant provision (idempotent).
+2. **0:30–0:60** — Demo inventory + CRM login email; optional BullMQ demo 3D seed (§16).
+3. **0:60–0:90** — Link to `/appraisals` + “first appraisal” checklist; `Tenant.onboardedAt` completion.
+
+---
+
+## 19. Investor attention magnet
+
+- **Live site** as pitch: screen-record **hero sheen + optional video** + **configurator** (WebGL or graceful fallback) + **investor-deck** metrics proxy.
+- **Narrative:** “Tenant-safe dealer OS + consumer-grade discovery — same product, two surfaces.”
+- **Data room:** Token-gated `RaisePackage` + pilot network metrics — already API-backed.
+
+---
+
+## 20. Stakeholder “feel” description (QA script)
+
+The first viewport should read as an **obsidian vault**: soft **violet–gold** light bleeding at the floor line, **champagne headline** shimmer (stops cold under reduced motion), optional **cinema-grade loop** behind the fold when env video is configured, and a **glass cockpit** column that sells enterprise depth. Scroll feels **layered**, not flat marketing.
 
 ---
 

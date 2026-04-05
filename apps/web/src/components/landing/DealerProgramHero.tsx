@@ -16,6 +16,7 @@ export function DealerProgramHero() {
       <div className={styles.ambient} aria-hidden />
       <div className={styles.overlay} />
       <div className={styles.vignette} aria-hidden />
+      <div className={styles.sheen} aria-hidden />
       <div ref={revealRef} className={styles.shell} data-reveal>
         <div className={styles.copy}>
           <div className={styles.badgeRow}>
