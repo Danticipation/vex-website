@@ -36,7 +36,7 @@ Use this file as the primary command center for execution.
 - **Elite digital presence v2.0 (Crown Jewel Protocol — full spec):** `docs/plans/2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.0.md`
 - **Elite v2 summary checklist:** `docs/plans/2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md`
 - **Apex Studio `/build` (v2.1):** `docs/plans/2026-04-05-vex-apex-studio-configurator-v1.0.md`
-- **Elite digital presence v1 (WebGL gate + §21+ + VLR “Vault Launch Ready” halt):** `docs/plans/2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md`
+- **Elite digital presence v1** (WebGL §21+, VLR, Cox gap §28, production firepower §30): `docs/plans/2026-04-04-vex-ELITE-DIGITAL-PRESENCE-v1.md`
 
 ## Standard Commands
 
