@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-04 (updated live snapshot)  
 **Branch:** `elite-digital-presence-v1` (from `cursor/pilot-appraisal-loop` @ `1e84177`)  
-**Status:** Active blueprint + **live partial implementation** (see §0). **Single source of truth (numbered corpus):** **§0–§30** — **VLR** halt, live snapshot (§0), perf + luxury UX (§21+), revenue + investor (§26–27), **Cox gap** (§28), **local machine autonomy** (§29), **Resource Arsenal + production-rate firepower** (§30). **Crown Jewel expanded spec:** [2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.0.md](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.0.md); short checklist: [2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md). This file remains the **WebGL gate + perf budget** detail (§21+).
+**Status:** Active blueprint + **live partial implementation** (see §0). **Single source of truth (numbered corpus):** **§0–§30** — **VLR** halt, live snapshot (§0), perf + luxury UX (§21+), revenue + investor (§26–27), **Cox gap** (§28), **local machine autonomy** (§29), **Resource Arsenal + production-rate firepower** (§30). **Turbo 2.9.x CLI lock:** graph inspection = **`pnpm … run build --dry-run=text`** only — **`--dry`** is invalid (§**29**/§**30**). **Crown Jewel expanded spec:** [2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.0.md](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.0.md); short checklist: [2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md). This file remains the **WebGL gate + perf budget** detail (§21+).
 
 **Reality check:** The items below describe the **target experience** plus **what is already shipped**. Shipping requires multiple sprints: 3D performance budgets, asset pipelines, a11y fallbacks, and load testing. Each phase must pass `pnpm -w turbo run build` and scoped quality gates.
 
@@ -391,6 +391,7 @@ apps/crm
 ## 25. Documentation corpus — cross-links (policy)
 
 - **Single source of truth:** this file (**§0–§30**): **`VLR`**, **WebGL perf + 2026 luxury UX**, **revenue / investor**, **Cox §28**, **local autonomy §29**, **§30 Resource Arsenal** (live tooling + asset links) **+ firepower doctrine** (CI, Turbo, honest automation claims). Do not fork competing matrices in Slack or Notion without linking back.
+- **Turbo / copy-paste integrity:** **§29** and **§30** standardize **`--dry-run=text`** (Turbo **2.9.x**); obsolete **`--dry`** recipes are **explicitly rejected** here so no contributor wastes time on a broken flag.
 - **Entry points** (canonical one-liners already wired): `PROJECT_SPACE.md`, `AGENTS.md`, `README.md`, `docs/SHIP.md`, `docs/ENGINEERING_REALITY.md` → **§29** (zero-click IDE autonomy), **§30** (Resource Arsenal + **Turbo remote cache** copy/paste setup + perf tools), **§28** (Cox) as needed; plus [Crown Jewel v2.0](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.0.md), [v2 summary](2026-04-05-vex-ELITE-DIGITAL-PRESENCE-v2.md), [Apex Studio `/build`](2026-04-05-vex-apex-studio-configurator-v1.0.md).
 - **Other markdown:** add a pointer **when you touch** a file for marketing, web perf, 3D, or pilot narrative — **no** repo-wide mechanical edit of every `.md` (noise + merge pain). Pure API/vendor memos stay lean unless the change affects customer-facing surfaces.
 - **Do not** duplicate §21–§30 into playbooks; **link** here for WebGL + luxury UX supremacy specs + **§30** velocity / tooling.
@@ -399,7 +400,7 @@ apps/crm
 
 ## 26. WebGL supremacy → revenue engine v3 (one-pager)
 
-**One Solution → Revenue Engine v3:** one **tenant-safe** monorepo ships the **cinematic vault** (`vortex` + configure + `/build`) **and** the **GTM velocity stack** — **§29** (**Settings → Agent background = Always** + modal **don’t ask again** + **full Cursor quit/reopen** = **zero-click** autonomy), **§30** (**Turbo** cache warm-up + remote cache + **`turbo.json`** graph + **visual asset arsenal** + **`NEXT_PUBLIC_HERO_VEHICLE_GLB`** for flagship GLB), plus **human + agent swarm** on this **§0–§30** spec. That combination is the **honest** luxury-segment **production-rate** edge vs **acquisition-siloed** mass-market stacks (**§28**); it is **not** a claim to Cox-scale **DMS / auction** breadth until **named** integrations exist.
+**One Solution → Revenue Engine v3:** one **tenant-safe** monorepo ships the **cinematic vault** (`vortex` + configure + `/build`) **and** the **GTM velocity stack** — **§29** (**Settings → Agent background = Always** + modal **don’t ask again** + **full Cursor quit/reopen** = **zero-click** autonomy), **§30** (**Turbo** cache warm-up + remote cache + **`turbo.json`** graph + **visual asset arsenal** + **`NEXT_PUBLIC_HERO_VEHICLE_GLB`** for flagship GLB), plus **human + agent swarm** on this **§0–§30** spec. The same **documentation-first** corpus **self-corrects** operational footguns (e.g. **Turbo `--dry` vs `--dry-run=text`**, **§29** trust note) so **onboarding + agents** spend less time on dead-end commands than teams reconciling **tribal wiki** across **multi-brand** stacks. That combination is the **honest** luxury-segment **production-rate** edge vs **acquisition-siloed** mass-market orgs (**§28**); it is **not** a claim to Cox-scale **DMS / auction** breadth until **named** integrations exist.
 
 | Pillar | Tie to performance |
 |--------|---------------------|
@@ -472,6 +473,7 @@ Cox-scale operators combine **Dealertrack-class DMS**, **VinSolutions-class CRM*
 - **90-second self-serve pilot playbook:** Stripe → tenant + CRM login → **first paint** is either **`vortex`** (WebGL vault) or **`legacy`** (CSS + optional video) — **zero** broken layout; messaging leads with the **private hypercar vault** emotional hook Cox’s mass-market stack was not built to **romance**.
 - **Investor attention magnet:** The **obsidian vault hero** (**Lenis**-synced scroll context, **Apex** orchestration, formation particles, **violet–gold** post stack) is the **definitive live pitch asset** — screen-record at **60 fps** (target hardware), then **`NEXT_PUBLIC_ENABLE_HERO_WEBGL=0`** to prove **legacy** parity; pair with **configure** + **/build** in one session to show **one OS**, not a microsite.
 - **Internal rule:** Never claim **parity** with Cox on **DMS or auctions** until **named** integrations ship; **do** claim **differentiation** on **cinematic 3D**, **unified luxury UX**, and **tenant-isolated** trust **today**.
+- **Documentation as velocity:** A **living §0–§30** blueprint that **fixes** stale one-liners (CLI flags, cache auth, asset paths) and states **non-negotiable** trust boundaries (**§29** **Security note**) is part of VEX’s **luxury-segment** speed — **less** rework from bad copy-paste than **siloed** product orgs where truth lives in **Slack** threads and **version-skewed** runbooks.
 
 ---
 
