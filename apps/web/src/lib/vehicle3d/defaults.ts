@@ -9,6 +9,18 @@
  * - **Meshroom** / **COLMAP** — open-source photogrammetry from photo sets → mesh → Blender → GLB
  *
  * Host large `.glb` / HDR on your CDN or `apps/web/public/models/` (keep repo lean; prefer CDN).
+ * Stage large binaries under `packages/3d-configurator/assets/models/` (LFS/CDN), then **copy** or **upload** to
+ * `apps/web/public/models/` or a CDN — Next only serves static files from `public/`.
  */
 export const DEFAULT_PUBLIC_VEHICLE_GLB =
   "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ToyCar/glTF-Binary/ToyCar.glb";
+
+/**
+ * Vortex / marketing hero GLB: optional **`NEXT_PUBLIC_HERO_VEHICLE_GLB`** (HTTPS or site-relative `/models/…`).
+ * When unset, uses {@link DEFAULT_PUBLIC_VEHICLE_GLB} (Khronos ToyCar).
+ */
+export function resolveHeroVehicleGlbUrl(): string {
+  const v = process.env.NEXT_PUBLIC_HERO_VEHICLE_GLB?.trim();
+  if (v) return v;
+  return DEFAULT_PUBLIC_VEHICLE_GLB;
+}

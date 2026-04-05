@@ -9,7 +9,7 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useReveal } from "@/hooks/useReveal";
 import { useApexHeroOrchestration } from "@/hooks/useApexHeroOrchestration";
 import { HeroScrollHint } from "@/components/HeroScrollHint";
-import { DEFAULT_PUBLIC_VEHICLE_GLB } from "@/lib/vehicle3d/defaults";
+import { resolveHeroVehicleGlbUrl } from "@/lib/vehicle3d/defaults";
 import styles from "../cinematic-hero-v2/CinematicHeroV2.module.css";
 
 function cinematicModeFromEnv(): boolean {
@@ -101,7 +101,7 @@ export default function VortexHeroScene() {
         <div className={styles.canvasWrap}>
           <VortexHeroWebGL
             scrollY={scrollY}
-            glbUrl={DEFAULT_PUBLIC_VEHICLE_GLB}
+            glbUrl={resolveHeroVehicleGlbUrl()}
             cinematicMode={cinematicMode}
             brand={brand}
             paintMode={paintMode}
