@@ -56,6 +56,22 @@ export interface InventoryListResponse {
   offset: number;
 }
 
+export interface MarketListing {
+  id: string;
+  source: string;
+  externalUrl: string;
+  thumbnailUrl: string | null;
+  make: string;
+  model: string;
+  trim: string | null;
+  year: number;
+  price: number | null;
+  mileage: number | null;
+  location: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Vehicle {
   id: string;
   make: string;
@@ -88,6 +104,28 @@ export async function getInventory(params: GetInventoryParams = {}): Promise<Inv
   });
   const res = await fetch(`${API_BASE}/inventory?${search}`);
   if (!res.ok) throw new Error("Failed to fetch inventory");
+  return res.json();
+}
+
+export interface GetMarketListingsParams {
+  source?: string;
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  make?: string;
+  model?: string;
+  year?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export async function getMarketListings(params: GetMarketListingsParams = {}): Promise<{ items: MarketListing[]; total: number; limit: number; offset: number }> {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== "") search.set(k, String(v));
+  });
+  const res = await fetch(`${API_BASE}/market-listings?${search}`);
+  if (!res.ok) throw new Error("Failed to fetch market listings");
   return res.json();
 }
 

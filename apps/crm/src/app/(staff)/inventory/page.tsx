@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { addAppraisalToInventory, createInventoryItem, getInventory, listAppraisals } from "@/lib/api";
+import { getInventory, getMarketListings } from "@/lib/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL || "http://localhost:3000";
 
 export default function InventoryPage() {
@@ -18,6 +18,7 @@ export default function InventoryPage() {
     Array<{ id: string; value: number | null; status: string; createdAt: string }>
   >([]);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
+  const [market, setMarket] = useState<{ items: unknown[] } | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -87,6 +88,19 @@ export default function InventoryPage() {
       <h1 className="crm-title" style={{ marginBottom: "0.4rem" }}>Inventory</h1>
       <p className="crm-subtitle" style={{ marginBottom: "1rem" }}>
         Manage from API or <a href={`${API_BASE.replace(/\/$/, "")}/inventory`} target="_blank" rel="noopener noreferrer">API docs</a>.
+    getMarketListings()
+      .then(setMarket)
+      .catch(() => setMarket({ items: [] }));
+  }, [token]);
+
+  const items = (data?.items ?? []) as { id: string; source: string; listPrice: number; status: string; location: string | null; vehicle?: { make: string; model: string; year: number } }[];
+  const marketItems = (market?.items ?? []) as { id: string; source: string; price: number | null; location: string | null; make: string; model: string; year: number; externalUrl: string }[];
+
+  return (
+    <main style={{ padding: "1.5rem", maxWidth: "1000px", margin: "0 auto" }}>
+      <h1 style={{ marginBottom: "1rem", color: "var(--text-primary)" }}>Inventory</h1>
+      <p style={{ marginBottom: "1rem", color: "var(--text-muted)", fontSize: "0.9rem" }}>
+        Manage in-house inventory from the API or upcoming CRM tools. External market listings are read-only.
       </p>
       <div className="crm-panel" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr auto", gap: "0.55rem", marginBottom: "1rem", padding: "0.8rem" }}>
         <input value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} placeholder="Vehicle ID" />
@@ -150,6 +164,30 @@ export default function InventoryPage() {
         </table>
       </div>
       {items.length === 0 && <p style={{ color: "var(--text-muted)", marginTop: "1rem" }}>No inventory.</p>}
+
+      <h2 style={{ margin: "2rem 0 1rem", color: "var(--text-primary)", fontSize: "1.1rem" }}>Market listings</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Source</th>
+            <th>Price</th>
+            <th>Location</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {marketItems.map((i) => (
+            <tr key={i.id}>
+              <td>{`${i.make} ${i.model} ${i.year}`}</td>
+              <td>{i.source}</td>
+              <td>{i.price != null ? `£${i.price.toLocaleString()}` : "—"}</td>
+              <td>{i.location || "—"}</td>
+              <td><a href={i.externalUrl} target="_blank" rel="noopener noreferrer">View listing</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </main>
   );
 }

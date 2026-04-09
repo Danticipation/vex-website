@@ -62,6 +62,7 @@ import { dealertrackFiRouter } from "./routes/integrations/dealertrack-fi.js";
 import { dealertrackWebhookRouter } from "./routes/integrations/webhooks/dealertrack.js";
 import { cdkDriveRouter } from "./routes/integrations/cdk-drive.js";
 import { cdkNeuronWebhookRouter } from "./routes/integrations/webhooks/cdk-neuron.js";
+import { marketListingsRouter } from "./routes/marketListings.js";
 
 const app: Express = express();
 
@@ -209,5 +210,6 @@ app.use("/forecasting", forecastingRouter);
 app.use("/governance", governanceRouter);
 app.use("/accounting", accountingRouter);
 app.use("/liquidity", liquidityRouter);
+app.use("/market-listings", marketListingsRouter);
 
 export { app };

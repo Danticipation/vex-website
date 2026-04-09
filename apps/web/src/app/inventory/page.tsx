@@ -5,10 +5,18 @@ import { Header } from "@/components/Header";
 import { getInventory, type InventoryItem, type GetInventoryParams } from "@/lib/api";
 import { formatUsd } from "@/lib/formatCurrency";
 import { ImmersiveVehicleCard } from "@/components/ImmersiveVehicleCard";
+import {
+  getInventory,
+  getMarketListings,
+  type InventoryItem,
+  type GetInventoryParams,
+  type MarketListing,
+} from "@/lib/api";
 import styles from "./inventory.module.css";
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [marketItems, setMarketItems] = useState<MarketListing[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<GetInventoryParams>({
@@ -19,15 +27,31 @@ export default function InventoryPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getInventory(filters)
-      .then((data) => {
+    Promise.all([
+      getInventory(filters),
+      getMarketListings({
+        make: filters.make,
+        model: filters.model,
+        year: filters.year,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        location: filters.location,
+        limit: 20,
+        offset: 0,
+      }),
+    ])
+      .then(([inventory, market]) => {
         if (!cancelled) {
-          setItems(data.items);
-          setTotal(data.total);
+          setItems(inventory.items);
+          setMarketItems(market.items);
+          setTotal(inventory.total + market.total);
         }
       })
       .catch(() => {
-        if (!cancelled) setItems([]);
+        if (!cancelled) {
+          setItems([]);
+          setMarketItems([]);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -139,7 +163,7 @@ export default function InventoryPage() {
         <section className={styles.gridSection}>
           {loading ? (
             <p className={styles.loading}>Loading…</p>
-          ) : items.length === 0 ? (
+          ) : items.length === 0 && marketItems.length === 0 ? (
             <p className={styles.empty}>No vehicles match your filters.</p>
           ) : (
             <>
@@ -160,6 +184,36 @@ export default function InventoryPage() {
                     className={styles.card}
                     imageClassName={styles.cardImage}
                   />
+                ))}
+                {marketItems.map((m) => (
+                  <a
+                    key={m.id}
+                    href={m.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.card}
+                  >
+                    <div className={styles.cardImage}>
+                      {m.thumbnailUrl ? (
+                        <img src={m.thumbnailUrl} alt="" loading="lazy" />
+                      ) : (
+                        <div className={styles.placeholder}>No image</div>
+                      )}
+                    </div>
+                    <div className={styles.cardBody}>
+                      <span className={styles.badge}>Market · {m.source}</span>
+                      <h3 className={styles.cardTitle}>
+                        {m.make} {m.model}
+                      </h3>
+                      <p className={styles.cardMeta}>
+                        {m.year} {m.location ? ` · ${m.location}` : ""}
+                      </p>
+                      {m.price != null && (
+                        <p className={styles.cardPrice}>£{m.price.toLocaleString()}</p>
+                      )}
+                      <span className={styles.cardCta}>View listing</span>
+                    </div>
+                  </a>
                 ))}
               </div>
               {items.length < total ? (
