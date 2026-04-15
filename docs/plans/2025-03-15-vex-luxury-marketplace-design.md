@@ -21,7 +21,7 @@ A consumer-first exotic car platform where the customer is in full control of th
   - **packages/shared** — Shared TypeScript types, Zod (or similar) schemas, constants.
 - **Database:** Postgres; only the API talks to it.
 - **Auth:** API issues JWT (or session tokens); Next.js sends them. Same auth for customer site and CRM; role-based access (customer | staff | admin).
-- **Deployment:** Front-end and API deployable separately (e.g. Vercel for Next.js, Railway/Fly/Render for Node), both using the same Postgres.
+- **Deployment:** Front-end and API deployable separately (e.g. Netlify for Next.js, Railway/Fly/Render for Node), both using the same Postgres.
 
 ---
 
@@ -137,7 +137,7 @@ A consumer-first exotic car platform where the customer is in full control of th
 - **Payments:** v1 deposit recorded only (amount + status); no gateway. Later: Stripe (or similar) + webhook to update order.
 - **Appraisal:** v1 rule-based; later AI or third-party API behind same endpoint.
 - **Auth:** v1 email/password + JWT; later OAuth/magic links.
-- **Deployment:** Next.js (Vercel or Node host); API (Railway/Render/Fly); Postgres (Neon/Supabase/self-hosted). Env: NEXT_PUBLIC_API_URL, DATABASE_URL, JWT_SECRET, etc. No secrets in front-end.
+- **Deployment:** Next.js (Netlify or Node host); API (Railway/Render/Fly); Postgres (Neon/Supabase/self-hosted). Env: NEXT_PUBLIC_API_URL, DATABASE_URL, JWT_SECRET, etc. No secrets in front-end.
 - **Performance:** Pagination on list endpoints; DB indexes on filters; Next.js Image + lazy load; shared types in packages/shared.
 
 ---

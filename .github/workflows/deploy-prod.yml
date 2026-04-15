@@ -39,11 +39,6 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Generate CI JWT secret
         run: echo "JWT_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
-      - name: Turbo Remote Cache
-        uses: turborepo/action@v2
-        with:
-          token: ${{ secrets.TURBO_TOKEN }}
-          team: ${{ secrets.TURBO_TEAM }}
       - name: Prisma generate
         run: pnpm --filter @vex/api run db:generate
       - name: Migrate (API E2E prerequisite)
@@ -52,7 +47,7 @@ jobs:
       - name: Security scan
         run: pnpm audit --prod
       - name: Build
-        run: pnpm -w turbo run build
+        run: pnpm run build
       - name: Install Playwright browsers
         run: pnpm --filter @vex/web exec playwright install --with-deps chromium
       - name: Web e2e
@@ -71,8 +66,8 @@ jobs:
           ignore-unfixed: true
       - name: Deploy hooks (blue-green trigger)
         env:
-          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+          NETLIFY_DEPLOY_HOOK: ${{ secrets.NETLIFY_DEPLOY_HOOK }}
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then curl -fsSL -X POST "$VERCEL_DEPLOY_HOOK"; fi
+          if [ -n "$NETLIFY_DEPLOY_HOOK" ]; then curl -fsSL -X POST "$NETLIFY_DEPLOY_HOOK"; fi
           if [ -n "$RENDER_DEPLOY_HOOK" ]; then curl -fsSL -X POST "$RENDER_DEPLOY_HOOK"; fi

@@ -6,8 +6,12 @@ import type { RegisterInput, LoginInput } from "@vex/shared";
 
 const prisma = new PrismaClient();
 
-const JWT_SECRET = process.env.JWT_SECRET || "change-me-in-production";
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = "7d";
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET not configured");
+}
 
 function toPublicUser(user: {
   id: string;

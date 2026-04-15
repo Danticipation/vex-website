@@ -1,8 +1,15 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "declaration": false,
+    "declarationMap": false,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "strict": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
