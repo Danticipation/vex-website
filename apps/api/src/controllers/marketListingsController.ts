@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { MarketSource, PrismaClient, type Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -14,22 +14,17 @@ export async function list(req: Request, res: Response) {
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const offset = Number(req.query.offset) || 0;
 
-  const where: {
-    source?: string;
-    make?: { equals: string; mode: "insensitive" };
-    model?: { equals: string; mode: "insensitive" };
-    year?: number;
-    price?: { gte?: number; lte?: number };
-    location?: { contains: string; mode: "insensitive" };
-  } = {};
+  const where: Prisma.MarketListingWhereInput = {};
 
-  if (source) where.source = source;
+  if (source && Object.values(MarketSource).includes(source as MarketSource)) {
+    where.source = source as MarketSource;
+  }
   if (make) where.make = { equals: make, mode: "insensitive" };
   if (model) where.model = { equals: model, mode: "insensitive" };
   if (year) where.year = year;
   if (location) where.location = { contains: location, mode: "insensitive" };
 
-  const priceWhere: { gte?: number; lte?: number } = {};
+  const priceWhere: Prisma.DecimalFilter = {};
   if (minPrice != null && !Number.isNaN(minPrice)) priceWhere.gte = minPrice;
   if (maxPrice != null && !Number.isNaN(maxPrice)) priceWhere.lte = maxPrice;
   if (Object.keys(priceWhere).length > 0) where.price = priceWhere;

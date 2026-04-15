@@ -1,70 +1,59 @@
 .footer {
-  position: relative;
-  z-index: 1;
-  padding: 3.25rem 2rem 2.25rem;
-  margin-top: 4rem;
-  border-top: 1px solid var(--line-gold);
-  background:
-    radial-gradient(ellipse 90% 80% at 50% 100%, rgba(201, 169, 98, 0.06), transparent 55%),
-    linear-gradient(180deg, rgba(5, 5, 7, 0.98) 0%, var(--bg-footer) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-top: 1px solid #2a2a2a;
+  background: #080808;
+  color: var(--color-platinum);
+  padding: 1.75rem clamp(1rem, 4vw, 2rem);
 }
 
 .inner {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  text-align: center;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
 }
 
-.links {
+.left {
+  font-family: var(--font-display), serif;
+  color: var(--color-gold);
+  letter-spacing: 0.3em;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.center {
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.95rem;
+  text-align: center;
+  color: var(--color-platinum);
+}
+
+.right {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .link {
-  font-family: var(--font-poppins), sans-serif;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
+  color: var(--color-platinum);
+  text-decoration: none;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.95rem;
 }
 
 .link:hover {
-  color: var(--accent);
+  color: var(--color-gold);
 }
 
-.social {
-  display: flex;
-  justify-content: center;
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.socialLink {
-  font-size: 0.85rem;
-  color: var(--accent);
-  transition: opacity 0.2s ease;
-}
-
-.socialLink:hover {
-  opacity: 0.85;
-}
-
-.copyright {
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  font-family: var(--font-poppins), system-ui, sans-serif;
-}
-
-@media (max-width: 768px) {
-  .footer {
-    padding: 2rem 1rem;
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: 1fr;
+    text-align: center;
   }
 
-  .links {
-    gap: 1rem;
+  .right {
+    justify-content: center;
   }
 }

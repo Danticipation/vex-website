@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { TenantThemeProvider } from "@/components/TenantThemeProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
 import { SkipToContent } from "@/components/SkipToContent";
 import { AmbientShell } from "@/components/ambient";
 import { CinematicMotionProvider, LuxuryEdgeAccent, SceneAwareFx } from "@/components/fx";
@@ -13,11 +14,11 @@ import "./globals.css";
 
 /**
  * Typography stack (CSS variable names kept for existing modules):
- * - --font-montserrat → Syne (bold gallery/display for UI, labels, section titles)
- * - --font-display → Playfair (hero & marquee-scale headlines)
- * - --font-serif → Fraunces (italic ledes, editorial moments)
- * - --font-inter → Plus Jakarta Sans (body, forms, readable UI)
- * - --font-poppins → Outfit (nav, cards, secondary UI)
+ * - --font-montserrat -> Syne (bold gallery/display for UI, labels, section titles)
+ * - --font-display -> Playfair (hero and marquee-scale headlines)
+ * - --font-serif -> Fraunces (italic ledes, editorial moments)
+ * - --font-inter -> Plus Jakarta Sans (body, forms, readable UI)
+ * - --font-poppins -> Outfit (nav, cards, secondary UI)
  */
 const syne = Syne({
   subsets: ["latin"],
@@ -60,9 +61,9 @@ const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  title: "Vex | Dealer OS — CRM, inventory, portal, appraisals",
+  title: "Vex | Dealer OS - CRM, inventory, portal, appraisals",
   description:
-    "White-label dealer platform: tenant-scoped CRM, inventory, customer portal, and appraisals — with a public marketplace layer for discovery and consignment.",
+    "White-label dealer platform: tenant-scoped CRM, inventory, customer portal, and appraisals - with a public marketplace layer for discovery and consignment.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Vex" },
   openGraph: {
@@ -89,7 +90,7 @@ export default function RootLayout({
       lang="en-US"
       className={`${syne.variable} ${playfair.variable} ${fraunces.variable} ${plusJakarta.variable} ${outfit.variable}`}
     >
-      <body style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}>
+      <body style={{ fontFamily: "var(--font-body), var(--font-inter), system-ui, sans-serif" }}>
         <SkipToContent />
         <AmbientShell />
         <CinematicMotionProvider>
@@ -99,6 +100,7 @@ export default function RootLayout({
             <QueryProvider>
               <AuthProvider>
                 <BuildProvider>
+                  <Header />
                   {children}
                   <Footer />
                 </BuildProvider>

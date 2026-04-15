@@ -1,234 +1,110 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { getInventory, type InventoryItem, type GetInventoryParams } from "@/lib/api";
-import { formatUsd } from "@/lib/formatCurrency";
-import { ImmersiveVehicleCard } from "@/components/ImmersiveVehicleCard";
-import {
-  getInventory,
-  getMarketListings,
-  type InventoryItem,
-  type GetInventoryParams,
-  type MarketListing,
-} from "@/lib/api";
-import styles from "./inventory.module.css";
+import { useMemo, useState } from "react";
+import { FEATURED_VEHICLES } from "@/lib/vehicles";
+import { VehicleCard } from "@/components/VehicleCard";
+
+const priceRanges = [
+  { label: "All", value: "all" },
+  { label: "Under $300k", value: "under-300" },
+  { label: "$300k - $500k", value: "300-500" },
+  { label: "$500k+", value: "500-plus" },
+];
+
+const mileageRanges = [
+  { label: "All", value: "all" },
+  { label: "Under 1,000 mi", value: "under-1000" },
+  { label: "1,000 - 2,500 mi", value: "1000-2500" },
+  { label: "2,500+ mi", value: "2500-plus" },
+];
+
+const sortOptions = [
+  { label: "Newest arrivals", value: "newest" },
+  { label: "Price: low to high", value: "price-asc" },
+  { label: "Price: high to low", value: "price-desc" },
+];
 
 export default function InventoryPage() {
-  const [items, setItems] = useState<InventoryItem[]>([]);
-  const [marketItems, setMarketItems] = useState<MarketListing[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<GetInventoryParams>({
-    limit: 20,
-    offset: 0,
-  });
+  const [make, setMake] = useState("All");
+  const [priceRange, setPriceRange] = useState("all");
+  const [mileage, setMileage] = useState("all");
+  const [sort, setSort] = useState("newest");
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    Promise.all([
-      getInventory(filters),
-      getMarketListings({
-        make: filters.make,
-        model: filters.model,
-        year: filters.year,
-        minPrice: filters.minPrice,
-        maxPrice: filters.maxPrice,
-        location: filters.location,
-        limit: 20,
-        offset: 0,
-      }),
-    ])
-      .then(([inventory, market]) => {
-        if (!cancelled) {
-          setItems(inventory.items);
-          setMarketItems(market.items);
-          setTotal(inventory.total + market.total);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setItems([]);
-          setMarketItems([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [filters.source, filters.location, filters.minPrice, filters.maxPrice, filters.make, filters.model, filters.year, filters.limit, filters.offset]);
+  const makes = ["All", ...Array.from(new Set(FEATURED_VEHICLES.map((vehicle) => vehicle.make)))];
 
-  const applyFilters = (next: Partial<GetInventoryParams>) => {
-    setFilters((prev) => ({ ...prev, ...next, offset: 0 }));
-  };
+  const filtered = useMemo(() => {
+    return FEATURED_VEHICLES.filter((vehicle) => {
+      const matchMake = make === "All" || vehicle.make === make;
+      const matchPrice =
+        priceRange === "all" ||
+        (priceRange === "under-300" && vehicle.price < 300000) ||
+        (priceRange === "300-500" && vehicle.price >= 300000 && vehicle.price <= 500000) ||
+        (priceRange === "500-plus" && vehicle.price > 500000);
+      const matchMileage =
+        mileage === "all" ||
+        (mileage === "under-1000" && vehicle.miles < 1000) ||
+        (mileage === "1000-2500" && vehicle.miles >= 1000 && vehicle.miles <= 2500) ||
+        (mileage === "2500-plus" && vehicle.miles > 2500);
+      return matchMake && matchPrice && matchMileage;
+    });
+  }, [make, priceRange, mileage]);
 
-  const imageUrl = (item: InventoryItem) => {
-    const urls = item.imageUrls ?? item.vehicle?.imageUrls;
-    if (Array.isArray(urls) && urls[0]) return urls[0];
-    return null;
-  };
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sort === "price-asc") return a.price - b.price;
+      if (sort === "price-desc") return b.price - a.price;
+      return b.id - a.id;
+    });
+  }, [filtered, sort]);
 
   return (
-    <>
-      <Header />
-      <main id="main-content" className={styles.main}>
-        <div className={styles.top}>
-          <h1 className={styles.title}>Browse cars</h1>
-          <p className={styles.subtitle}>Tap a car to see details, photos, and price.</p>
+    <main className="section">
+      <div className="hero-strip" style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <p className="hero-eyebrow">Private Inventory</p>
+        <h1 className="sectionHeading">Private Inventory</h1>
+        <p className="sectionIntro">Currently showing {sorted.length} verified vehicles.</p>
+      </div>
+
+      <div className="filter-bar">
+        <div className="filter-field">
+          <label className="filter-label" htmlFor="make">Make</label>
+          <select id="make" className="select" value={make} onChange={(event) => setMake(event.target.value)}>
+            {makes.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
         </div>
+        <div className="filter-field">
+          <label className="filter-label" htmlFor="price">Price Range</label>
+          <select id="price" className="select" value={priceRange} onChange={(event) => setPriceRange(event.target.value)}>
+            {priceRanges.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-field">
+          <label className="filter-label" htmlFor="mileage">Mileage</label>
+          <select id="mileage" className="select" value={mileage} onChange={(event) => setMileage(event.target.value)}>
+            {mileageRanges.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="filter-field">
+          <label className="filter-label" htmlFor="sort">Sort By</label>
+          <select id="sort" className="select" value={sort} onChange={(event) => setSort(event.target.value)}>
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-        <aside className={styles.filters}>
-          <h2 className={styles.filterTitle}>Narrow results</h2>
-          <label className={styles.label}>
-            Seller
-            <select
-              value={filters.source ?? ""}
-              onChange={(e) => applyFilters({ source: e.target.value || undefined })}
-              className={styles.select}
-            >
-              <option value="">All</option>
-              <option value="COMPANY">Company</option>
-              <option value="PRIVATE_SELLER">Private seller</option>
-            </select>
-          </label>
-          <label className={styles.label}>
-            Location
-            <input
-              type="text"
-              placeholder="City or region"
-              value={filters.location ?? ""}
-              onChange={(e) => applyFilters({ location: e.target.value || undefined })}
-              className={styles.input}
-            />
-          </label>
-          <label className={styles.label}>
-            Min price (USD)
-            <input
-              type="number"
-              min={0}
-              placeholder="0"
-              value={filters.minPrice ?? ""}
-              onChange={(e) => applyFilters({ minPrice: e.target.value ? Number(e.target.value) : undefined })}
-              className={styles.input}
-            />
-          </label>
-          <label className={styles.label}>
-            Max price (USD)
-            <input
-              type="number"
-              min={0}
-              placeholder="Any"
-              value={filters.maxPrice ?? ""}
-              onChange={(e) => applyFilters({ maxPrice: e.target.value ? Number(e.target.value) : undefined })}
-              className={styles.input}
-            />
-          </label>
-          <label className={styles.label}>
-            Make
-            <input
-              type="text"
-              placeholder="e.g. Ferrari"
-              value={filters.make ?? ""}
-              onChange={(e) => applyFilters({ make: e.target.value || undefined })}
-              className={styles.input}
-            />
-          </label>
-          <label className={styles.label}>
-            Model
-            <input
-              type="text"
-              placeholder="e.g. 488"
-              value={filters.model ?? ""}
-              onChange={(e) => applyFilters({ model: e.target.value || undefined })}
-              className={styles.input}
-            />
-          </label>
-          <label className={styles.label}>
-            Year
-            <input
-              type="number"
-              min={1990}
-              max={2030}
-              placeholder="e.g. 2023"
-              value={filters.year ?? ""}
-              onChange={(e) => applyFilters({ year: e.target.value ? Number(e.target.value) : undefined })}
-              className={styles.input}
-            />
-          </label>
-        </aside>
-
-        <section className={styles.gridSection}>
-          {loading ? (
-            <p className={styles.loading}>Loading…</p>
-          ) : items.length === 0 && marketItems.length === 0 ? (
-            <p className={styles.empty}>No vehicles match your filters.</p>
-          ) : (
-            <>
-              <p className={styles.count}>{total} vehicle{total !== 1 ? "s" : ""} found</p>
-              <div className={styles.grid}>
-                {items.map((item) => (
-                  <ImmersiveVehicleCard
-                    key={item.id}
-                    inventoryId={item.id}
-                    href={`/inventory/${item.id}`}
-                    imageUrl={imageUrl(item)}
-                    badge={item.source === "PRIVATE_SELLER" ? "Private" : "Company"}
-                    badges={["Verified history", "Enclosed shipping"]}
-                    title={`${item.vehicle?.make ?? ""} ${item.vehicle?.model ?? ""}`.trim()}
-                    meta={`${item.vehicle?.year ?? ""}${item.location ? ` · ${item.location}` : ""}`.trim()}
-                    price={formatUsd(item.listPrice)}
-                    cta="View details"
-                    className={styles.card}
-                    imageClassName={styles.cardImage}
-                  />
-                ))}
-                {marketItems.map((m) => (
-                  <a
-                    key={m.id}
-                    href={m.externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.card}
-                  >
-                    <div className={styles.cardImage}>
-                      {m.thumbnailUrl ? (
-                        <img src={m.thumbnailUrl} alt="" loading="lazy" />
-                      ) : (
-                        <div className={styles.placeholder}>No image</div>
-                      )}
-                    </div>
-                    <div className={styles.cardBody}>
-                      <span className={styles.badge}>Market · {m.source}</span>
-                      <h3 className={styles.cardTitle}>
-                        {m.make} {m.model}
-                      </h3>
-                      <p className={styles.cardMeta}>
-                        {m.year} {m.location ? ` · ${m.location}` : ""}
-                      </p>
-                      {m.price != null && (
-                        <p className={styles.cardPrice}>£{m.price.toLocaleString()}</p>
-                      )}
-                      <span className={styles.cardCta}>View listing</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
-              {items.length < total ? (
-                <button
-                  type="button"
-                  className={styles.loadMore}
-                  onClick={() => setFilters((prev) => ({ ...prev, limit: Math.min((prev.limit ?? 20) + 12, 96) }))}
-                >
-                  Load more vehicles
-                </button>
-              ) : null}
-            </>
-          )}
-        </section>
-      </main>
-    </>
+      <div className="grid-3">
+        {sorted.map((vehicle) => (
+          <VehicleCard key={vehicle.id} vehicle={vehicle} />
+        ))}
+      </div>
+    </main>
   );
 }

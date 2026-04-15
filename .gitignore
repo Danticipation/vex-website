@@ -10,6 +10,9 @@ dist
 .prisma
 .pnpm-store
 .cursor/worktrees.json
+node-portable/
+node-portable.zip
+pnpm-lock.yaml.bak
 
 # Local business / deck exports (do not commit)
 /VEX-Business-Package/

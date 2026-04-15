@@ -729,6 +729,8 @@ model IterationBacklog {
   @@index([tenantId, status, priority])
   @@index([tenantId, createdAt])
   @@map("iteration_backlog")
+}
+
 enum MarketSource {
   BAT
   CARS_COM

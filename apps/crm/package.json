@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3002",
-    "build": "rm -rf .next && next build",
+    "build": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\" && next build",
     "start": "next start -p 3002",
     "test:mobile": "tsx scripts/test-mobile.ts",
     "test:enterprise": "tsx scripts/test-enterprise.ts",
@@ -19,7 +19,6 @@
     "@tanstack/react-query": "5",
     "@vex/shared": "workspace:*",
     "@vex/ui": "workspace:*",
-    "next": "^14.2.0",
     "next": "^16.1.7",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
